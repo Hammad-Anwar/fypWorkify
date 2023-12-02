@@ -7,13 +7,15 @@
 import React from 'react';
 import {SafeAreaView} from 'react-native';
 import Main from './src/Main';
-
+import {NavigationContainer} from '@react-navigation/native';
 
 export default function App() {
   return (
-      <SafeAreaView style={{ height: '100%'}}>
+    <NavigationContainer>
+      <SafeAreaView style={{height: '100%'}}>
         <Main />
       </SafeAreaView>
+    </NavigationContainer>
   );
 }
 

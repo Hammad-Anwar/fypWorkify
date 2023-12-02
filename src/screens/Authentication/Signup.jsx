@@ -4,7 +4,7 @@ import { SafeAreaView, Text } from 'react-native'
 function Signup() {
   return (
     <SafeAreaView>
-        <Text> Signup</Text>
+        <Text style={{color: '#000'}}> Signup bvcf</Text>
     </SafeAreaView>
   )
 }

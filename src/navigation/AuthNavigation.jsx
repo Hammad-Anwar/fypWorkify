@@ -1,13 +1,20 @@
 import React from 'react';
-import {createStackNavigator} from '@react-navigation/stack';
+
 import Welcome from '../screens/Authentication/Welcome';
 import Authenticaion from '../screens/Authentication';
 import Signup from '../screens/Authentication/Signup';
+import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import { StatusBar } from 'react-native';
 function AuthNavigation() {
-  const Stack = createStackNavigator();
+  const Stack = createNativeStackNavigator();
   return (
     <>
-      <Stack.Navigator initialRouteName="Welcome">
+      <StatusBar
+        translucent={false}
+        backgroundColor="#DAE4E1"
+        barStyle="dark-content"
+      />
+      <Stack.Navigator initialRouteName="Authenticaion">
         <Stack.Screen
           options={{headerShown: false}}
           name="Welcome"
