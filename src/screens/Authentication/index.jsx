@@ -1,5 +1,6 @@
 import React, {useState} from 'react';
 import {
+  Image,
   SafeAreaView,
   StatusBar,
   StyleSheet,
@@ -8,12 +9,14 @@ import {
   View,
 } from 'react-native';
 import CustomInput from '../../components/CustomInput';
+import CustomBtn from '../../components/CustomBtn';
+import gImg from '../../assets/Images/google-img.png';
+
 
 function Authenticaion({navigation}) {
   const [password, setPassword] = useState('');
   return (
     <SafeAreaView style={styles.container}>
-      
       <View style={styles.headContainer}>
         <View>
           <Text style={styles.heading}>Welcome Back!</Text>
@@ -22,11 +25,13 @@ function Authenticaion({navigation}) {
         </View>
       </View>
       <CustomInput
+        isIcon={true}
         isIconName={'email-outline'}
         placeholder="Email"
         keyboardType="email-address"
       />
       <CustomInput
+        isIcon={true}
         isIconName={'lock-open-outline'}
         secureTextEntry={true}
         value={password}
@@ -44,10 +49,7 @@ function Authenticaion({navigation}) {
         }}>
         <Text style={[styles.text, {fontWeight: '600'}]}>Forget Password</Text>
       </TouchableOpacity>
-
-      <TouchableOpacity style={[styles.btn, {marginTop: 80}]}>
-        <Text style={styles.btnText}>LOG IN</Text>
-      </TouchableOpacity>
+      <CustomBtn lbl={'log in'} style={{marginTop: 80}} onPress={() => { navigation.navigate('BottomNavigation')}}/>
       <View
         style={{
           flexDirection: 'row',
@@ -66,7 +68,7 @@ function Authenticaion({navigation}) {
           marginTop: 30,
         }}>
         <TouchableOpacity style={styles.gBtn}>
-          {/* <Image source={gImg} style={{width: 35, height: 35}} /> */}
+          <Image source={gImg} style={{width: 35, height: 35}} />
         </TouchableOpacity>
       </View>
       <View
@@ -81,7 +83,11 @@ function Authenticaion({navigation}) {
           onPress={() => {
             navigation.navigate('Signup');
           }}>
-          <Text style={[styles.text, {fontSize: 16, fontWeight: '600', color: '#000'}]}>
+          <Text
+            style={[
+              styles.text,
+              {fontSize: 16, fontWeight: '600', color: '#000'},
+            ]}>
             Create Account
           </Text>
         </TouchableOpacity>
@@ -97,10 +103,9 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   headContainer: {
-    // marginRight: 180,
     flexDirection: 'row',
     justifyContent: 'flex-start',
-    marginVertical: 20,
+    marginVertical: 40,
   },
   heading: {
     color: '#000',
@@ -111,31 +116,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '400',
     color: '#636363',
-  },
-  // fieldContainer: {
-  //   flexDirection: "row",
-  //   alignItems: "center",
-  //   backgroundColor: "#fff",
-  //   padding: 10,
-  //   borderRadius: 8,
-  // },
-  // inputField: {
-  //   backgroundColor: "#fff",
-  //   color: "#636363",
-  //   padding: 5,
-  //   paddingHorizontal: 10,
-  // },
-  btn: {
-    backgroundColor: '#F6FF82',
-    flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingVertical: 15,
-    borderRadius: 8,
-  },
-  btnText: {
-    fontSize: 16,
-    fontWeight: '600',
   },
   line: {
     height: 1,

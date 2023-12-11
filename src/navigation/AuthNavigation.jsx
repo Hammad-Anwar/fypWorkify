@@ -5,6 +5,7 @@ import Authenticaion from '../screens/Authentication';
 import Signup from '../screens/Authentication/Signup';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import { StatusBar } from 'react-native';
+import BottomNavigation from './BottomNavigation';
 function AuthNavigation() {
   const Stack = createNativeStackNavigator();
   return (
@@ -29,6 +30,11 @@ function AuthNavigation() {
           options={{headerShown: false}}
           name="Signup"
           component={Signup}
+        />
+        <Stack.Screen
+          options={{headerShown: false}}
+          name="BottomNavigation"
+          component={BottomNavigation}
         />
       </Stack.Navigator>
     </>
