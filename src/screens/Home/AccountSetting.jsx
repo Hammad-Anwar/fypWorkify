@@ -17,9 +17,9 @@ function AccountSetting({navigation}) {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView style={styles.scrollContent}>
-        <View style={styles.row}>
+      <View style={[styles.row, {justifyContent: 'space-between'}]}>
           <TouchableOpacity
-            style={{marginRight: '35%'}}
+            // style={{marginRight: '30%'}}
             onPress={() => navigation.navigate('Home')}>
             <MaterialCommunityIcons
               name="chevron-left"
@@ -28,6 +28,14 @@ function AccountSetting({navigation}) {
             />
           </TouchableOpacity>
           <Text style={styles.largeTxt}>Profile</Text>
+          <TouchableOpacity
+            onPress={() => navigation.navigate('Authenticaion')}>
+            <MaterialCommunityIcons
+              name="power"
+              size={30}
+              color="red"
+            />
+          </TouchableOpacity>
         </View>
         <View style={{justifyContent: 'center', alignItems: 'center'}}>
           <Image source={profileImg} style={styles.imgStyle} />
@@ -52,7 +60,7 @@ function AccountSetting({navigation}) {
               lblStyle={{
                 textTransform: 'capitalize',
               }}
-              style={{marginRight: 20, paddingHorizontal: 30}}
+              style={{marginRight: 20, paddingHorizontal: 30, paddingVertical: 10}}
               onPress={() => navigation.navigate('EditProfile')}
             />
             <CustomBtn
@@ -60,8 +68,8 @@ function AccountSetting({navigation}) {
               lblStyle={{
                 textTransform: 'capitalize',
               }}
-              style={{ paddingHorizontal: 30}}
-              onPress={() => navigation.navigate('ProfileReview')}
+              style={{ paddingHorizontal: 30, paddingVertical: 10}}
+              onPress={() => navigation.navigate('TopReviewNav')}
             />
           </View>
         </View>

@@ -16,7 +16,7 @@ import { Picker } from "@react-native-picker/picker";
 import CustomBtn from '../../components/CustomBtn';
 import CustomInput from '../../components/CustomInput';
 
-const Signup = () => {
+const Signup = ({navigation}) => {
   const [dateOfBirth, setDateOfBirth] = useState('');
   const [account, setAccount] = useState('');
   const [password, setPassword] = useState('');
@@ -116,7 +116,7 @@ const Signup = () => {
           <Text style={[styles.text, {fontSize: 16}]}>
             Already Have Account?{' '}
           </Text>
-          <TouchableOpacity>
+          <TouchableOpacity onPress={() => {navigation.navigate('Authentication')}}>
             <Text style={[styles.text, {fontSize: 16, fontWeight: '600'}]}>
               Log In
             </Text>

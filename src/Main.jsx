@@ -9,7 +9,7 @@ function Main() {
   const Stack = createNativeStackNavigator();
   return (
     <View style={{flex: 1}}>
-      <Stack.Navigator initialRouteName="BottomNavigation">
+      <Stack.Navigator initialRouteName="AuthNavigation">
         <Stack.Screen
           options={{headerShown: false}}
           name="AuthNavigation"

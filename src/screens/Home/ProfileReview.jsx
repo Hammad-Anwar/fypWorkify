@@ -10,38 +10,25 @@ import {
   } from 'react-native';
   import {Colors} from '../../constants/theme';
   import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-  import profileImg from '../../assets/Images/profileImg.jpg';
-  import CustomBtn from '../../components/CustomBtn';
-  import LargeCard from '../../components/LargeCard';
 import SmallCard from '../../components/SmallCard';
 
 function ProfileReview({navigation}) {
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView style={styles.scrollContent}>
-        <View style={styles.row}>
-          <TouchableOpacity
-            style={{marginRight: '25%'}}
-            onPress={() => navigation.navigate('AccountSetting')}>
-            <MaterialCommunityIcons
-              name="chevron-left"
-              size={32}
-              color={Colors.primary.lightBlack}
-            />
-          </TouchableOpacity>
-          <Text style={styles.largeTxt}>Profile Review</Text>
-        </View>
         <View style={styles.line}></View>
-        <View style={{justifyContent: 'center', alignItems: 'center'}}>
-          
+        <View style={{justifyContent: 'center', alignItems: 'center'}}> 
           <Text style={[styles.largeTxt, {fontSize: 26}]}>4.2</Text>
           <Text style={styles.largeTxt}>Rating</Text>
           <Text style={styles.smallTxt}>*Average rating of your profile</Text>
         </View>
         <View style={styles.line}></View>
 
+      <ScrollView style={styles.scrollContent}>
         <View>
-            <SmallCard />
+            <SmallCard profile={true}/>
+            <SmallCard profile={true}/>
+            <SmallCard profile={true}/>
+            
         </View>
         
       </ScrollView>
@@ -52,8 +39,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.primary.white,
-    paddingHorizontal: 20,
-    paddingTop: 10,
   },
   imgStyle: {
     width: 82,
