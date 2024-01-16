@@ -22,7 +22,7 @@ import urlType from '../../constants/UrlConstants';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {showMessage} from 'react-native-flash-message';
 
-const Signup = ({navigation}) => {
+const MoreInfo = ({navigation}) => {
   const [email, setEmail] = useState('');
   const [user_name, setUser_name] = useState('');
   const [first_name, setFirst_name] = useState('');
@@ -372,4 +372,4 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
 });
-export default Signup;
+export default MoreInfo;

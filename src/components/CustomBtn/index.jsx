@@ -1,15 +1,30 @@
 import React from 'react';
-import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
-import { Colors } from '../../constants/theme';
+import {
+  ActivityIndicator,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
+import {Colors} from '../../constants/theme';
 
-function CustomBtn({style, lbl, onPress, disabled, lblStyle}) {
+function CustomBtn({
+  style,
+  lbl,
+  onPress,
+  disabled,
+  lblStyle,
+  loading,
+  loaderColor = 'black',
+}) {
   return (
     <View>
       <TouchableOpacity
         onPress={onPress}
-        disabled={disabled}
+        disabled={disabled || loading}
         style={[styles.btn, style]}>
-        <Text style={[styles.btnText, lblStyle]}>{lbl}</Text>
+        {loading ? <ActivityIndicator size={24} color={loaderColor} /> : null}
+        <Text style={[styles.btnText, lblStyle,  loading ? {display: 'none'} : null]}>{lbl}</Text>
       </TouchableOpacity>
     </View>
   );
@@ -28,7 +43,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     color: Colors.primary.darkgray,
-    textTransform: 'uppercase'
+    textTransform: 'uppercase',
   },
 });
 

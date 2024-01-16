@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   Image,
   SafeAreaView,
@@ -11,10 +11,94 @@ import {
 import CustomInput from '../../components/CustomInput';
 import CustomBtn from '../../components/CustomBtn';
 import gImg from '../../assets/Images/google-img.png';
-
+import {useQuery, useMutation} from '@tanstack/react-query';
+import apiRequest from '../../api/apiRequest';
+import urlType from '../../constants/UrlConstants';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import {showMessage} from 'react-native-flash-message';
 
 function Authenticaion({navigation}) {
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+
+  const userData = useQuery({
+    queryKey: ['user'],
+    queryFn: async () => {
+      const response = await apiRequest(urlType.BACKEND, {
+        method: 'get',
+        url: `user?user_id=2`,
+      });
+      return response.data;
+    },
+  });
+  // console.log(userData.data);
+
+  const loginMutation = useMutation({
+    mutationFn: async data => {
+      const response = await apiRequest(urlType.BACKEND, {
+        method: 'post',
+        url: `login`,
+        data,
+      });
+      // console.log(response);
+      return response;
+    },
+    onSuccess: async e => {
+      if (e.status === 200) {
+        await AsyncStorage.setItem('@user', JSON.stringify(e.data.user));
+        await AsyncStorage.setItem('@auth_token', e.data.token);
+        navigation.navigate('BottomNavigation');
+      } else if (e.response.status === 404) {
+        showMessage({
+          message: e.response.message,
+          type: 'danger',
+          color: '#fff',
+          backgroundColor: 'red',
+          floating: true,
+        });
+      } else {
+        showMessage({
+          message: e.response.message || 'An Error occured',
+          type: 'danger',
+          color: '#fff',
+          backgroundColor: 'red',
+          floating: true,
+        });
+      }
+    },
+  });
+
+  const handleLogin = async () => {
+    var format = /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+/;
+    if (email.length > 0) {
+      if (password.length > 0 && email.match(format)) {
+        const data = {
+          email: email,
+          password: password,
+        };
+        await loginMutation.mutate(data);
+        console.log(loginMutation.isLoading)
+        // console.log(data);
+      } else {
+        showMessage({
+          message: 'Invalid Email/Password',
+          type: 'danger',
+          color: '#fff',
+          backgroundColor: 'red',
+          floating: true,
+        });
+      }
+    } else {
+      showMessage({
+        message: 'Please Enter Email Address',
+        type: 'danger',
+        color: '#fff',
+        backgroundColor: 'red',
+        floating: true,
+      });
+    }
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.headContainer}>
@@ -29,6 +113,10 @@ function Authenticaion({navigation}) {
         isIconName={'email-outline'}
         placeholder="Email"
         keyboardType="email-address"
+        value={email}
+        onChangeText={text => {
+          setEmail(text);
+        }}
       />
       <CustomInput
         isIcon={true}
@@ -49,7 +137,13 @@ function Authenticaion({navigation}) {
         }}>
         <Text style={[styles.text, {fontWeight: '600'}]}>Forget Password</Text>
       </TouchableOpacity>
-      <CustomBtn lbl={'log in'} style={{marginTop: 80}} onPress={() => { navigation.navigate('BottomNavigation')}}/>
+      <CustomBtn
+        lbl="Login"
+        style={{marginTop: 80}}
+        onPress={handleLogin}
+        loading={loginMutation.isPending}
+        
+      />
       <View
         style={{
           flexDirection: 'row',
@@ -92,6 +186,14 @@ function Authenticaion({navigation}) {
           </Text>
         </TouchableOpacity>
       </View>
+      {/* <View>
+        <Text style={{color: '#000'}}>User Id: {userData.data?.user_id}</Text>
+        <Text style={{color: '#000'}}>
+          User Name: {userData.data?.user_name}
+        </Text>
+        <Text style={{color: '#000'}}>Email: {userData.data?.email}</Text>
+        <Text style={{color: '#000'}}>Password: {userData.data?.password}</Text>
+      </View> */}
     </SafeAreaView>
   );
 }

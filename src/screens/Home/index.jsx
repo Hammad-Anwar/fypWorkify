@@ -17,8 +17,29 @@ import CustomInput from '../../components/CustomInput';
 import {Colors} from '../../constants/theme';
 import SmallCard from '../../components/SmallCard';
 import LargeCard from '../../components/LargeCard';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 
 function Home({navigation}) {
+
+  const checkAuthToken = async () => {
+    try {
+      const authToken = await AsyncStorage.getItem('@auth_token');
+      const user = await AsyncStorage.getItem('@user');
+      if (authToken) {
+        console.log('Auth Token:', authToken);
+        console.log('User:', user);
+        // Perform any additional actions based on the authToken value
+      } else {
+        console.log('Auth Token not found in AsyncStorage');
+      }
+    } catch (error) {
+      console.error('Error checking Auth Token:', error);
+    }
+  };
+  
+  // Call the function to check the auth token
+  checkAuthToken();
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView style={styles.scrollContent}>

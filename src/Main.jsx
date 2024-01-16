@@ -1,26 +1,30 @@
 import React from 'react';
 import {Text, TextInput, TouchableOpacity, View} from 'react-native';
 import AuthNavigation from './navigation/AuthNavigation';
-
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import {NavigationContainer} from '@react-navigation/native';
+import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import BottomNavigation from './navigation/BottomNavigation';
+import FlashMessage from 'react-native-flash-message';
 
+const Stack = createNativeStackNavigator();
 function Main() {
-  const Stack = createNativeStackNavigator();
   return (
     <View style={{flex: 1}}>
-      <Stack.Navigator initialRouteName="AuthNavigation">
-        <Stack.Screen
-          options={{headerShown: false}}
-          name="AuthNavigation"
-          component={AuthNavigation}
-        />
-        <Stack.Screen
-          options={{headerShown: false}}
-          name="BottomNavigation"
-          component={BottomNavigation}
-        />
-      </Stack.Navigator>
+      <NavigationContainer>
+        <Stack.Navigator initialRouteName="AuthNavigation">
+          <Stack.Screen
+            options={{headerShown: false}}
+            name="AuthNavigation"
+            component={AuthNavigation}
+          />
+          <Stack.Screen
+            options={{headerShown: false}}
+            name="BottomNavigation"
+            component={BottomNavigation}
+          />
+        </Stack.Navigator>
+      </NavigationContainer>
+      <FlashMessage position="top" duration={5000} hideOnPress={true} />
     </View>
   );
 }
