@@ -21,18 +21,45 @@ import apiRequest from '../../api/apiRequest';
 import urlType from '../../constants/UrlConstants';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {showMessage} from 'react-native-flash-message';
+import {DropdownMultiselectView} from 'react-native-dropdown-multiselect';
+import OutlinedChip from '../../components/OutlinedChip';
 
-const Signup = ({navigation}) => {
+const AddSkills = ({navigation}) => {
   const [email, setEmail] = useState('');
   const [user_name, setUser_name] = useState('');
-  const [first_name, setFirst_name] = useState('');
-  const [last_name, setLast_name] = useState('');
-
-  const [account, setAccount] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-
   const [selectedGender, setSelectedGender] = useState('');
+  const [selectedItem, setSelectedItem] = useState([]);
+
+  const getUserData = async () => {
+    try {
+      const userString = await AsyncStorage.getItem('@user');
+      return JSON.parse(userString);
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+      return null;
+    }
+  };
+  
+  // Example of how to use the async function
+  const fetchData = async () => {
+    const user = await getUserData();
+  
+    if (user) {
+      console.log("hello",user); // Complete user object
+      // console.log("hello2",user.user_account.user_id); // Accessing nested property
+      console.log("hello3",user.first_name);
+      console.log(user.last_name);
+      console.log(user.role_id);
+      console.log(user.role.name);
+    }
+  };
+  fetchData()
+
+  const data = [
+    {key: 1, value: 'orange'},
+    {key: 2, value: 'apple'},
+    {key: 3, value: 'banana'},
+  ];
 
   const handleSelect = option => {
     setSelectedGender(option);
@@ -54,12 +81,7 @@ const Signup = ({navigation}) => {
       if (e.status === 200) {
         await AsyncStorage.setItem('@user', JSON.stringify(e.data.user));
         await AsyncStorage.setItem('@auth_token', e.data.token);
-        navigation.navigate('MoreInfo', {
-          accountType: parseInt(account),
-          firstName: first_name,
-          lastName: last_name,
-        });
-
+        navigation.navigate('BottomNavigation');
       } else if (e.response.status === 404) {
         showMessage({
           message: e.response.message,
@@ -153,7 +175,7 @@ const Signup = ({navigation}) => {
             <Text style={styles.text}>with google</Text>
           </View>
         </View>
-        <CustomInput
+        {/* <CustomInput
           isIcon={true}
           isIconName={'account-outline'}
           placeholder="User Name"
@@ -162,163 +184,66 @@ const Signup = ({navigation}) => {
           onChangeText={text => {
             setUser_name(text);
           }}
-        />
-        <View
-          style={{
-            marginTop: 20,
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-          }}>
-          <CustomInput
-            placeholder={'First Name'}
-            keyboardType={'default'}
-            style={{width: 160}}
-            value={first_name}
-            onChangeText={text => {
-              setFirst_name(text);
+        /> */}
+        <View style={{color: '#000'}}>
+          {/* <DropdownMultiselectView
+            data={data}
+            displayKey="value"
+            displayValue="key"
+            selectedItem={selectedItem}
+            optionsContainer={{backgroundColor: 'grey'}}
+            selectContainer={{backgroundColor: 'red', color: 'black'}}
+            itemContainer={{backgroundColor: 'yellow', color: 'black'}}
+            setSelectedItem={selectedItems => {
+              console.log('Selected Items:', selectedItems);
+              setSelectedItem(selectedItems);
+            }}
+          /> */}
+          <DropdownMultiselectView
+          optionsContainer={styles.text}
+            data={data}
+            displayKey="value"
+            displayValue="key"
+            selectedItem={selectedItem}
+            setSelectedItem={selectedItems => {
+              console.log('Selected Items:', selectedItems);
+              setSelectedItem(selectedItems);
             }}
           />
-          <CustomInput
-            placeholder={'Last Name'}
-            keyboardType={'default'}
-            style={{width: 160}}
-            value={last_name}
-            onChangeText={text => {
-              setLast_name(text);
+          {/* <Text>Selected Items: {JSON.stringify(selectedItem.values)}</Text>
+          <SelectedItems
+            selectedItems={selectedItem}
+            onRemoveItem={itemToRemove => {
+              const updatedItems = selectedItem.filter(
+                item => item.key !== itemToRemove.key,
+              );
+              setSelectedItem(updatedItems);
             }}
-          />
-        </View>
-        <View style={[styles.inputField, {marginTop: 20}]}>
-          <Text
-            style={{
-              fontSize: 16,
-              fontWeight: 500,
-              color: Colors.primary.darkgray,
-            }}>
-            Gender
-          </Text>
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'space-evenly',
-            }}>
-            <CustomRadioBtn
-              label="Male"
-              onSelect={() => handleSelect('Male')}
-              selected={selectedGender === 'Male'}
-            />
-            <CustomRadioBtn
-              label="Female"
-              onSelect={() => handleSelect('Female')}
-              selected={selectedGender === 'Female'}
-            />
+          /> */}
+
+          <View style={styles.chipWrapper}>
+            {selectedItem.map(item => (
+              <OutlinedChip
+                key={item.key}
+                label={item.value}
+                onDelete={() => {
+                  // Remove the item from selected items
+                  const updatedItems = selectedItem.filter(
+                    selected => selected.key !== item.key,
+                  );
+                  setSelectedItem(updatedItems);
+                }}
+              />
+            ))}
           </View>
         </View>
-        <CustomInput
-          isIcon={true}
-          isIconName={'email-outline'}
-          placeholder="Email"
-          keyboardType="email-address"
-          value={email}
-          onChangeText={text => {
-            setEmail(text);
-          }}
-        />
-        <CustomInput
-          isIcon={true}
-          isIconName={'lock-open-outline'}
-          secureTextEntry={true}
-          value={password}
-          onChangeText={e => {
-            setPassword(e);
-          }}
-          isPasswordIcon={true}
-          placeholder="Password"
-        />
-        <CustomInput
-          isIcon={true}
-          isIconName={'lock-open-outline'}
-          secureTextEntry={true}
-          value={confirmPassword}
-          onChangeText={e => {
-            setConfirmPassword(e);
-          }}
-          isPasswordIcon={true}
-          placeholder="Confirm Password"
-        />
 
-        <View
-          style={[
-            styles.inputField,
-            {borderRadius: 12, marginTop: 20, padding: 0},
-          ]}>
-          <Picker
-            style={[styles.inputField]}
-            dropdownIconColor={Colors.primary.darkgray}
-            dropdownIconRippleColor={Colors.primary.lightGray}
-            selectedValue={account}
-            onValueChange={itemValue => setAccount(itemValue)}>
-            <Picker.Item
-              label="Select account type"
-              value=""
-              style={{borderRadius: 12}}
-            />
-            <Picker.Item label="Client" value="2" />
-            <Picker.Item label="Freelancer" value="1" />
-          </Picker>
-        </View>
         <CustomBtn
           lbl={'sign up'}
           style={{marginTop: 80}}
-          onPress={handleSignup}
-          // onPress={() => navigation.navigate('MoreInfo',{
-          //   accountType: account,
-          //   firstName: first_name,
-          //   lastName: last_name,
-          // })}
+          //   onPress={handleSignup}
+          onPress={() => navigation.navigate('BottomNavigation')}
         />
-        <View
-          style={{
-            flexDirection: 'row',
-            justifyContent: 'center',
-            alignItems: 'center',
-            marginTop: 30,
-          }}>
-          <View style={styles.line}></View>
-          <Text style={styles.text}>Or Continue with</Text>
-          <View style={styles.line}></View>
-        </View>
-        <View
-          style={{
-            flexDirection: 'col',
-            alignItems: 'center',
-            marginTop: 30,
-          }}>
-          <TouchableOpacity style={styles.gBtn}>
-            <Image source={gImg} style={{width: 35, height: 35}} />
-          </TouchableOpacity>
-        </View>
-        <View
-          style={{
-            flexDirection: 'row',
-            justifyContent: 'center',
-            alignItems: 'center',
-            marginTop: 30,
-          }}>
-          <Text style={[styles.text, {fontSize: 16}]}>
-            Already Have Account?{' '}
-          </Text>
-          <TouchableOpacity
-            onPress={() => {
-              navigation.navigate('Authentication');
-            }}>
-            <Text style={[styles.text, {fontSize: 16, fontWeight: '600'}]}>
-              Log In
-            </Text>
-          </TouchableOpacity>
-        </View>
       </SafeAreaView>
     </ScrollView>
   );
@@ -353,6 +278,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     borderRadius: 12,
   },
+  chipWrapper: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginTop: 10,
+  },
   line: {
     height: 1,
     width: 50,
@@ -382,4 +312,4 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
 });
-export default Signup;
+export default AddSkills;

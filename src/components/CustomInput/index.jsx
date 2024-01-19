@@ -26,6 +26,7 @@ function CustomInput({
   isIconName,
   style,
   containerStyle,
+  numberOfLines,
 }) {
   const [isPasswordVisible, setIsPasswordVisible] = useState(true);
 
@@ -83,6 +84,7 @@ function CustomInput({
             editable={editable}
             scrollEnabled={scrollEnabled}
             keyboardType={keyboardType}
+            numberOfLines={numberOfLines}
           />
       )}
     </View>

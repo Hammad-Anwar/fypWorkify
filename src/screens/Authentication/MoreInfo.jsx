@@ -1,5 +1,6 @@
 import React, {useState} from 'react';
 import {
+  FlatList,
   Image,
   SafeAreaView,
   ScrollView,
@@ -10,7 +11,6 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import gImg from '../../assets/Images/google-img.png';
 import {Picker} from '@react-native-picker/picker';
 import CustomBtn from '../../components/CustomBtn';
 import CustomInput from '../../components/CustomInput';
@@ -21,30 +21,70 @@ import apiRequest from '../../api/apiRequest';
 import urlType from '../../constants/UrlConstants';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {showMessage} from 'react-native-flash-message';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import profileImg from '../../assets/Images/profileImg.jpg';
+// import ImagePicker from 'react-native-image-picker';
+import ImageCropPicker from 'react-native-image-crop-picker';
 
-const MoreInfo = ({navigation}) => {
-  const [email, setEmail] = useState('');
-  const [user_name, setUser_name] = useState('');
-  const [first_name, setFirst_name] = useState('');
-  const [last_name, setLast_name] = useState('');
+const MoreInfo = ({route, navigation}) => {
+  const {accountType, firstName, lastName} = route.params;
+  const [overview, setOverview] = useState('');
+  const [experience, setExperience] = useState('');
+  const [link, setLink] = useState('');
+  const [location, setLocation] = useState('');
+  const [imageUri, setImageUri] = useState(null);
 
-  const [account, setAccount] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const getUserData = async () => {
+    try {
+      const userString = await AsyncStorage.getItem('@user');
+      return JSON.parse(userString);
+    } catch (error) {
+      console.error('Error fetching user data:', error);
+      return null;
+    }
+  };
 
-  const [selectedGender, setSelectedGender] = useState('');
+  const countries = [
+    {label: 'United States', value: 'US'},
+    {label: 'Canada', value: 'CA'},
+    {label: 'Pakistan', value: 'PK'},
+    {label: 'Germany', value: 'DE'},
+    // Add more countries as needed
+  ];
 
-  const handleSelect = option => {
-    setSelectedGender(option);
+  const chooseImage = async () => {
+    try {
+      const image = await ImageCropPicker.openPicker({
+        width: 82,
+        height: 82,
+        cropping: true,
+      });
+      setImageUri(image.path);
+    } catch (error) {
+      console.log('ImagePicker Error: ', error);
+    }
+  };
+
+  const renderImage = () => {
+    if (imageUri) {
+      return <Image source={{uri: imageUri}} style={styles.imgStyle} />;
+    } else {
+      return (
+        <Image
+          source={profileImg} // Set the path to your default image
+          style={styles.imgStyle}
+        />
+      );
+    }
   };
 
   // console.log(account)
 
-  const signupMutation = useMutation({
+  const continueMutation = useMutation({
     mutationFn: async data => {
       const response = await apiRequest(urlType.BACKEND, {
         method: 'post',
-        url: `signup`,
+        url: `user`,
         data,
       });
       // console.log(response);
@@ -52,9 +92,9 @@ const MoreInfo = ({navigation}) => {
     },
     onSuccess: async e => {
       if (e.status === 200) {
-        await AsyncStorage.setItem('@user', JSON.stringify(e.data.user));
-        await AsyncStorage.setItem('@auth_token', e.data.token);
-        navigation.navigate('BottomNavigation');
+        console.log(e.data)
+        await AsyncStorage.setItem('@user', JSON.stringify(e.data));
+        navigation.navigate('AddSkills');
       } else if (e.response.status === 404) {
         showMessage({
           message: e.response.message,
@@ -75,240 +115,249 @@ const MoreInfo = ({navigation}) => {
     },
   });
 
-  const handleSignup = async () => {
-    var emailFormat = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    var passwordFormat =
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]).{8,}$/;
-    // const password = 'SecurePassword123!';
-    // const isValid = passwordFormat.test(password);
-
-    // if (isValid) {
-    //   console.log('Valid password');
-    // } else {
-    //   console.log('Invalid password');
-    // }
-    if (
-      email.length > 0 &&
-      user_name.length > 0 &&
-      first_name.length > 0 &&
-      last_name.length > 0 &&
-      selectedGender.length > 0 &&
-      password.length > 0 &&
-      account > 0 &&
-      password === confirmPassword
-    ) {
-      if (email.match(emailFormat)) {
+  const handleContinue = async () => {
+    const userInfo = await getUserData();
+    console.log("Info",userInfo.user_id)
+    // Freelancer
+    if (accountType == 1) {
+      if (
+        overview.length > 0 &&
+        experience.length > 0 &&
+        link.length > 0 &&
+        countries.length > 0
+      ) {
         const data = {
-          user_name: user_name,
-          email: email,
-          password: password,
-          first_name: first_name,
-          last_name: last_name,
-          gender: selectedGender,
-          role_id: parseInt(account),
+          user_id: parseInt(userInfo.user_id),
+          image: imageUri,
+          userData: {
+            overview: overview,
+            experience: experience,
+            links: link,
+            location: location,
+          },
         };
-        await signupMutation.mutate(data);
+        await continueMutation.mutate(data);
         // console.log(loginMutation.isLoading);
         console.log(data);
       } else {
         showMessage({
-          message: 'Invalid Email Format',
+          message: 'Please fill all the fields Or upload image',
           type: 'danger',
           color: '#fff',
           backgroundColor: 'red',
           floating: true,
         });
       }
-    } else if (password !== confirmPassword) {
-      showMessage({
-        message: 'Password does not match',
-        type: 'danger',
-        color: '#fff',
-        backgroundColor: 'red',
-        floating: true,
-      });
-    } else {
-      showMessage({
-        message: 'Please fill all the fields',
-        type: 'danger',
-        color: '#fff',
-        backgroundColor: 'red',
-        floating: true,
-      });
+    }
+    // Client
+    else if (accountType == 2) {
+      if (
+        overview.length > 0 &&
+        countries.length > 0
+      ) {
+        const data = {
+          user_id: parseInt(userInfo.user_id),
+          image: imageUri,
+          userData: {
+            overview: overview,
+            location: location,
+          },
+        };
+        await continueMutation.mutate(data);
+        // console.log(loginMutation.isLoading);
+        console.log(data);
+      } else {
+        showMessage({
+          message: 'Please fill all the fields Or upload image',
+          type: 'danger',
+          color: '#fff',
+          backgroundColor: 'red',
+          floating: true,
+        });
+      }
     }
   };
 
   return (
     <ScrollView>
       <SafeAreaView style={styles.container}>
-        <View style={styles.headContainer}>
-          <View>
-            <Text style={styles.heading}>Register Account</Text>
-            <Text style={styles.text}>Fill your details or continue</Text>
-            <Text style={styles.text}>with google</Text>
-          </View>
-        </View>
-        <CustomInput
-          isIcon={true}
-          isIconName={'account-outline'}
-          placeholder="User Name"
-          keyboardType="default"
-          value={user_name}
-          onChangeText={text => {
-            setUser_name(text);
-          }}
-        />
-        <View
-          style={{
-            marginTop: 20,
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-          }}>
-          <CustomInput
-            placeholder={'First Name'}
-            keyboardType={'default'}
-            style={{width: 160}}
-            value={first_name}
-            onChangeText={text => {
-              setFirst_name(text);
-            }}
-          />
-          <CustomInput
-            placeholder={'Last Name'}
-            keyboardType={'default'}
-            style={{width: 160}}
-            value={last_name}
-            onChangeText={text => {
-              setLast_name(text);
-            }}
-          />
-        </View>
-        <View style={[styles.inputField, {marginTop: 20}]}>
-          <Text
-            style={{
-              fontSize: 16,
-              fontWeight: 500,
-              color: Colors.primary.darkgray,
-            }}>
-            Gender
-          </Text>
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              justifyContent: 'space-evenly',
-            }}>
-            <CustomRadioBtn
-              label="Male"
-              onSelect={() => handleSelect('Male')}
-              selected={selectedGender === 'Male'}
-            />
-            <CustomRadioBtn
-              label="Female"
-              onSelect={() => handleSelect('Female')}
-              selected={selectedGender === 'Female'}
-            />
-          </View>
-        </View>
-        <CustomInput
-          isIcon={true}
-          isIconName={'email-outline'}
-          placeholder="Email"
-          keyboardType="email-address"
-          value={email}
-          onChangeText={text => {
-            setEmail(text);
-          }}
-        />
-        <CustomInput
-          isIcon={true}
-          isIconName={'lock-open-outline'}
-          secureTextEntry={true}
-          value={password}
-          onChangeText={e => {
-            setPassword(e);
-          }}
-          isPasswordIcon={true}
-          placeholder="Password"
-        />
-        <CustomInput
-          isIcon={true}
-          isIconName={'lock-open-outline'}
-          secureTextEntry={true}
-          value={confirmPassword}
-          onChangeText={e => {
-            setConfirmPassword(e);
-          }}
-          isPasswordIcon={true}
-          placeholder="Confirm Password"
-        />
+        {accountType == 1 ? (
+          <>
+            <View style={styles.headContainer}>
+              <View>
+                <Text style={styles.heading}>More Details</Text>
+                <Text style={styles.text}>Fill the details for your</Text>
+                <Text style={styles.text}>profile as a Freelancer</Text>
+              </View>
+            </View>
+            <View style={styles.row}>
+              <TouchableOpacity
+                style={[styles.containerImg, {marginRight: 10}]}
+                onPress={chooseImage}>
+                {renderImage()}
+                <View style={styles.overlay}>
+                  <MaterialCommunityIcons
+                    name="camera"
+                    size={32}
+                    color={Colors.primary.sub}
+                  />
+                </View>
+              </TouchableOpacity>
+              <View>
+                <Text style={styles.largeTxt}>
+                  {firstName} {lastName}
+                </Text>
+                <Text style={{color: Colors.primary.darkgray, fontSize: 12}}>
+                  *Add your profile image
+                </Text>
+              </View>
+            </View>
+            <View style={styles.line}></View>
 
-        <View
-          style={[
-            styles.inputField,
-            {borderRadius: 12, marginTop: 20, padding: 0},
-          ]}>
-          <Picker
-            style={[styles.inputField]}
-            dropdownIconColor={Colors.primary.darkgray}
-            dropdownIconRippleColor={Colors.primary.lightGray}
-            selectedValue={account}
-            onValueChange={itemValue => setAccount(itemValue)}>
-            <Picker.Item
-              label="Select account type"
-              value=""
-              style={{borderRadius: 12}}
+            <CustomInput
+              placeholder="Write the overview of your profile"
+              keyboardType="default"
+              value={overview}
+              onChangeText={text => {
+                setOverview(text);
+              }}
+              multiline={true}
+              numberOfLines={2}
             />
-            <Picker.Item label="Client" value="2" />
-            <Picker.Item label="Freelancer" value="1" />
-          </Picker>
-        </View>
-        <CustomBtn
-          lbl={'sign up'}
-          style={{marginTop: 80}}
-          onPress={handleSignup}
-        />
-        <View
-          style={{
-            flexDirection: 'row',
-            justifyContent: 'center',
-            alignItems: 'center',
-            marginTop: 30,
-          }}>
-          <View style={styles.line}></View>
-          <Text style={styles.text}>Or Continue with</Text>
-          <View style={styles.line}></View>
-        </View>
-        <View
-          style={{
-            flexDirection: 'col',
-            alignItems: 'center',
-            marginTop: 30,
-          }}>
-          <TouchableOpacity style={styles.gBtn}>
-            <Image source={gImg} style={{width: 35, height: 35}} />
-          </TouchableOpacity>
-        </View>
-        <View
-          style={{
-            flexDirection: 'row',
-            justifyContent: 'center',
-            alignItems: 'center',
-            marginTop: 30,
-          }}>
-          <Text style={[styles.text, {fontSize: 16}]}>
-            Already Have Account?{' '}
-          </Text>
-          <TouchableOpacity
-            onPress={() => {
-              navigation.navigate('Authentication');
-            }}>
-            <Text style={[styles.text, {fontSize: 16, fontWeight: '600'}]}>
-              Log In
-            </Text>
-          </TouchableOpacity>
-        </View>
+            <View>
+              <CustomInput
+                style={{marginVertical: 20}}
+                placeholder="Write the experience of your work in detail"
+                keyboardType="default"
+                value={experience}
+                onChangeText={text => {
+                  setExperience(text);
+                }}
+                multiline={true}
+                numberOfLines={4}
+              />
+
+              <CustomInput
+                placeholder="Add any Links"
+                keyboardType="default"
+                value={link}
+                onChangeText={text => {
+                  setLink(text);
+                }}
+                multiline={true}
+              />
+            </View>
+            <View
+              style={[
+                styles.inputField,
+                {borderRadius: 12, marginTop: 20, padding: 0},
+              ]}>
+              <Picker
+                style={[styles.inputField]}
+                dropdownIconColor={Colors.primary.darkgray}
+                dropdownIconRippleColor={Colors.primary.lightGray}
+                selectedValue={location}
+                onValueChange={itemValue => setLocation(itemValue)}>
+                <Picker.Item
+                  label="Select Your Country"
+                  value=""
+                  style={{borderRadius: 12}}
+                />
+                {countries.map((country, index) => (
+                  <Picker.Item
+                    key={index}
+                    label={country.label}
+                    value={country.value}
+                    style={{borderRadius: 12}}
+                  />
+                ))}
+              </Picker>
+            </View>
+            <CustomBtn
+              lbl={'Continue'}
+              style={{marginTop: 80, marginBottom: 60}}
+              onPress={handleContinue}
+              // onPress={() => navigation.navigate('AddSkills')}
+            />
+          </>
+        ) : (
+          <>
+            <View style={styles.headContainer}>
+              <View>
+                <Text style={styles.heading}>More Details</Text>
+                <Text style={styles.text}>Fill the details for your</Text>
+                <Text style={styles.text}>profile as a Client</Text>
+              </View>
+            </View>
+            <View style={styles.row}>
+              <TouchableOpacity
+                style={[styles.containerImg, {marginRight: 10}]}
+                onPress={chooseImage}>
+                {renderImage()}
+                <View style={styles.overlay}>
+                  <MaterialCommunityIcons
+                    name="camera"
+                    size={32}
+                    color={Colors.primary.sub}
+                  />
+                </View>
+              </TouchableOpacity>
+              <View>
+                <Text style={styles.largeTxt}>
+                  {firstName} {lastName}
+                </Text>
+                <Text style={{color: Colors.primary.darkgray, fontSize: 12}}>
+                  *Add your profile image
+                </Text>
+              </View>
+            </View>
+            <View style={styles.line}></View>
+
+            <CustomInput
+              placeholder="Write the overview of your profile"
+              keyboardType="default"
+              value={overview}
+              onChangeText={text => {
+                setOverview(text);
+              }}
+              multiline={true}
+              numberOfLines={4}
+            />
+
+            <View
+              style={[
+                styles.inputField,
+                {borderRadius: 12, marginTop: 20, padding: 0},
+              ]}>
+              <Picker
+                style={[styles.inputField]}
+                dropdownIconColor={Colors.primary.darkgray}
+                dropdownIconRippleColor={Colors.primary.lightGray}
+                selectedValue={location}
+                onValueChange={itemValue => setLocation(itemValue)}>
+                <Picker.Item
+                  label="Select Your Country"
+                  value=""
+                  style={{borderRadius: 12}}
+                />
+                {countries.map((country, index) => (
+                  <Picker.Item
+                    key={index}
+                    label={country.label}
+                    value={country.value}
+                    style={{borderRadius: 12}}
+                  />
+                ))}
+              </Picker>
+            </View>
+            <CustomBtn
+              lbl={'Continue'}
+              style={{marginTop: 80, marginBottom: 210}}
+              // onPress={handleSignup}
+              onPress={() => navigation.navigate('AddSkills')}
+            />
+          </>
+        )}
       </SafeAreaView>
     </ScrollView>
   );
@@ -343,12 +392,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     borderRadius: 12,
   },
-  line: {
-    height: 1,
-    width: 50,
-    backgroundColor: '#636363',
-    marginHorizontal: 10,
-  },
+
   gBtn: {
     flexDirection: 'column',
     justifyContent: 'center',
@@ -370,6 +414,42 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     paddingLeft: 10,
     marginBottom: 10,
+  },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignContent: 'center',
+  },
+  largeTxt: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: Colors.primary.lightBlack,
+  },
+  line: {
+    marginVertical: 10,
+    marginBottom: 20,
+    height: 2,
+    width: '100%',
+    backgroundColor: Colors.primary.black,
+  },
+  imgStyle: {
+    width: 82,
+    height: 82,
+    borderRadius: 55,
+    marginTop: 20,
+    marginBottom: 10,
+    resizeMode: 'cover',
+  },
+  containerImg: {
+    position: 'relative',
+    overflow: 'hidden',
+  },
+
+  overlay: {
+    ...StyleSheet.absoluteFillObject, // Position the overlay absolutely
+    justifyContent: 'center',
+    alignItems: 'center',
+    // marginTop: 70
   },
 });
 export default MoreInfo;

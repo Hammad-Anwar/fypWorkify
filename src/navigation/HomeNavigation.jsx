@@ -44,11 +44,11 @@ function HomeNavigation() {
           name="ChangePassword"
           component={ChangePassword}
         />
-        <Stack.Screen
+        {/* <Stack.Screen
           options={{headerShown: false}}
           name="Authenticaion"
           component={Authenticaion}
-        />
+        /> */}
       </Stack.Navigator>
     </>
   );

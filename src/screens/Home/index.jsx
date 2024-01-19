@@ -25,10 +25,13 @@ function Home({navigation}) {
   const checkAuthToken = async () => {
     try {
       const authToken = await AsyncStorage.getItem('@auth_token');
-      const user = await AsyncStorage.getItem('@user');
+      const userString = await AsyncStorage.getItem('@user');
       if (authToken) {
         console.log('Auth Token:', authToken);
-        console.log('User:', user);
+        console.log('User:', userString);
+        const user = JSON.parse(userString);
+
+        console.log('UserId:', user.useraccount_id);
         // Perform any additional actions based on the authToken value
       } else {
         console.log('Auth Token not found in AsyncStorage');
