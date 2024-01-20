@@ -273,6 +273,7 @@ const Signup = ({navigation}) => {
           lbl={'sign up'}
           style={{marginTop: 80}}
           onPress={handleSignup}
+          loading={signupMutation.isPending}
           // onPress={() => navigation.navigate('MoreInfo',{
           //   accountType: account,
           //   firstName: first_name,

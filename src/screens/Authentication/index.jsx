@@ -21,16 +21,16 @@ function Authenticaion({navigation}) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const userData = useQuery({
-    queryKey: ['user'],
-    queryFn: async () => {
-      const response = await apiRequest(urlType.BACKEND, {
-        method: 'get',
-        url: `user?user_id=2`,
-      });
-      return response.data;
-    },
-  });
+  // const userData = useQuery({
+  //   queryKey: ['user'],
+  //   queryFn: async () => {
+  //     const response = await apiRequest(urlType.BACKEND, {
+  //       method: 'get',
+  //       url: `user?user_id=2`,
+  //     });
+  //     return response.data;
+  //   },
+  // });
   // console.log(userData.data);
 
   const loginMutation = useMutation({

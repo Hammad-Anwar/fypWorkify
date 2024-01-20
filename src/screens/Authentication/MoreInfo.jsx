@@ -277,6 +277,7 @@ const MoreInfo = ({route, navigation}) => {
               lbl={'Continue'}
               style={{marginTop: 80, marginBottom: 60}}
               onPress={handleContinue}
+              loading={continueMutation.isPending}
               // onPress={() => navigation.navigate('AddSkills')}
             />
           </>
@@ -353,8 +354,9 @@ const MoreInfo = ({route, navigation}) => {
             <CustomBtn
               lbl={'Continue'}
               style={{marginTop: 80, marginBottom: 210}}
-              // onPress={handleSignup}
-              onPress={() => navigation.navigate('AddSkills')}
+              onPress={handleContinue}
+              loading={continueMutation.isPending}
+              // onPress={() => navigation.navigate('AddSkills')}
             />
           </>
         )}

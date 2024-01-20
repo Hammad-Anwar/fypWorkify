@@ -242,6 +242,7 @@ const AddSkills = ({navigation}) => {
           lbl={'sign up'}
           style={{marginTop: 80}}
           //   onPress={handleSignup}
+          // loading={loginMutation.isPending}
           onPress={() => navigation.navigate('BottomNavigation')}
         />
       </SafeAreaView>

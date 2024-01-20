@@ -7,20 +7,40 @@ import {
   Text,
   TouchableOpacity,
   View,
+  ActivityIndicator,
 } from 'react-native';
 import {Colors} from '../../constants/theme';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import profileImg from '../../assets/Images/profileImg.jpg';
 import CustomBtn from '../../components/CustomBtn';
 import LargeCard from '../../components/LargeCard';
-function AccountSetting({navigation}) {
+import {useQuery, useMutation} from '@tanstack/react-query';
+import apiRequest from '../../api/apiRequest';
+import urlType from '../../constants/UrlConstants';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import {showMessage} from 'react-native-flash-message';
+function AccountSetting({route, navigation}) {
+  const {userInfo, userDetail} = route.params;
+
+  const userData = useQuery({
+    queryKey: ['freelancerPost'],
+    queryFn: async () => {
+      const response = await apiRequest(urlType.BACKEND, {
+        method: 'get',
+        url: `freelancerJobs?freelancer_id=${userInfo?.id}`,
+      });
+      return response.data;
+    },
+  });
+  console.log(userInfo);
+  console.log(userDetail);
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView style={styles.scrollContent}>
-      <View style={[styles.row, {justifyContent: 'space-between'}]}>
+        <View style={[styles.row, {justifyContent: 'space-between'}]}>
           <TouchableOpacity
             // style={{marginRight: '30%'}}
-            onPress={() => navigation.navigate('Home')}>
+            onPress={() => navigation.goBack()}>
             <MaterialCommunityIcons
               name="chevron-left"
               size={32}
@@ -30,16 +50,15 @@ function AccountSetting({navigation}) {
           <Text style={styles.largeTxt}>Profile</Text>
           <TouchableOpacity
             onPress={() => navigation.navigate('Authenticaion')}>
-            <MaterialCommunityIcons
-              name="power"
-              size={30}
-              color="red"
-            />
+            <MaterialCommunityIcons name="power" size={30} color="red" />
           </TouchableOpacity>
         </View>
         <View style={{justifyContent: 'center', alignItems: 'center'}}>
-          <Image source={profileImg} style={styles.imgStyle} />
-          <Text style={styles.largeTxt}>John William</Text>
+          <Image source={{uri: userDetail?.user_account?.image}} style={styles.imgStyle} />
+          <Text style={styles.largeTxt}>
+            {userDetail?.user_account?.first_name}{' '}
+            {userDetail?.user_account?.last_name}
+          </Text>
           <View style={[styles.row, {marginVertical: 20}]}>
             <View style={{alignItems: 'center', marginRight: 35}}>
               <Text style={styles.smallTxt}>20</Text>
@@ -60,7 +79,11 @@ function AccountSetting({navigation}) {
               lblStyle={{
                 textTransform: 'capitalize',
               }}
-              style={{marginRight: 20, paddingHorizontal: 30, paddingVertical: 10}}
+              style={{
+                marginRight: 20,
+                paddingHorizontal: 30,
+                paddingVertical: 10,
+              }}
               onPress={() => navigation.navigate('EditProfile')}
             />
             <CustomBtn
@@ -68,14 +91,30 @@ function AccountSetting({navigation}) {
               lblStyle={{
                 textTransform: 'capitalize',
               }}
-              style={{ paddingHorizontal: 30, paddingVertical: 10}}
+              style={{paddingHorizontal: 30, paddingVertical: 10}}
               onPress={() => navigation.navigate('TopReviewNav')}
             />
           </View>
         </View>
         <View style={styles.line}></View>
-        <LargeCard/>
-        <LargeCard/>
+        <Text style={styles.largeTxt}>Your Posts</Text>
+        <View style={{marginTop: 10}}>
+          {userData.data && userData.data.length > 0 ? (
+            userData.data.map((jobData, index) => (
+              <LargeCard key={index} jobData={jobData} />
+            ))
+          ) : (
+            <View style={{alignItems: 'center', marginTop: 10}}>
+              {userData.data ? (
+                <Text style={{color: Colors.primary.lightGray}}>
+                  No posts available
+                </Text>
+              ) : (
+                <ActivityIndicator size={24} color={Colors.primary.black} />
+              )}
+            </View>
+          )}
+        </View>
       </ScrollView>
     </SafeAreaView>
   );

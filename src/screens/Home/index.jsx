@@ -1,5 +1,6 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {
+  ActivityIndicator,
   Image,
   SafeAreaView,
   ScrollView,
@@ -17,32 +18,101 @@ import CustomInput from '../../components/CustomInput';
 import {Colors} from '../../constants/theme';
 import SmallCard from '../../components/SmallCard';
 import LargeCard from '../../components/LargeCard';
+import {useQuery, useMutation} from '@tanstack/react-query';
+import apiRequest from '../../api/apiRequest';
+import urlType from '../../constants/UrlConstants';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {showMessage} from 'react-native-flash-message';
 
-
+// const getUserData = async () => {
+//   try {
+//     const userString = await AsyncStorage.getItem('@user');
+//     const userData = JSON.parse(userString);
+//     return userData ? userData.freelancer_id : null;
+//   } catch (error) {
+//     console.error('Error fetching user data:', error);
+//     return null;
+//   }
+// };
 function Home({navigation}) {
+  const [userInfo, setUserInfo] = useState(null);
 
-  const checkAuthToken = async () => {
-    try {
-      const authToken = await AsyncStorage.getItem('@auth_token');
-      const userString = await AsyncStorage.getItem('@user');
-      if (authToken) {
-        console.log('Auth Token:', authToken);
-        console.log('User:', userString);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const userString = await AsyncStorage.getItem('@user');
         const user = JSON.parse(userString);
 
-        console.log('UserId:', user.useraccount_id);
-        // Perform any additional actions based on the authToken value
-      } else {
-        console.log('Auth Token not found in AsyncStorage');
+        if (user) {
+          if (user.freelancer_id) {
+            setUserInfo({userType: 'freelancer', id: user.freelancer_id});
+          } else if (user.client_id) {
+            setUserInfo({userType: 'client', id: user.client_id});
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching user data:', error);
       }
-    } catch (error) {
-      console.error('Error checking Auth Token:', error);
-    }
-  };
-  
-  // Call the function to check the auth token
-  checkAuthToken();
+    };
+
+    fetchData();
+  }, []);
+  const userData = useQuery({
+    queryKey: ['jobPost'],
+    queryFn: async () => {
+      if (userInfo.userType === 'freelancer') {
+        const response = await apiRequest(urlType.BACKEND, {
+          method: 'get',
+          url: `skillsJobs?freelancer_id=${userInfo?.id}`,
+        });
+        return response.data;
+      } else if (userInfo.userType === 'client') {
+        const response = await apiRequest(urlType.BACKEND, {
+          method: 'get',
+          url: `clientJobs?client_id=${userInfo?.id}`,
+        });
+        return response.data;
+      }
+    },
+  });
+
+  const userDetail = useQuery({
+    queryKey: ['userDetail'],
+    queryFn: async () => {
+      try {
+        const response = await apiRequest(urlType.BACKEND, {
+          method: 'get',
+          url: `user?id=${userInfo?.id}&userType=${userInfo?.userType}`,
+        });
+        if (response.data) {
+          return response.data;
+        } else {
+          throw new Error('Data not available');
+        }
+      } catch (error) {
+        console.error('Error fetching user detail:', error);
+        throw error;
+      }
+    },
+  });
+
+  if (!userInfo) {
+    return <ActivityIndicator size={24} color={Colors.primary.darkgray} />;
+  }
+  if (!userInfo.userType) {
+    showMessage({
+      message: 'Error: User information not available',
+      type: 'danger',
+      color: '#fff',
+      backgroundColor: 'red',
+      floating: true,
+    });
+    return null;
+  }
+  console.log("user Info", userInfo)
+  console.log('User data: ', userDetail);
+  console.log(userData.data);
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView style={styles.scrollContent}>
@@ -55,8 +125,17 @@ function Home({navigation}) {
             />
           </TouchableOpacity>
           <Text style={{color: Colors.primary.black}}>Workify</Text>
-          <TouchableOpacity onPress={() => { navigation.navigate('AccountSetting')}}>
-            <Image source={profileImg} style={styles.imgStyle} />
+          <TouchableOpacity
+            onPress={() => {
+              navigation.navigate('AccountSetting', {
+                userInfo: userInfo,
+                userDetail: userDetail.data,
+              });
+            }}>
+            <Image
+              source={{uri: userDetail?.data?.user_account?.image}}
+              style={styles.imgStyle}
+            />
           </TouchableOpacity>
         </View>
         <View style={styles.row}>
@@ -85,31 +164,86 @@ function Home({navigation}) {
             <Image source={filterIcon} style={styles.iconStyle} />
           </TouchableOpacity>
         </View>
-        <View style={[styles.row, {marginTop: 30}]}>
-          <Text style={styles.largeTxt}>Featured Posts</Text>
-          <TouchableOpacity>
-            <Text style={styles.smallTxt}>View all</Text>
-          </TouchableOpacity>
-        </View>
-        <ScrollView
-          horizontal={true}
-          showsHorizontalScrollIndicator={false}
-          style={{flex: 1}}>
-          <SmallCard />
-          <SmallCard />
-          <SmallCard />
-        </ScrollView>
-        <View style={{marginTop: 20}}>
-          <View style={styles.line}></View>
-          <View style={{marginTop: 20}}>
-
-            <LargeCard />
-            <LargeCard />
-            <LargeCard />
-            <LargeCard />
-          </View>
-          
-        </View>
+        {userInfo?.userType === 'freelancer' ? (
+          <>
+            <View style={[styles.row, {marginTop: 30}]}>
+              <Text style={styles.largeTxt}>Featured Posts</Text>
+              <TouchableOpacity>
+                <Text style={styles.smallTxt}>View all</Text>
+              </TouchableOpacity>
+            </View>
+            <ScrollView
+              horizontal={true}
+              showsHorizontalScrollIndicator={false}
+              style={{flex: 1}}>
+              <SmallCard />
+              <SmallCard />
+              <SmallCard />
+            </ScrollView>
+            <View style={{marginTop: 20}}>
+              <View style={styles.line}></View>
+              <View style={{marginTop: 20}}>
+                {userData.data && userData.data.length > 0 ? (
+                  userData.data.map((jobData, index) => (
+                    <LargeCard key={index} jobData={jobData} />
+                  ))
+                ) : (
+                  <View style={{alignItems: 'center', marginTop: 10}}>
+                    {userData.data ? (
+                      <Text style={{color: Colors.primary.lightGray}}>
+                        No posts available
+                      </Text>
+                    ) : (
+                      <ActivityIndicator
+                        size={24}
+                        color={Colors.primary.black}
+                      />
+                    )}
+                  </View>
+                )}
+              </View>
+            </View>
+          </>
+        ) : userInfo?.userType === 'client' ? (
+          <>
+            <View style={{marginTop: 20}}>
+              <View style={styles.line}></View>
+              <View style={{marginTop: 20}}>
+                <Text style={styles.largeTxt}>Your Posts</Text>
+              </View>
+              <View style={{marginTop: 0}}>
+                {userData?.data && userData?.data.length > 0 ? (
+                  userData?.data.map((jobData, index) => (
+                    <LargeCard key={index} jobData={jobData} />
+                  ))
+                ) : (
+                  <View style={{alignItems: 'center', marginTop: 10}}>
+                    {userData?.data ? (
+                      <Text style={{color: Colors.primary.lightGray}}>
+                        No posts available
+                      </Text>
+                    ) : (
+                      <ActivityIndicator
+                        size={24}
+                        color={Colors.primary.black}
+                      />
+                    )}
+                  </View>
+                )}
+              </View>
+            </View>
+          </>
+        ) : (
+          <>
+            {showMessage({
+              message: 'User type not recognized',
+              type: 'danger',
+              color: '#fff',
+              backgroundColor: 'red',
+              floating: true,
+            })}
+          </>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -119,7 +253,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.primary.white,
     paddingHorizontal: 20,
-    paddingTop: 20
+    paddingTop: 20,
   },
   imgStyle: {
     width: 34,
