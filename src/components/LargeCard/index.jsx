@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {
   Image,
   SafeAreaView,
@@ -11,8 +11,55 @@ import {Colors} from '../../constants/theme';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import profileImg from '../../assets/Images/profileImg.jpg';
+import CustomModal from '../CustomModal';
+import {useQuery, useMutation} from '@tanstack/react-query';
+import apiRequest from '../../api/apiRequest';
+import urlType from '../../constants/UrlConstants';
 
-function LargeCard({jobData}) {
+function LargeCard({jobData, isMyPost, postId, handleUpdate}) {
+  const [isDeleteModalVisible, setDeleteModalVisible] = useState(false);
+
+  const deleteMutation = useMutation({
+    mutationFn: async id => {
+      const response = await apiRequest(urlType.BACKEND, {
+        method: 'delete',
+        url: `job?job_id=${id}`,
+      });
+      return response;
+    },
+    onSuccess: async e => {
+      console.log(response);
+
+      if (e.status === 200) {
+        console.log('sada', e.message);
+        showMessage({
+          message: e.message,
+          type: 'success',
+          color: '#fff',
+          backgroundColor: Colors.primary.green,
+          floating: true,
+        });
+        // navigation.navigate('AddSkills');
+      } else {
+        showMessage({
+          message: e.message || 'An Error occured',
+          type: 'danger',
+          color: '#fff',
+          backgroundColor: Colors.primary.red,
+          floating: true,
+        });
+      }
+    },
+  });
+  const handleDelete = () => {
+    setDeleteModalVisible(true);
+  };
+
+  const confirmDelete = async () => {
+    await deleteMutation.mutate(postId);
+    setDeleteModalVisible(false);
+  };
+
   const formatDate = dateString => {
     const options = {
       year: 'numeric',
@@ -32,11 +79,11 @@ function LargeCard({jobData}) {
           <Image
             // source={profileImg}
             source={
-              jobData?.profile_image 
+              jobData?.profile_image
                 ? {uri: jobData.profile_image}
-                : jobData?.client?.image 
+                : jobData?.client?.image
                 ? {uri: jobData?.client?.image}
-                : jobData?.freelancer?.image 
+                : jobData?.freelancer?.image
                 ? {uri: jobData?.freelancer?.image}
                 : {profileImg}
             }
@@ -62,27 +109,50 @@ function LargeCard({jobData}) {
             </Text>
           </View>
         </View>
-        <TouchableOpacity>
-          <MaterialCommunityIcons
-            name="dots-horizontal"
-            size={24}
-            color={Colors.primary.darkgray}
-          />
-        </TouchableOpacity>
+        {isMyPost ? (
+          <View style={{flexDirection: 'row', alignItems: 'center'}}>
+            <TouchableOpacity style={{marginRight: 10}} onPress={handleUpdate}>
+              <MaterialCommunityIcons
+                name="book-edit-outline"
+                size={24}
+                color={Colors.primary.darkgray}
+              />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={handleDelete}>
+              <MaterialCommunityIcons
+                name="delete-outline"
+                size={24}
+                color={Colors.primary.red}
+              />
+            </TouchableOpacity>
+            <CustomModal
+              visible={isDeleteModalVisible}
+              onClose={() => setDeleteModalVisible(false)}
+              onAction={confirmDelete}
+              action="Delete"
+              message="Are you sure you want to delete this post?"
+            />
+          </View>
+        ) : (
+          <TouchableOpacity>
+            <MaterialCommunityIcons
+              name="dots-horizontal"
+              size={24}
+              color={Colors.primary.darkgray}
+            />
+          </TouchableOpacity>
+        )}
       </View>
       <View style={{marginTop: 10}}>
         <Text style={styles.txt}>{jobData?.job_description}</Text>
       </View>
       <View style={{marginTop: 10}}>
-        {jobData?.image.length > 0 ? (
+        {jobData?.image ? (
           <Image
-            source={profileImg}
-            //  source={{ uri: jobData?.image }}
+            source={{uri: jobData?.image}}
             style={{width: 'auto', height: 400, resizeMode: 'contain'}}
           />
-        ) : (
-          <Text style={styles.txt}>{jobData?.image}</Text>
-        )}
+        ) : null}
       </View>
       <View style={[styles.row, {justifyContent: 'flex-start', marginTop: 10}]}>
         <Text style={styles.txt}>Payment: </Text>

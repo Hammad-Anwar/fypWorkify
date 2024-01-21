@@ -1,9 +1,9 @@
 import React from 'react';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import HomeNavigation from './HomeNavigation';
-import { Colors } from '../constants/theme';
-
+import {Colors} from '../constants/theme';
+import AddPost from '../screens/AddPost';
 
 const Tab = createBottomTabNavigator();
 
@@ -19,59 +19,78 @@ function BottomNavigation() {
         name="Home"
         component={HomeNavigation}
         options={{
-            headerShown: false,
-            tabBarLabel: 'Home',
-            tabBarIcon: ({focused, color, size}) => (
-                <MaterialCommunityIcons name={focused ? "home" : "home-outline"} color={color} size={size} />
-                ),
-            }}
+          headerShown: false,
+          tabBarLabel: 'Home',
+          tabBarIcon: ({focused, color, size}) => (
+            <MaterialCommunityIcons
+              name={focused ? 'home' : 'home-outline'}
+              color={color}
+              size={size}
             />
+          ),
+        }}
+      />
       <Tab.Screen
         name="Message"
         component={HomeNavigation}
         options={{
-            headerShown: false,
-            tabBarLabel: 'Messages',
-            tabBarIcon: ({focused, color, size}) => (
-                <MaterialCommunityIcons name={ focused ?  "message-text" : "message-text-outline" } color={color} size={size} />
-                ),
-            }}
+          headerShown: false,
+          tabBarLabel: 'Messages',
+          tabBarIcon: ({focused, color, size}) => (
+            <MaterialCommunityIcons
+              name={focused ? 'message-text' : 'message-text-outline'}
+              color={color}
+              size={size}
             />
+          ),
+        }}
+      />
       <Tab.Screen
         name="Post"
-        component={HomeNavigation}
+        component={AddPost}
         options={{
-            headerShown: false,
-            tabBarLabel: 'Post',
-            tabBarIcon: ({focused, color, size}) => (
-                <MaterialCommunityIcons name={ focused ?  "plus-box" : "plus-box-outline" } color={color} size={size} />
-                ),
-            }}
+          headerShown: false,
+          tabBarLabel: 'Post',
+          tabBarIcon: ({focused, color, size}) => (
+            <MaterialCommunityIcons
+              name={focused ? 'plus-box' : 'plus-box-outline'}
+              color={color}
+              size={size}
             />
+          ),
+        }}
+      />
       <Tab.Screen
         name="Notifications"
         component={HomeNavigation}
         options={{
-            headerShown: false,
-            tabBarLabel: 'Updates',
-            tabBarIcon: ({focused, color, size}) => (
-                <MaterialCommunityIcons name={ focused ?  "bell" : "bell-outline" } color={color} size={size} />
-                ),
-                tabBarBadge: 3,
-            }}
+          headerShown: false,
+          tabBarLabel: 'Updates',
+          tabBarIcon: ({focused, color, size}) => (
+            <MaterialCommunityIcons
+              name={focused ? 'bell' : 'bell-outline'}
+              color={color}
+              size={size}
             />
+          ),
+          tabBarBadge: 3,
+        }}
+      />
       <Tab.Screen
         name="Order"
         component={HomeNavigation}
         options={{
-            headerShown: false,
-            tabBarLabel: 'Orders',
-            tabBarIcon: ({focused, color, size}) => (
-                <MaterialCommunityIcons name={ focused ?  "clipboard-list" : "clipboard-list-outline" } color={color} size={size} />
-                ),
-            }}
+          headerShown: false,
+          tabBarLabel: 'Orders',
+          tabBarIcon: ({focused, color, size}) => (
+            <MaterialCommunityIcons
+              name={focused ? 'clipboard-list' : 'clipboard-list-outline'}
+              color={color}
+              size={size}
             />
-      
+          ),
+        }}
+      />
     </Tab.Navigator>
   );
 }

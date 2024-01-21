@@ -21,14 +21,147 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import {showMessage} from 'react-native-flash-message';
 import ImageCropPicker from 'react-native-image-crop-picker';
 
-function EditProfile({navigation}) {
-  const [overview, setOverview] = useState('');
-  const [experience, setExperience] = useState('');
-  const [link, setLink] = useState('');
-  const [location, setLocation] = useState('');
-  const [imageUri, setImageUri] = useState(null);
+function EditProfile({route, navigation}) {
+  const {userDetail, userInfo} = route.params;
+  const userApiDetail = useQuery({
+    queryKey: ['userApiDetail', userInfo?.userType, userInfo?.id],
+    queryFn: async () => {
+      try {
+        const response = await apiRequest(urlType.BACKEND, {
+          method: 'get',
+          url: `user?id=${userInfo?.id}&userType=${userInfo?.userType}`,
+        });
+        if (response.data) {
+          return response.data;
+        } else {
+          throw new Error('Data not available');
+        }
+      } catch (error) {
+        console.error('Error fetching user detail:', error);
+        throw error;
+      }
+    },
+  });
+  const [first_name, setFirst_name] = useState(
+    userApiDetail?.data?.user_account?.first_name,
+  );
+  const [last_name, setLast_name] = useState(
+    userApiDetail?.data?.user_account?.last_name,
+  );
+  const [overview, setOverview] = useState(userApiDetail?.data?.overview);
+  const [experience, setExperience] = useState(userApiDetail?.data?.experience);
+  const [link, setLink] = useState(userApiDetail?.data?.links);
+  const [location, setLocation] = useState(userApiDetail?.data?.location);
+  const [imageUri, setImageUri] = useState(
+    userApiDetail?.data?.user_account?.image,
+  );
 
-  const accountType = 1;
+  const updateMutation = useMutation({
+    mutationFn: async data => {
+      const response = await apiRequest(urlType.BACKEND, {
+        method: 'put',
+        url: `user`,
+        data,
+      });
+      return response;
+    },
+    onSuccess: async e => {
+      if (e.status === 200) {
+        console.log('sada', e.data);
+        showMessage({
+          message: e.message,
+          type: 'success',
+          color: '#fff',
+          backgroundColor: Colors.primary.green,
+          floating: true,
+        });
+        // navigation.navigate('AddSkills');
+      } else if (e.status === 404) {
+        showMessage({
+          message: e.message,
+          type: 'danger',
+          color: '#fff',
+          backgroundColor: Colors.primary.red,
+          floating: true,
+        });
+      } else {
+        showMessage({
+          message: e.message || 'An Error occured',
+          type: 'danger',
+          color: '#fff',
+          backgroundColor: Colors.primary.red,
+          floating: true,
+        });
+      }
+    },
+  });
+
+  const handleUpdate = async () => {
+    // const userInfo = await getUserData();
+    // console.log('Info', userInfo.user_id);
+    // Freelancer
+    if (userInfo?.userType === 'freelancer') {
+      if (
+        overview.length > 0 &&
+        experience.length > 0 &&
+        link.length > 0 &&
+        countries.length > 0
+      ) {
+        const data = {
+          user_id: parseInt(userApiDetail?.data?.useraccount_id),
+          image: imageUri,
+          first_name: first_name,
+          last_name: last_name,
+          userData: {
+            overview: overview,
+            experience: experience,
+            links: link,
+            location: location,
+          },
+        };
+        await updateMutation.mutate(data);
+        userApiDetail.refetch();
+        // console.log(loginMutation.isLoading);
+        // console.log(data);
+      } else {
+        showMessage({
+          message: 'Please fill all the fields Or upload image',
+          type: 'danger',
+          color: '#fff',
+          backgroundColor: Colors.primary.red,
+          floating: true,
+        });
+      }
+    }
+    // Client
+    else if (userInfo?.userType === 'client') {
+      if (overview.length > 0 && countries.length > 0) {
+        const data = {
+          user_id: parseInt(userApiDetail?.data?.useraccount_id),
+          first_name: first_name,
+          last_name: last_name,
+          image: imageUri,
+          userData: {
+            overview: overview,
+            location: location,
+          },
+        };
+        await updateMutation.mutate(data);
+        userApiDetail.refetch();
+        // console.log(loginMutation.isLoading);
+        // console.log(data);
+      } else {
+        showMessage({
+          message: 'Please fill all the fields Or upload image',
+          type: 'danger',
+          color: '#fff',
+          backgroundColor: Colors.primary.red,
+          floating: true,
+        });
+      }
+    }
+  };
+
   const countries = [
     {label: 'United States', value: 'US'},
     {label: 'Canada', value: 'CA'},
@@ -37,11 +170,24 @@ function EditProfile({navigation}) {
     // Add more countries as needed
   ];
 
+  const formatDate = dateString => {
+    const options = {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: 'numeric',
+      // second: 'numeric',
+      // timeZoneName: 'short',
+    };
+    return new Date(dateString).toLocaleString('en-US', options);
+  };
+
   const chooseImage = async () => {
     try {
       const image = await ImageCropPicker.openPicker({
-        width: 82,
-        height: 82,
+        width: 150,
+        height: 150,
         cropping: true,
       });
       setImageUri(image.path);
@@ -56,12 +202,14 @@ function EditProfile({navigation}) {
     } else {
       return (
         <Image
-          source={profileImg} // Set the path to your default image
+          source={{uri: userApiDetail?.data?.user_account?.image}}
           style={styles.imgStyle}
         />
       );
     }
   };
+  // console.log('detail', userDetail);
+  console.log('APi Detail', userApiDetail?.data);
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView style={styles.scrollContent}>
@@ -91,11 +239,64 @@ function EditProfile({navigation}) {
               />
             </View>
           </TouchableOpacity>
-          <Text style={styles.largeTxt}>John William</Text>
+          <Text style={styles.largeTxt}>
+            {userApiDetail?.data?.user_account?.first_name}{' '}
+            {userApiDetail?.data?.user_account?.last_name}
+          </Text>
         </View>
         <View style={styles.line}></View>
-        {accountType == 1 ? (
+
+        <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+          <View>
+            <Text style={styles.smallTxt}>Created: </Text>
+            <Text style={{color: Colors.primary.lightGray}}>
+              {formatDate(userApiDetail?.data?.created_at)}
+            </Text>
+          </View>
+          <View>
+            <Text style={styles.smallTxt}>Updated: </Text>
+            <Text style={{color: Colors.primary.lightGray}}>
+              {formatDate(userApiDetail?.data?.updated_at)}
+            </Text>
+          </View>
+        </View>
+        <View style={styles.line}></View>
+
+        {userInfo?.userType === 'freelancer' ? (
           <>
+            <View
+              style={{
+                marginTop: 10,
+              }}>
+              <Text style={styles.smallTxt}>Your Name</Text>
+
+              <View
+                style={{
+                  marginTop: 5,
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                }}>
+                <CustomInput
+                  placeholder={'First Name'}
+                  keyboardType={'default'}
+                  style={{backgroundColor: Colors.primary.sub, width: 160}}
+                  value={first_name}
+                  onChangeText={text => {
+                    setFirst_name(text);
+                  }}
+                />
+                <CustomInput
+                  placeholder={'Last Name'}
+                  keyboardType={'default'}
+                  style={{backgroundColor: Colors.primary.sub, width: 160}}
+                  value={last_name}
+                  onChangeText={text => {
+                    setLast_name(text);
+                  }}
+                />
+              </View>
+            </View>
             <View style={{marginTop: 20}}>
               <Text style={styles.smallTxt}>Overview</Text>
               <CustomInput
@@ -140,11 +341,17 @@ function EditProfile({navigation}) {
                 multiline={true}
               />
             </View>
+            <View style={{marginTop: 20}}>
+              <Text style={styles.smallTxt}>Country</Text>
+            </View>
             <View
-              style={[
-                styles.inputField,
-                {borderRadius: 12, marginTop: 20, padding: 0},
-              ]}>
+              style={{
+                backgroundColor: Colors.primary.sub,
+                color: Colors.primary.lightBlack,
+                borderRadius: 12,
+                marginTop: 5,
+                padding: 0,
+              }}>
               <Picker
                 style={[styles.inputField]}
                 dropdownIconColor={Colors.primary.darkgray}
@@ -154,14 +361,14 @@ function EditProfile({navigation}) {
                 <Picker.Item
                   label="Select Your Country"
                   value=""
-                  style={{borderRadius: 12}}
+                  style={{borderRadius: 12, color: Colors.primary.darkgray}}
                 />
                 {countries.map((country, index) => (
                   <Picker.Item
                     key={index}
                     label={country.label}
                     value={country.value}
-                    style={{borderRadius: 12}}
+                    style={{borderRadius: 12, color: Colors.primary.darkgray}}
                   />
                 ))}
               </Picker>
@@ -176,7 +383,11 @@ function EditProfile({navigation}) {
                 marginBottom: 40,
               }}>
               <TouchableOpacity
-                onPress={() => navigation.navigate('ChangePassword')}
+                onPress={() =>
+                  navigation.navigate('ChangePassword', {
+                    userDetail: userDetail
+                  })
+                }
                 style={[styles.skillContainer, {marginRight: 0}]}>
                 <Text
                   style={{color: Colors.primary.lightBlack, marginRight: 20}}>
@@ -191,15 +402,48 @@ function EditProfile({navigation}) {
               </TouchableOpacity>
             </View>
             <CustomBtn
-              lbl={'Continue'}
+              lbl={'Update'}
               style={{marginTop: 20, marginBottom: 60}}
-              // onPress={handleContinue}
-              // loading={continueMutation.isPending}
+              onPress={handleUpdate}
+              loading={updateMutation.isPending}
               // onPress={() => navigation.navigate('AddSkills')}
             />
           </>
-        ) : (
+        ) : userInfo?.userType === 'client' ? (
           <>
+            <View
+              style={{
+                marginTop: 10,
+              }}>
+              <Text style={styles.smallTxt}>Your Name</Text>
+
+              <View
+                style={{
+                  marginTop: 5,
+                  flexDirection: 'row',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                }}>
+                <CustomInput
+                  placeholder={'First Name'}
+                  keyboardType={'default'}
+                  style={{backgroundColor: Colors.primary.sub, width: 160}}
+                  value={first_name}
+                  onChangeText={text => {
+                    setFirst_name(text);
+                  }}
+                />
+                <CustomInput
+                  placeholder={'Last Name'}
+                  keyboardType={'default'}
+                  style={{backgroundColor: Colors.primary.sub, width: 160}}
+                  value={last_name}
+                  onChangeText={text => {
+                    setLast_name(text);
+                  }}
+                />
+              </View>
+            </View>
             <View style={{marginTop: 20}}>
               <Text style={styles.smallTxt}>Overview</Text>
               <CustomInput
@@ -215,11 +459,17 @@ function EditProfile({navigation}) {
               />
             </View>
 
+            <View style={{marginTop: 20}}>
+              <Text style={styles.smallTxt}>Country</Text>
+            </View>
             <View
-              style={[
-                styles.inputField,
-                {borderRadius: 12, marginTop: 20, padding: 0},
-              ]}>
+              style={{
+                backgroundColor: Colors.primary.sub,
+                color: Colors.primary.lightBlack,
+                borderRadius: 12,
+                marginTop: 5,
+                padding: 0,
+              }}>
               <Picker
                 style={[styles.inputField]}
                 dropdownIconColor={Colors.primary.darkgray}
@@ -229,14 +479,14 @@ function EditProfile({navigation}) {
                 <Picker.Item
                   label="Select Your Country"
                   value=""
-                  style={{borderRadius: 12}}
+                  style={{borderRadius: 12, color: Colors.primary.darkgray}}
                 />
                 {countries.map((country, index) => (
                   <Picker.Item
                     key={index}
                     label={country.label}
                     value={country.value}
-                    style={{borderRadius: 12}}
+                    style={{borderRadius: 12, color: Colors.primary.darkgray}}
                   />
                 ))}
               </Picker>
@@ -251,7 +501,11 @@ function EditProfile({navigation}) {
                 marginBottom: 40,
               }}>
               <TouchableOpacity
-                onPress={() => navigation.navigate('ChangePassword')}
+                onPress={() =>
+                  navigation.navigate('ChangePassword', {
+                    userDetail: userDetail,
+                  })
+                }
                 style={[styles.skillContainer, {marginRight: 0}]}>
                 <Text
                   style={{color: Colors.primary.lightBlack, marginRight: 20}}>
@@ -266,10 +520,21 @@ function EditProfile({navigation}) {
               </TouchableOpacity>
             </View>
             <CustomBtn
-              lbl={'Continue'}
-              style={{marginTop: 80, marginBottom: 210}}
-              // onPress={handleSignup}
+              lbl={'Update'}
+              style={{marginTop: 20, marginBottom: 60}}
+              onPress={handleUpdate}
+              loading={updateMutation.isPending}
             />
+          </>
+        ) : (
+          <>
+            {showMessage({
+              message: 'User type not recognized',
+              type: 'danger',
+              color: '#fff',
+              backgroundColor: Colors.primary.red,
+              floating: true,
+            })}
           </>
         )}
 

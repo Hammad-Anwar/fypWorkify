@@ -52,34 +52,6 @@ const MoreInfo = ({route, navigation}) => {
     // Add more countries as needed
   ];
 
-  const chooseImage = async () => {
-    try {
-      const image = await ImageCropPicker.openPicker({
-        width: 82,
-        height: 82,
-        cropping: true,
-      });
-      setImageUri(image.path);
-    } catch (error) {
-      console.log('ImagePicker Error: ', error);
-    }
-  };
-
-  const renderImage = () => {
-    if (imageUri) {
-      return <Image source={{uri: imageUri}} style={styles.imgStyle} />;
-    } else {
-      return (
-        <Image
-          source={profileImg} // Set the path to your default image
-          style={styles.imgStyle}
-        />
-      );
-    }
-  };
-
-  // console.log(account)
-
   const continueMutation = useMutation({
     mutationFn: async data => {
       const response = await apiRequest(urlType.BACKEND, {
@@ -92,7 +64,7 @@ const MoreInfo = ({route, navigation}) => {
     },
     onSuccess: async e => {
       if (e.status === 200) {
-        console.log(e.data)
+        console.log(e.data);
         await AsyncStorage.setItem('@user', JSON.stringify(e.data));
         navigation.navigate('AddSkills');
       } else if (e.response.status === 404) {
@@ -117,7 +89,7 @@ const MoreInfo = ({route, navigation}) => {
 
   const handleContinue = async () => {
     const userInfo = await getUserData();
-    console.log("Info",userInfo.user_id)
+    console.log('Info', userInfo.user_id);
     // Freelancer
     if (accountType == 1) {
       if (
@@ -151,10 +123,7 @@ const MoreInfo = ({route, navigation}) => {
     }
     // Client
     else if (accountType == 2) {
-      if (
-        overview.length > 0 &&
-        countries.length > 0
-      ) {
+      if (overview.length > 0 && countries.length > 0) {
         const data = {
           user_id: parseInt(userInfo.user_id),
           image: imageUri,
@@ -177,7 +146,33 @@ const MoreInfo = ({route, navigation}) => {
       }
     }
   };
+  const chooseImage = async () => {
+    try {
+      const image = await ImageCropPicker.openPicker({
+        width: 150,
+        height: 150,
+        cropping: true,
+      });
+      setImageUri(image.path);
+    } catch (error) {
+      console.log('ImagePicker Error: ', error);
+    }
+  };
 
+  const renderImage = () => {
+    if (imageUri) {
+      return <Image source={{uri: imageUri}} style={styles.imgStyle} />;
+    } else {
+      return (
+        <Image
+          source={profileImg} // Set the path to your default image
+          style={styles.imgStyle}
+        />
+      );
+    }
+  };
+
+  // console.log(account)
   return (
     <ScrollView>
       <SafeAreaView style={styles.container}>

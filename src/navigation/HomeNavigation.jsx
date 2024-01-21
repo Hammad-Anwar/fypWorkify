@@ -9,6 +9,9 @@ import ChangePassword from '../screens/Home/ChangePassword';
 import TopReviewNav from './TopReviewNav';
 import AuthNavigation from './AuthNavigation';
 import Authenticaion from '../screens/Authentication';
+import Main from '../Main';
+import Welcome from '../screens/Authentication/Welcome';
+import EditPost from '../screens/Home/EditPost';
 function HomeNavigation() {
   const Stack = createNativeStackNavigator();
   return (
@@ -44,11 +47,16 @@ function HomeNavigation() {
           name="ChangePassword"
           component={ChangePassword}
         />
-        {/* <Stack.Screen
+        <Stack.Screen
           options={{headerShown: false}}
-          name="Authenticaion"
-          component={Authenticaion}
-        /> */}
+          name="Main"
+          component={Main}
+        />
+        <Stack.Screen
+          options={{headerShown: false}}
+          name="EditPost"
+          component={EditPost}
+        />
       </Stack.Navigator>
     </>
   );

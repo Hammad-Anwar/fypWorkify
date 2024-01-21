@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {
   Image,
   SafeAreaView,
@@ -11,7 +11,6 @@ import {
 } from 'react-native';
 import {Colors} from '../../constants/theme';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import profileImg from '../../assets/Images/profileImg.jpg';
 import CustomBtn from '../../components/CustomBtn';
 import LargeCard from '../../components/LargeCard';
 import {useQuery, useMutation} from '@tanstack/react-query';
@@ -19,8 +18,24 @@ import apiRequest from '../../api/apiRequest';
 import urlType from '../../constants/UrlConstants';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {showMessage} from 'react-native-flash-message';
+import CustomModal from '../../components/CustomModal';
 function AccountSetting({route, navigation}) {
   const {userInfo, userDetail} = route.params;
+  const [isLogoutModalVisible, setLogoutModalVisible] = useState(false);
+
+  const handleLogout = () => {
+    setLogoutModalVisible(true);
+  };
+
+  const confirmLogout = async () => {
+    await AsyncStorage.removeItem('@auth_token');
+    await AsyncStorage.removeItem('@user');
+    navigation.replace('Main');
+    // Perform the logout action
+    // logout();
+    // Close the modal
+    setLogoutModalVisible(false);
+  };
 
   const userData = useQuery({
     queryKey: ['freelancerPost'],
@@ -32,91 +47,119 @@ function AccountSetting({route, navigation}) {
       return response.data;
     },
   });
-  console.log(userInfo);
-  console.log(userDetail);
+  // console.log(userInfo);
+  console.log(userData.data);
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView style={styles.scrollContent}>
-        <View style={[styles.row, {justifyContent: 'space-between'}]}>
-          <TouchableOpacity
-            // style={{marginRight: '30%'}}
-            onPress={() => navigation.goBack()}>
-            <MaterialCommunityIcons
-              name="chevron-left"
-              size={32}
-              color={Colors.primary.lightBlack}
+    <>
+      <SafeAreaView style={styles.container}>
+        <ScrollView style={styles.scrollContent}>
+          <View style={[styles.row, {justifyContent: 'space-between'}]}>
+            <TouchableOpacity
+              // style={{marginRight: '30%'}}
+              onPress={() => navigation.goBack()}>
+              <MaterialCommunityIcons
+                name="chevron-left"
+                size={32}
+                color={Colors.primary.lightBlack}
+              />
+            </TouchableOpacity>
+            <Text style={styles.largeTxt}>Profile</Text>
+            <TouchableOpacity
+              onPress={handleLogout}
+              // onPress={() => navigation.navigate('Authenticaion')}
+            >
+              <MaterialCommunityIcons name="power" size={30} color="red" />
+            </TouchableOpacity>
+          </View>
+
+          <View style={{justifyContent: 'center', alignItems: 'center'}}>
+            <Image
+              source={{uri: userDetail?.user_account?.image}}
+              style={styles.imgStyle}
             />
-          </TouchableOpacity>
-          <Text style={styles.largeTxt}>Profile</Text>
-          <TouchableOpacity
-            onPress={() => navigation.navigate('Authenticaion')}>
-            <MaterialCommunityIcons name="power" size={30} color="red" />
-          </TouchableOpacity>
-        </View>
-        <View style={{justifyContent: 'center', alignItems: 'center'}}>
-          <Image source={{uri: userDetail?.user_account?.image}} style={styles.imgStyle} />
-          <Text style={styles.largeTxt}>
-            {userDetail?.user_account?.first_name}{' '}
-            {userDetail?.user_account?.last_name}
-          </Text>
-          <View style={[styles.row, {marginVertical: 20}]}>
-            <View style={{alignItems: 'center', marginRight: 35}}>
-              <Text style={styles.smallTxt}>20</Text>
-              <Text style={styles.smallTxt}>Posts</Text>
+            <Text style={styles.largeTxt}>
+              {userDetail?.user_account?.first_name}{' '}
+              {userDetail?.user_account?.last_name}
+            </Text>
+            <View style={[styles.row, {marginVertical: 20}]}>
+              <View style={{alignItems: 'center', marginRight: 35}}>
+                <Text style={styles.smallTxt}>20</Text>
+                <Text style={styles.smallTxt}>Posts</Text>
+              </View>
+              <View style={{alignItems: 'center', marginRight: 35}}>
+                <Text style={styles.smallTxt}>4.2</Text>
+                <Text style={styles.smallTxt}>Rating</Text>
+              </View>
+              <View style={{alignItems: 'center'}}>
+                <Text style={styles.smallTxt}>20</Text>
+                <Text style={styles.smallTxt}>Jobs</Text>
+              </View>
             </View>
-            <View style={{alignItems: 'center', marginRight: 35}}>
-              <Text style={styles.smallTxt}>4.2</Text>
-              <Text style={styles.smallTxt}>Rating</Text>
-            </View>
-            <View style={{alignItems: 'center'}}>
-              <Text style={styles.smallTxt}>20</Text>
-              <Text style={styles.smallTxt}>Jobs</Text>
+            <View style={styles.row}>
+              <CustomBtn
+                lbl={'Edit Profile'}
+                lblStyle={{
+                  textTransform: 'capitalize',
+                }}
+                style={{
+                  marginRight: 20,
+                  paddingHorizontal: 30,
+                  paddingVertical: 10,
+                }}
+                onPress={() =>
+                  navigation.navigate('EditProfile', {
+                    userDetail: userDetail,
+                    userInfo: userInfo,
+                  })
+                }
+              />
+              <CustomBtn
+                lbl={'Profile Review'}
+                lblStyle={{
+                  textTransform: 'capitalize',
+                }}
+                style={{paddingHorizontal: 30, paddingVertical: 10}}
+                onPress={() => navigation.navigate('TopReviewNav')}
+              />
             </View>
           </View>
-          <View style={styles.row}>
-            <CustomBtn
-              lbl={'Edit Profile'}
-              lblStyle={{
-                textTransform: 'capitalize',
-              }}
-              style={{
-                marginRight: 20,
-                paddingHorizontal: 30,
-                paddingVertical: 10,
-              }}
-              onPress={() => navigation.navigate('EditProfile')}
-            />
-            <CustomBtn
-              lbl={'Profile Review'}
-              lblStyle={{
-                textTransform: 'capitalize',
-              }}
-              style={{paddingHorizontal: 30, paddingVertical: 10}}
-              onPress={() => navigation.navigate('TopReviewNav')}
-            />
+          <View style={styles.line}></View>
+          <Text style={styles.largeTxt}>Your Posts</Text>
+          <View style={{marginTop: 10}}>
+            {userData.data && userData.data.length > 0 ? (
+              userData.data.map((jobData, index) => (
+                <LargeCard
+                  key={index}
+                  jobData={jobData}
+                  isMyPost={true}
+                  postId={jobData?.job_id}
+                  handleUpdate={() =>
+                    navigation.navigate('EditPost', {job_id: jobData?.job_id})
+                  }
+                />
+              ))
+            ) : (
+              <View style={{alignItems: 'center', marginTop: 10}}>
+                {userData.data ? (
+                  <Text style={{color: Colors.primary.lightGray}}>
+                    No posts available
+                  </Text>
+                ) : (
+                  <ActivityIndicator size={24} color={Colors.primary.black} />
+                )}
+              </View>
+            )}
           </View>
-        </View>
-        <View style={styles.line}></View>
-        <Text style={styles.largeTxt}>Your Posts</Text>
-        <View style={{marginTop: 10}}>
-          {userData.data && userData.data.length > 0 ? (
-            userData.data.map((jobData, index) => (
-              <LargeCard key={index} jobData={jobData} />
-            ))
-          ) : (
-            <View style={{alignItems: 'center', marginTop: 10}}>
-              {userData.data ? (
-                <Text style={{color: Colors.primary.lightGray}}>
-                  No posts available
-                </Text>
-              ) : (
-                <ActivityIndicator size={24} color={Colors.primary.black} />
-              )}
-            </View>
-          )}
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+        </ScrollView>
+      </SafeAreaView>
+      <CustomModal
+        visible={isLogoutModalVisible}
+        onClose={() => setLogoutModalVisible(false)}
+        onAction={confirmLogout}
+        action="Logout"
+        message="Are you sure you want to log out?"
+      />
+    </>
   );
 }
 const styles = StyleSheet.create({

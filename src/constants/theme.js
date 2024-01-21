@@ -7,12 +7,12 @@ export const Colors = {
         sub:'#DAE4E1',
         darkgray:'#636363',
         lightGray: '#C4C4C4',
-        // error: '#EE1D52',
+        green:'#32BA45',
+        red: 'red',
         // inputText: '#767A7C',
         // bg:'#fa4415',
         // field:'#909090',
         // yellow:'#E4E835',
-        // green:'#32BA45',
         // lightestgray:'#EDEDED'
       },
 }

@@ -4,6 +4,7 @@ import {
   Image,
   SafeAreaView,
   ScrollView,
+  StatusBar,
   StyleSheet,
   Text,
   TextInputBase,
@@ -24,16 +25,6 @@ import urlType from '../../constants/UrlConstants';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {showMessage} from 'react-native-flash-message';
 
-// const getUserData = async () => {
-//   try {
-//     const userString = await AsyncStorage.getItem('@user');
-//     const userData = JSON.parse(userString);
-//     return userData ? userData.freelancer_id : null;
-//   } catch (error) {
-//     console.error('Error fetching user data:', error);
-//     return null;
-//   }
-// };
 function Home({navigation}) {
   const [userInfo, setUserInfo] = useState(null);
 
@@ -58,7 +49,7 @@ function Home({navigation}) {
     fetchData();
   }, []);
   const userData = useQuery({
-    queryKey: ['jobPost'],
+    queryKey: ['jobPost', userInfo?.userType, userInfo?.id],
     queryFn: async () => {
       if (userInfo.userType === 'freelancer') {
         const response = await apiRequest(urlType.BACKEND, {
@@ -75,9 +66,10 @@ function Home({navigation}) {
       }
     },
   });
+  userData.refetch();
 
   const userDetail = useQuery({
-    queryKey: ['userDetail'],
+    queryKey: ['userDetail', userInfo?.userType, userInfo?.id],
     queryFn: async () => {
       try {
         const response = await apiRequest(urlType.BACKEND, {
@@ -95,6 +87,7 @@ function Home({navigation}) {
       }
     },
   });
+  userDetail.refetch();
 
   if (!userInfo) {
     return <ActivityIndicator size={24} color={Colors.primary.darkgray} />;
@@ -109,9 +102,22 @@ function Home({navigation}) {
     });
     return null;
   }
-  console.log("user Info", userInfo)
-  console.log('User data: ', userDetail);
-  console.log(userData.data);
+  if (userData.isError || userDetail.isError) {
+    showMessage({
+      message: 'Error fetching data',
+      type: 'danger',
+      color: '#fff',
+      backgroundColor: 'red',
+      floating: true,
+    });
+    return null;
+  }
+  if (userData.isLoading || userDetail.isLoading) {
+    return <ActivityIndicator size={24} color={Colors.primary.darkgray} />;
+  }
+  // console.log("user Info", userInfo)
+  // console.log('User data: ', userDetail);
+  // console.log(userData.data);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -214,7 +220,17 @@ function Home({navigation}) {
               <View style={{marginTop: 0}}>
                 {userData?.data && userData?.data.length > 0 ? (
                   userData?.data.map((jobData, index) => (
-                    <LargeCard key={index} jobData={jobData} />
+                    <LargeCard
+                      key={index}
+                      jobData={jobData}
+                      isMyPost={true}
+                      postId={jobData?.job_id}
+                      handleUpdate={() =>
+                        navigation.navigate('EditPost', {
+                          job_id: jobData?.job_id,
+                        })
+                      }
+                    />
                   ))
                 ) : (
                   <View style={{alignItems: 'center', marginTop: 10}}>
