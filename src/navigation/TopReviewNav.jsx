@@ -22,7 +22,7 @@ function TopReviewNav({navigation}) {
       <View style={[styles.row, {marginBottom: 20}]}>
         <TouchableOpacity
           style={{marginRight: '25%'}}
-          onPress={() => navigation.navigate('AccountSetting')}>
+          onPress={() => navigation.goBack()}>
           <MaterialCommunityIcons
             name="chevron-left"
             size={32}

@@ -47,11 +47,11 @@ function HomeNavigation() {
           name="ChangePassword"
           component={ChangePassword}
         />
-        <Stack.Screen
+        {/* <Stack.Screen
           options={{headerShown: false}}
           name="Main"
           component={Main}
-        />
+        /> */}
         <Stack.Screen
           options={{headerShown: false}}
           name="EditPost"

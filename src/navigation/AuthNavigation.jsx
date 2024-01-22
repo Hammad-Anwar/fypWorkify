@@ -43,11 +43,11 @@ function AuthNavigation() {
           name="AddSkills"
           component={AddSkills}
         />
-        <Stack.Screen
+        {/* <Stack.Screen
           options={{headerShown: false}}
           name="BottomNavigation"
           component={BottomNavigation}
-        />
+        /> */}
       </Stack.Navigator>
     </>
   );

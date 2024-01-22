@@ -15,8 +15,9 @@ import CustomModal from '../CustomModal';
 import {useQuery, useMutation} from '@tanstack/react-query';
 import apiRequest from '../../api/apiRequest';
 import urlType from '../../constants/UrlConstants';
+import {showMessage} from 'react-native-flash-message';
 
-function LargeCard({jobData, isMyPost, postId, handleUpdate}) {
+function LargeCard({jobData, isMyPost, postId, handleUpdate, userData}) {
   const [isDeleteModalVisible, setDeleteModalVisible] = useState(false);
 
   const deleteMutation = useMutation({
@@ -28,10 +29,7 @@ function LargeCard({jobData, isMyPost, postId, handleUpdate}) {
       return response;
     },
     onSuccess: async e => {
-      console.log(response);
-
       if (e.status === 200) {
-        console.log('sada', e.message);
         showMessage({
           message: e.message,
           type: 'success',
@@ -39,7 +37,7 @@ function LargeCard({jobData, isMyPost, postId, handleUpdate}) {
           backgroundColor: Colors.primary.green,
           floating: true,
         });
-        // navigation.navigate('AddSkills');
+        userData.refetch();
       } else {
         showMessage({
           message: e.message || 'An Error occured',

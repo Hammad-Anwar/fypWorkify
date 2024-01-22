@@ -6,57 +6,109 @@ import AuthNavigation from './navigation/AuthNavigation';
 import BottomNavigation from './navigation/BottomNavigation';
 import FlashMessage from 'react-native-flash-message';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import {useQuery} from '@tanstack/react-query';
+import {useStateValue} from './context/GlobalContextProvider';
+import urlType from './constants/UrlConstants';
+import { navigationRef } from './api/RootNavigation';
 
 const Stack = createNativeStackNavigator();
 
 function Main() {
-  const [loading, setLoading] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-
+  // const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [{isLogin}, dispatch] = useStateValue();
+  const userQuery = useQuery({
+    queryKey: ['user'],
+    queryFn: async () => {
+      const result = await apiRequest(urlType.BACKEND, {
+        method: 'get',
+        url: `usersMe`,
+      });
+      if (result?.status === 200) {
+        return result.data.data;
+      } else {
+        return false;
+      }
+    },
+    enabled: false,
+  });
   useEffect(() => {
     checkUser();
-  }, []);
+  }, [isLogin]);
 
   const checkUser = async () => {
-    try {
-      const userToken = await AsyncStorage.getItem('@auth_token');
+    setLoading(true);
+    const userToken = await AsyncStorage.getItem('@auth_token');
 
-      if (userToken) {
-        setIsAuthenticated(true);
-      }
-
+    if (userToken) {
+      dispatch({
+        type: 'SET_LOGIN',
+        isLogin: true,
+      });
+      await userQuery.refetch();
       setLoading(false);
-    } catch (error) {
-      console.error('Error checking user:', error);
+    } else {
+      dispatch({
+        type: 'SET_LOGIN',
+        isLogin: false,
+      });
       setLoading(false);
     }
   };
 
-  if (loading) {
-    return <ActivityIndicator size="large" />;
-  }
+  // const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  // useEffect(() => {
+  //   checkUser();
+  // }, []);
+
+  // const checkUser = async () => {
+  //   try {
+  //     const userToken = await AsyncStorage.getItem('@auth_token');
+
+  //     if (userToken) {
+  //       setIsAuthenticated(true);
+  //     }
+
+  //     setLoading(false);
+  //   } catch (error) {
+  //     console.error('Error checking user:', error);
+  //     setLoading(false);
+  //   }
+  // };
+
+  // if (loading) {
+  //   return <ActivityIndicator size="large" />;
+  // }
 
   return (
-    // <NavigationContainer>
     <View style={{flex: 1}}>
-      <Stack.Navigator>
-        {isAuthenticated ? (
-          <Stack.Screen
-            options={{headerShown: false}}
-            name="BottomNavigation"
-            component={BottomNavigation}
-          />
+      <NavigationContainer ref={navigationRef}>
+        {loading ? (
+          <View
+            style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+            <ActivityIndicator animating={true} size={32} />
+          </View>
         ) : (
-          <Stack.Screen
-            options={{headerShown: false}}
-            name="AuthNavigation"
-            component={AuthNavigation}
-          />
+          <Stack.Navigator>
+            {isLogin === true ? (
+              <Stack.Screen
+                options={{headerShown: false}}
+                name="BottomNavigation"
+                component={BottomNavigation}
+              />
+            ) : (
+              <Stack.Screen
+                options={{headerShown: false}}
+                name="AuthNavigation"
+                component={AuthNavigation}
+              />
+            )}
+          </Stack.Navigator>
         )}
-      </Stack.Navigator>
+      </NavigationContainer>
       <FlashMessage position="top" duration={5000} hideOnPress={true} />
     </View>
-    // </NavigationContainer>
   );
 }
 

@@ -25,6 +25,7 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import profileImg from '../../assets/Images/profileImg.jpg';
 // import ImagePicker from 'react-native-image-picker';
 import ImageCropPicker from 'react-native-image-crop-picker';
+import {useStateValue} from '../../context/GlobalContextProvider';
 
 const MoreInfo = ({route, navigation}) => {
   const {accountType, firstName, lastName} = route.params;
@@ -33,6 +34,23 @@ const MoreInfo = ({route, navigation}) => {
   const [link, setLink] = useState('');
   const [location, setLocation] = useState('');
   const [imageUri, setImageUri] = useState(null);
+  const [{}, dispatch] = useStateValue();
+
+  const userQuery = useQuery({
+    queryKey: ['user'],
+    queryFn: async () => {
+      const result = await apiRequest(urlType.BACKEND, {
+        method: 'get',
+        url: `usersMe`,
+      });
+      if (result?.status === 200) {
+        return result.data.data;
+      } else {
+        return false;
+      }
+    },
+    enabled: false,
+  });
 
   const getUserData = async () => {
     try {
@@ -66,7 +84,17 @@ const MoreInfo = ({route, navigation}) => {
       if (e.status === 200) {
         console.log(e.data);
         await AsyncStorage.setItem('@user', JSON.stringify(e.data));
-        navigation.navigate('AddSkills');
+        if (accountType == 1) {
+          navigation.navigate('AddSkills', {user_id: e?.data?.useraccount_id});
+        } else if (accountType == 2) {
+          if (e !== false) {
+            await userQuery.refetch();
+            await dispatch({
+              type: 'SET_LOGIN',
+              isLogin: true,
+            });
+          }
+        }
       } else if (e.response.status === 404) {
         showMessage({
           message: e.response.message,
@@ -88,10 +116,10 @@ const MoreInfo = ({route, navigation}) => {
   });
 
   const handleContinue = async () => {
-    const userInfo = await getUserData();
-    console.log('Info', userInfo.user_id);
+      const userInfo = await getUserData();
+      console.log('Info', userInfo.user_id);
     // Freelancer
-    if (accountType == 1) {
+    if (parseInt(accountType) == 1) {
       if (
         overview.length > 0 &&
         experience.length > 0 &&
@@ -109,8 +137,9 @@ const MoreInfo = ({route, navigation}) => {
           },
         };
         await continueMutation.mutate(data);
+        // console.log(dasdasd)
         // console.log(loginMutation.isLoading);
-        console.log(data);
+        // console.log(data);
       } else {
         showMessage({
           message: 'Please fill all the fields Or upload image',
@@ -122,7 +151,7 @@ const MoreInfo = ({route, navigation}) => {
       }
     }
     // Client
-    else if (accountType == 2) {
+    else if (parseInt(accountType) == 2) {
       if (overview.length > 0 && countries.length > 0) {
         const data = {
           user_id: parseInt(userInfo.user_id),
@@ -134,7 +163,7 @@ const MoreInfo = ({route, navigation}) => {
         };
         await continueMutation.mutate(data);
         // console.log(loginMutation.isLoading);
-        console.log(data);
+        // console.log(data);
       } else {
         showMessage({
           message: 'Please fill all the fields Or upload image',
@@ -351,6 +380,7 @@ const MoreInfo = ({route, navigation}) => {
               style={{marginTop: 80, marginBottom: 210}}
               onPress={handleContinue}
               loading={continueMutation.isPending}
+
               // onPress={() => navigation.navigate('AddSkills')}
             />
           </>

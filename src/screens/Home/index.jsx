@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import {
   ActivityIndicator,
+  FlatList,
   Image,
   SafeAreaView,
   ScrollView,
@@ -64,7 +65,7 @@ function Home({navigation}) {
         });
         return response.data;
       }
-    },
+    }, enabled: userInfo?.id ? true : false
   });
   userData.refetch();
 
@@ -85,7 +86,7 @@ function Home({navigation}) {
         console.error('Error fetching user detail:', error);
         throw error;
       }
-    },
+    },enabled: userInfo?.id && userInfo?.userType ? true : false 
   });
   userDetail.refetch();
 
@@ -121,58 +122,57 @@ function Home({navigation}) {
 
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView style={styles.scrollContent}>
-        <View style={styles.row}>
-          <TouchableOpacity>
-            <MaterialCommunityIcons
-              name="menu"
-              size={24}
-              color={Colors.primary.darkgray}
-            />
-          </TouchableOpacity>
-          <Text style={{color: Colors.primary.black}}>Workify</Text>
-          <TouchableOpacity
-            onPress={() => {
-              navigation.navigate('AccountSetting', {
-                userInfo: userInfo,
-                userDetail: userDetail.data,
-              });
-            }}>
-            <Image
-              source={{uri: userDetail?.data?.user_account?.image}}
-              style={styles.imgStyle}
-            />
-          </TouchableOpacity>
-        </View>
-        <View style={styles.row}>
-          <CustomInput
-            isIcon={true}
-            placeholder="Search for a job..."
-            isIconName="magnify"
-            keyboardType="default"
-            style={{
-              backgroundColor: Colors.primary.sub,
-              width: '78%',
-              padding: 0,
-            }}
-            containerStyle={{
-              backgroundColor: Colors.primary.sub,
-              paddingRight: 0,
-            }}
+      <View style={styles.row}>
+        <TouchableOpacity>
+          <MaterialCommunityIcons
+            name="menu"
+            size={24}
+            color={Colors.primary.darkgray}
           />
-          <TouchableOpacity
-            style={{
-              backgroundColor: Colors.primary.main,
-              padding: 12,
-              borderRadius: 12,
-              marginTop: 20,
-            }}>
-            <Image source={filterIcon} style={styles.iconStyle} />
-          </TouchableOpacity>
-        </View>
-        {userInfo?.userType === 'freelancer' ? (
-          <>
-            <View style={[styles.row, {marginTop: 30}]}>
+        </TouchableOpacity>
+        <Text style={{color: Colors.primary.black}}>Workify</Text>
+        <TouchableOpacity
+          onPress={() => {
+            navigation.navigate('AccountSetting', {
+              userInfo: userInfo,
+              userDetail: userDetail.data,
+            });
+          }}>
+          <Image
+            source={{uri: userDetail?.data?.user_account?.image}}
+            style={styles.imgStyle}
+          />
+        </TouchableOpacity>
+      </View>
+      <View style={styles.row}>
+        <CustomInput
+          isIcon={true}
+          placeholder="Search for a job..."
+          isIconName="magnify"
+          keyboardType="default"
+          style={{
+            backgroundColor: Colors.primary.sub,
+            width: '78%',
+            padding: 0,
+          }}
+          containerStyle={{
+            backgroundColor: Colors.primary.sub,
+            paddingRight: 0,
+          }}
+        />
+        <TouchableOpacity
+          style={{
+            backgroundColor: Colors.primary.main,
+            padding: 12,
+            borderRadius: 12,
+            marginTop: 20,
+          }}>
+          <Image source={filterIcon} style={styles.iconStyle} />
+        </TouchableOpacity>
+      </View>
+      {userInfo?.userType === 'freelancer' ? (
+        <>
+          {/* <View style={[styles.row, {marginTop: 30}]}>
               <Text style={styles.largeTxt}>Featured Posts</Text>
               <TouchableOpacity>
                 <Text style={styles.smallTxt}>View all</Text>
@@ -187,39 +187,60 @@ function Home({navigation}) {
               <SmallCard />
             </ScrollView>
             <View style={{marginTop: 20}}>
-              <View style={styles.line}></View>
-              <View style={{marginTop: 20}}>
-                {userData.data && userData.data.length > 0 ? (
-                  userData.data.map((jobData, index) => (
-                    <LargeCard key={index} jobData={jobData} />
-                  ))
+              <View style={styles.line}></View>*/}
+          <View style={{marginTop: 20}}>
+            {userData.data && userData.data.length > 0 ? (
+              <FlatList
+                data={userData.data}
+                keyExtractor={(item, index) => index.toString()}
+                renderItem={({item: jobData, index}) => (
+                  <LargeCard key={index} jobData={jobData} />
+                )}
+                ListHeaderComponent={
+                  <>
+                    <View style={[styles.row, {marginTop: 30}]}>
+                      <Text style={styles.largeTxt}>Featured Posts</Text>
+                      <TouchableOpacity>
+                        <Text style={styles.smallTxt}>View all</Text>
+                      </TouchableOpacity>
+                    </View>
+                    <FlatList
+                      horizontal={true}
+                      showsHorizontalScrollIndicator={false}
+                      data={[1, 2, 3]} // Replace this array with your data
+                      keyExtractor={(item, index) => index.toString()}
+                      renderItem={() => <SmallCard />}
+                    />
+                    <View style={{marginVertical: 20}}>
+                      <View style={styles.line}></View>
+                    </View>
+                  </>
+                }
+                ListFooterComponent={<><View style={{marginBottom: 140}}></View></>}
+              />
+            ) : (
+              <View style={{alignItems: 'center', marginTop: 10}}>
+                {userData.data ? (
+                  <Text style={{color: Colors.primary.lightGray}}>
+                    No posts available
+                  </Text>
                 ) : (
-                  <View style={{alignItems: 'center', marginTop: 10}}>
-                    {userData.data ? (
-                      <Text style={{color: Colors.primary.lightGray}}>
-                        No posts available
-                      </Text>
-                    ) : (
-                      <ActivityIndicator
-                        size={24}
-                        color={Colors.primary.black}
-                      />
-                    )}
-                  </View>
+                  <ActivityIndicator size={24} color={Colors.primary.black} />
                 )}
               </View>
-            </View>
-          </>
-        ) : userInfo?.userType === 'client' ? (
-          <>
-            <View style={{marginTop: 20}}>
-              <View style={styles.line}></View>
-              <View style={{marginTop: 20}}>
-                <Text style={styles.largeTxt}>Your Posts</Text>
-              </View>
-              <View style={{marginTop: 0}}>
-                {userData?.data && userData?.data.length > 0 ? (
-                  userData?.data.map((jobData, index) => (
+            )}
+            {/* </View> */}
+          </View>
+        </>
+      ) : userInfo?.userType === 'client' ? (
+        <>
+          <View style={{marginTop: 20}}>
+            <View style={{marginTop: 0}}>
+              {userData?.data && userData?.data.length > 0 ? (
+                <FlatList
+                  data={userData?.data}
+                  keyExtractor={(item, index) => index.toString()}
+                  renderItem={({item: jobData, index}) => (
                     <LargeCard
                       key={index}
                       jobData={jobData}
@@ -231,36 +252,41 @@ function Home({navigation}) {
                         })
                       }
                     />
-                  ))
-                ) : (
-                  <View style={{alignItems: 'center', marginTop: 10}}>
-                    {userData?.data ? (
-                      <Text style={{color: Colors.primary.lightGray}}>
-                        No posts available
-                      </Text>
-                    ) : (
-                      <ActivityIndicator
-                        size={24}
-                        color={Colors.primary.black}
-                      />
-                    )}
-                  </View>
-                )}
-              </View>
+                  )}
+                  ListHeaderComponent={
+                    <>
+                      <View style={styles.line}></View>
+                      <View style={{marginTop: 20}}>
+                        <Text style={styles.largeTxt}>Your Posts</Text>
+                      </View>
+                    </>
+                  }
+                />
+              ) : (
+                <View style={{alignItems: 'center', marginTop: 10}}>
+                  {userData?.data ? (
+                    <Text style={{color: Colors.primary.lightGray}}>
+                      No posts available
+                    </Text>
+                  ) : (
+                    <ActivityIndicator size={24} color={Colors.primary.black} />
+                  )}
+                </View>
+              )}
             </View>
-          </>
-        ) : (
-          <>
-            {showMessage({
-              message: 'User type not recognized',
-              type: 'danger',
-              color: '#fff',
-              backgroundColor: 'red',
-              floating: true,
-            })}
-          </>
-        )}
-      </ScrollView>
+          </View>
+        </>
+      ) : (
+        <>
+          {showMessage({
+            message: 'User type not recognized',
+            type: 'danger',
+            color: '#fff',
+            backgroundColor: 'red',
+            floating: true,
+          })}
+        </>
+      )}
     </SafeAreaView>
   );
 }

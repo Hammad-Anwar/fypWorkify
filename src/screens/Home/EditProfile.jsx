@@ -23,6 +23,15 @@ import ImageCropPicker from 'react-native-image-crop-picker';
 
 function EditProfile({route, navigation}) {
   const {userDetail, userInfo} = route.params;
+
+  const [first_name, setFirst_name] = useState('');
+  const [last_name, setLast_name] = useState('');
+  const [overview, setOverview] = useState('');
+  const [experience, setExperience] = useState('');
+  const [link, setLink] = useState('');
+  const [location, setLocation] = useState('');
+  const [imageUri, setImageUri] = useState();
+
   const userApiDetail = useQuery({
     queryKey: ['userApiDetail', userInfo?.userType, userInfo?.id],
     queryFn: async () => {
@@ -32,6 +41,13 @@ function EditProfile({route, navigation}) {
           url: `user?id=${userInfo?.id}&userType=${userInfo?.userType}`,
         });
         if (response.data) {
+          setFirst_name(response?.data?.user_account?.first_name);
+          setLast_name(response?.data?.user_account?.last_name);
+          setOverview(response?.data?.overview);
+          setExperience(response?.data?.experience)
+          setLink(response?.data?.links);
+          setLocation(response?.data?.location);
+          setImageUri(response?.data?.user_account?.image);
           return response.data;
         } else {
           throw new Error('Data not available');
@@ -41,20 +57,9 @@ function EditProfile({route, navigation}) {
         throw error;
       }
     },
+    enabled: userInfo ? true : false,
   });
-  const [first_name, setFirst_name] = useState(
-    userApiDetail?.data?.user_account?.first_name,
-  );
-  const [last_name, setLast_name] = useState(
-    userApiDetail?.data?.user_account?.last_name,
-  );
-  const [overview, setOverview] = useState(userApiDetail?.data?.overview);
-  const [experience, setExperience] = useState(userApiDetail?.data?.experience);
-  const [link, setLink] = useState(userApiDetail?.data?.links);
-  const [location, setLocation] = useState(userApiDetail?.data?.location);
-  const [imageUri, setImageUri] = useState(
-    userApiDetail?.data?.user_account?.image,
-  );
+  console.log('das',location)
 
   const updateMutation = useMutation({
     mutationFn: async data => {
@@ -385,7 +390,7 @@ function EditProfile({route, navigation}) {
               <TouchableOpacity
                 onPress={() =>
                   navigation.navigate('ChangePassword', {
-                    userDetail: userDetail
+                    userDetail: userDetail,
                   })
                 }
                 style={[styles.skillContainer, {marginRight: 0}]}>
@@ -537,43 +542,6 @@ function EditProfile({route, navigation}) {
             })}
           </>
         )}
-
-        <View style={{marginTop: 10}}>
-          <Text style={styles.smallTxt}>Selected Skills</Text>
-          <View
-            style={{
-              flexDirection: 'row',
-              flexWrap: 'wrap',
-              justifyContent: 'flex-start',
-              alignItems: 'center',
-              marginVertical: 10,
-            }}>
-            <View style={styles.skillContainer}>
-              <Text style={{color: Colors.primary.lightBlack, marginRight: 5}}>
-                UI / UX Designer
-              </Text>
-              <TouchableOpacity>
-                <MaterialCommunityIcons
-                  name="close"
-                  size={22}
-                  color={Colors.primary.lightBlack}
-                />
-              </TouchableOpacity>
-            </View>
-            <View style={styles.skillContainer}>
-              <Text style={{color: Colors.primary.lightBlack, marginRight: 5}}>
-                UI / UX Designer
-              </Text>
-              <TouchableOpacity>
-                <MaterialCommunityIcons
-                  name="close"
-                  size={22}
-                  color={Colors.primary.lightBlack}
-                />
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
       </ScrollView>
     </SafeAreaView>
   );

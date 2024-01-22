@@ -32,7 +32,7 @@ function BottomNavigation() {
       />
       <Tab.Screen
         name="Message"
-        component={HomeNavigation}
+        component={""}
         options={{
           headerShown: false,
           tabBarLabel: 'Messages',
@@ -62,7 +62,7 @@ function BottomNavigation() {
       />
       <Tab.Screen
         name="Notifications"
-        component={HomeNavigation}
+        component={""}
         options={{
           headerShown: false,
           tabBarLabel: 'Updates',
@@ -78,7 +78,7 @@ function BottomNavigation() {
       />
       <Tab.Screen
         name="Order"
-        component={HomeNavigation}
+        component={""}
         options={{
           headerShown: false,
           tabBarLabel: 'Orders',

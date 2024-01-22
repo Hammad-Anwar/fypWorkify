@@ -28,6 +28,13 @@ import img from '../../assets/Images/empty.jpg';
 const EditPost = ({route, navigation}) => {
   const {job_id} = route.params;
   console.log(job_id);
+  const [description, setDescription] = useState('');
+  const [duration, setDuration] = useState('');
+  const [amount, setAmount] = useState('');
+  const [category, setCategory] = useState();
+  const [isChecked, setIsChecked] = useState();
+  const [imageUri, setImageUri] = useState();
+  const [userId, setUserId] = useState(null);
 
   const jobData = useQuery({
     queryKey: ['post'],
@@ -36,25 +43,21 @@ const EditPost = ({route, navigation}) => {
         method: 'get',
         url: `job?job_id=${job_id}`,
       });
-      return response.data;
+      if (response.data) {
+        setDescription(response?.data?.job_description);
+        setDuration(response?.data?.duration);
+        setAmount(response?.data?.payment?.payment_amount);
+        setCategory(response?.data?.skillcategory_id);
+        setIsChecked(Boolean(response?.data?.feature_job?.status));
+        setImageUri(response?.data?.image);
+        return response.data;
+      }
     },
+    enabled: job_id ? true : false,
   });
-
+  console.log('dasd', category);
   //   console.log(jobData?.data?.skillcategory_id);
-  jobData.refetch();
-  const [description, setDescription] = useState(
-    jobData?.data?.job_description,
-  );
-  const [duration, setDuration] = useState(jobData?.data?.duration);
-  const [amount, setAmount] = useState(jobData?.data?.payment?.payment_amount);
-  const [category, setCategory] = useState(
-    parseInt(jobData?.data?.skillcategory_id),
-  );
-  const [isChecked, setIsChecked] = useState(
-    Boolean(jobData?.data?.feature_job?.status),
-  );
-  const [imageUri, setImageUri] = useState(jobData?.data?.image);
-  const [userId, setUserId] = useState(null);
+  // jobData.refetch();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -293,7 +296,7 @@ const EditPost = ({route, navigation}) => {
               style={[styles.inputField]}
               dropdownIconColor={Colors.primary.darkgray}
               dropdownIconRippleColor={Colors.primary.lightGray}
-              selectedValue={category}
+              selectedValue={6}
               onValueChange={itemValue => setCategory(itemValue)}>
               <Picker.Item
                 label="Select suitable category for post"
@@ -301,11 +304,11 @@ const EditPost = ({route, navigation}) => {
                 style={{borderRadius: 12}}
               />
               {skillsData.isSuccess &&
-                skillsData.data.map(skill => (
+                skillsData.data.map((skill, index) => (
                   <Picker.Item
-                    key={skill.skill_id}
-                    label={skill.skill_name}
-                    value={skill.skill_id.toString()} // Ensure the value is a string
+                    key={index}
+                    label={skill?.skill_name}
+                    value={skill?.skill_id.toString()} // Ensure the value is a string
                   />
                 ))}
             </Picker>

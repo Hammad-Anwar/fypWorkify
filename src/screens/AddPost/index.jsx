@@ -47,7 +47,7 @@ const AddPost = ({navigation}) => {
 
     fetchData();
   }, []);
-    // console.log(userId)
+  // console.log(userId)
 
   const skillsData = useQuery({
     queryKey: ['skills'],
@@ -82,12 +82,14 @@ const AddPost = ({navigation}) => {
           backgroundColor: Colors.primary.green,
           floating: true,
         });
-        setAmount('')
-        setDescription('')
-        setImageUri(null)
-        setIsChecked(false)
-        setDuration('')
-        setImageUri(null)
+        navigation.goBack();
+
+        setAmount('');
+        setDescription('');
+        setImageUri(null);
+        setIsChecked(false);
+        setDuration('');
+        setImageUri(null);
       } else if (e.response.status === 404) {
         showMessage({
           message: e.message,

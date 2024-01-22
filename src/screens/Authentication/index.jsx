@@ -16,22 +16,28 @@ import apiRequest from '../../api/apiRequest';
 import urlType from '../../constants/UrlConstants';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {showMessage} from 'react-native-flash-message';
+import {useStateValue} from '../../context/GlobalContextProvider';
 
 function Authenticaion({navigation}) {
   const [email, setEmail] = useState('');
+  const [{}, dispatch] = useStateValue();
   const [password, setPassword] = useState('');
 
-  // const userData = useQuery({
-  //   queryKey: ['user'],
-  //   queryFn: async () => {
-  //     const response = await apiRequest(urlType.BACKEND, {
-  //       method: 'get',
-  //       url: `user?user_id=2`,
-  //     });
-  //     return response.data;
-  //   },
-  // });
-  // console.log(userData.data);
+  const userQuery = useQuery({
+    queryKey: ['user'],
+    queryFn: async () => {
+      const result = await apiRequest(urlType.BACKEND, {
+        method: 'get',
+        url: `usersMe`,
+      });
+      if (result?.status === 200) {
+        return result.data.data;
+      } else {
+        return false;
+      }
+    },
+    enabled: false,
+  });
 
   const loginMutation = useMutation({
     mutationFn: async data => {
@@ -44,10 +50,16 @@ function Authenticaion({navigation}) {
       return response;
     },
     onSuccess: async e => {
+      if (e !== false) {
+        await userQuery.refetch();
+        await dispatch({
+          type: 'SET_LOGIN',
+          isLogin: true,
+        });
+      }
       if (e.status === 200) {
         await AsyncStorage.setItem('@user', JSON.stringify(e.data.user));
         await AsyncStorage.setItem('@auth_token', e.data.token);
-        navigation.navigate('BottomNavigation');
       } else if (e.response.status === 404) {
         showMessage({
           message: e.response.message,
@@ -77,7 +89,7 @@ function Authenticaion({navigation}) {
           password: password,
         };
         await loginMutation.mutate(data);
-        console.log(loginMutation.isLoading)
+        console.log(loginMutation.isLoading);
         // console.log(data);
       } else {
         showMessage({
@@ -142,7 +154,6 @@ function Authenticaion({navigation}) {
         style={{marginTop: 80}}
         onPress={handleLogin}
         loading={loginMutation.isPending}
-        
       />
       <View
         style={{

@@ -19,23 +19,12 @@ import urlType from '../../constants/UrlConstants';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {showMessage} from 'react-native-flash-message';
 import CustomModal from '../../components/CustomModal';
+import {useStateValue} from '../../context/GlobalContextProvider';
+
 function AccountSetting({route, navigation}) {
   const {userInfo, userDetail} = route.params;
+  const [{}, dispatch] = useStateValue();
   const [isLogoutModalVisible, setLogoutModalVisible] = useState(false);
-
-  const handleLogout = () => {
-    setLogoutModalVisible(true);
-  };
-
-  const confirmLogout = async () => {
-    await AsyncStorage.removeItem('@auth_token');
-    await AsyncStorage.removeItem('@user');
-    navigation.replace('Main');
-    // Perform the logout action
-    // logout();
-    // Close the modal
-    setLogoutModalVisible(false);
-  };
 
   const userData = useQuery({
     queryKey: ['freelancerPost'],
@@ -47,8 +36,21 @@ function AccountSetting({route, navigation}) {
       return response.data;
     },
   });
-  // console.log(userInfo);
-  console.log(userData.data);
+
+  const handleLogout = () => {
+    setLogoutModalVisible(true);
+  };
+
+  const confirmLogout = async () => {
+    await AsyncStorage.removeItem('@auth_token');
+    await AsyncStorage.removeItem('@user');
+    dispatch({
+      type: 'SET_LOGIN',
+      isLogin: false,
+    });
+    setLogoutModalVisible(false);
+  };
+
   return (
     <>
       <SafeAreaView style={styles.container}>
@@ -129,6 +131,7 @@ function AccountSetting({route, navigation}) {
             {userData.data && userData.data.length > 0 ? (
               userData.data.map((jobData, index) => (
                 <LargeCard
+                  userData={userData}
                   key={index}
                   jobData={jobData}
                   isMyPost={true}
