@@ -8,6 +8,8 @@ import {
   TouchableOpacity,
   View,
   ActivityIndicator,
+  RefreshControl,
+  FlatList,
 } from 'react-native';
 import {Colors} from '../../constants/theme';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -54,82 +56,38 @@ function AccountSetting({route, navigation}) {
   return (
     <>
       <SafeAreaView style={styles.container}>
-        <ScrollView style={styles.scrollContent}>
-          <View style={[styles.row, {justifyContent: 'space-between'}]}>
-            <TouchableOpacity
-              // style={{marginRight: '30%'}}
-              onPress={() => navigation.goBack()}>
-              <MaterialCommunityIcons
-                name="chevron-left"
-                size={32}
-                color={Colors.primary.lightBlack}
-              />
-            </TouchableOpacity>
-            <Text style={styles.largeTxt}>Profile</Text>
-            <TouchableOpacity
-              onPress={handleLogout}
-              // onPress={() => navigation.navigate('Authenticaion')}
-            >
-              <MaterialCommunityIcons name="power" size={30} color="red" />
-            </TouchableOpacity>
-          </View>
-
-          <View style={{justifyContent: 'center', alignItems: 'center'}}>
-            <Image
-              source={{uri: userDetail?.user_account?.image}}
-              style={styles.imgStyle}
+        {/* <ScrollView style={styles.scrollContent}> */}
+        <View style={[styles.row, {justifyContent: 'space-between'}]}>
+          <TouchableOpacity
+            // style={{marginRight: '30%'}}
+            onPress={() => navigation.goBack()}>
+            <MaterialCommunityIcons
+              name="chevron-left"
+              size={32}
+              color={Colors.primary.lightBlack}
             />
-            <Text style={styles.largeTxt}>
-              {userDetail?.user_account?.first_name}{' '}
-              {userDetail?.user_account?.last_name}
-            </Text>
-            <View style={[styles.row, {marginVertical: 20}]}>
-              <View style={{alignItems: 'center', marginRight: 35}}>
-                <Text style={styles.smallTxt}>20</Text>
-                <Text style={styles.smallTxt}>Posts</Text>
-              </View>
-              <View style={{alignItems: 'center', marginRight: 35}}>
-                <Text style={styles.smallTxt}>4.2</Text>
-                <Text style={styles.smallTxt}>Rating</Text>
-              </View>
-              <View style={{alignItems: 'center'}}>
-                <Text style={styles.smallTxt}>20</Text>
-                <Text style={styles.smallTxt}>Jobs</Text>
-              </View>
-            </View>
-            <View style={styles.row}>
-              <CustomBtn
-                lbl={'Edit Profile'}
-                lblStyle={{
-                  textTransform: 'capitalize',
-                }}
-                style={{
-                  marginRight: 20,
-                  paddingHorizontal: 30,
-                  paddingVertical: 10,
-                }}
-                onPress={() =>
-                  navigation.navigate('EditProfile', {
-                    userDetail: userDetail,
-                    userInfo: userInfo,
-                  })
-                }
-              />
-              <CustomBtn
-                lbl={'Profile Review'}
-                lblStyle={{
-                  textTransform: 'capitalize',
-                }}
-                style={{paddingHorizontal: 30, paddingVertical: 10}}
-                onPress={() => navigation.navigate('TopReviewNav')}
-              />
-            </View>
-          </View>
-          <View style={styles.line}></View>
-          <Text style={styles.largeTxt}>Your Posts</Text>
-          <View style={{marginTop: 10}}>
-            {userData.data && userData.data.length > 0 ? (
-              userData.data.map((jobData, index) => (
+          </TouchableOpacity>
+          <Text style={styles.largeTxt}>Profile</Text>
+          <TouchableOpacity
+            onPress={handleLogout}
+            // onPress={() => navigation.navigate('Authenticaion')}
+          >
+            <MaterialCommunityIcons name="power" size={30} color="red" />
+          </TouchableOpacity>
+        </View>
+
+        <View style={{marginTop: 10, marginBottom: 40}}>
+          {userData.data && userData.data.length > 0 ? (
+            <FlatList
+              data={userData.data}
+              refreshControl={
+                <RefreshControl
+                  refreshing={userData.isLoading}
+                  onRefresh={() => userData.refetch()}
+                />
+              }
+              keyExtractor={(item, index) => index.toString()}
+              renderItem={({item: jobData, index}) => (
                 <LargeCard
                   userData={userData}
                   key={index}
@@ -140,20 +98,134 @@ function AccountSetting({route, navigation}) {
                     navigation.navigate('EditPost', {job_id: jobData?.job_id})
                   }
                 />
-              ))
-            ) : (
-              <View style={{alignItems: 'center', marginTop: 10}}>
-                {userData.data ? (
+              )}
+              ListHeaderComponent={
+                <>
+                  <View
+                    style={{justifyContent: 'center', alignItems: 'center'}}>
+                    <Image
+                      source={{uri: userDetail?.user_account?.image}}
+                      style={styles.imgStyle}
+                    />
+                    <Text style={styles.largeTxt}>
+                      {userDetail?.user_account?.first_name}{' '}
+                      {userDetail?.user_account?.last_name}
+                    </Text>
+                    <View style={[styles.row, {marginVertical: 20}]}>
+                      <View style={{alignItems: 'center', marginRight: 35}}>
+                        <Text style={styles.smallTxt}>20</Text>
+                        <Text style={styles.smallTxt}>Posts</Text>
+                      </View>
+                      <View style={{alignItems: 'center', marginRight: 35}}>
+                        <Text style={styles.smallTxt}>4.2</Text>
+                        <Text style={styles.smallTxt}>Rating</Text>
+                      </View>
+                      <View style={{alignItems: 'center'}}>
+                        <Text style={styles.smallTxt}>20</Text>
+                        <Text style={styles.smallTxt}>Jobs</Text>
+                      </View>
+                    </View>
+                    <View style={styles.row}>
+                      <CustomBtn
+                        lbl={'Edit Profile'}
+                        lblStyle={{
+                          textTransform: 'capitalize',
+                        }}
+                        style={{
+                          marginRight: 20,
+                          paddingHorizontal: 30,
+                          paddingVertical: 10,
+                        }}
+                        onPress={() =>
+                          navigation.navigate('EditProfile', {
+                            userDetail: userDetail,
+                            userInfo: userInfo,
+                          })
+                        }
+                      />
+                      <CustomBtn
+                        lbl={'Profile Review'}
+                        lblStyle={{
+                          textTransform: 'capitalize',
+                        }}
+                        style={{paddingHorizontal: 30, paddingVertical: 10}}
+                        onPress={() => navigation.navigate('TopReviewNav')}
+                      />
+                    </View>
+                  </View>
+                  <View style={styles.line}></View>
+                  <Text style={styles.largeTxt}>Your Posts</Text>
+                </>
+              }
+            />
+          ) : (
+            <View style={{alignItems: 'center', marginTop: 10}}>
+              {userData.data ? (
+                <>
+                  <View
+                    style={{justifyContent: 'center', alignItems: 'center'}}>
+                    <Image
+                      source={{uri: userDetail?.user_account?.image}}
+                      style={styles.imgStyle}
+                    />
+                    <Text style={styles.largeTxt}>
+                      {userDetail?.user_account?.first_name}{' '}
+                      {userDetail?.user_account?.last_name}
+                    </Text>
+                    <View style={[styles.row, {marginVertical: 20}]}>
+                      <View style={{alignItems: 'center', marginRight: 35}}>
+                        <Text style={styles.smallTxt}>20</Text>
+                        <Text style={styles.smallTxt}>Posts</Text>
+                      </View>
+                      <View style={{alignItems: 'center', marginRight: 35}}>
+                        <Text style={styles.smallTxt}>4.2</Text>
+                        <Text style={styles.smallTxt}>Rating</Text>
+                      </View>
+                      <View style={{alignItems: 'center'}}>
+                        <Text style={styles.smallTxt}>20</Text>
+                        <Text style={styles.smallTxt}>Jobs</Text>
+                      </View>
+                    </View>
+                    <View style={styles.row}>
+                      <CustomBtn
+                        lbl={'Edit Profile'}
+                        lblStyle={{
+                          textTransform: 'capitalize',
+                        }}
+                        style={{
+                          marginRight: 20,
+                          paddingHorizontal: 30,
+                          paddingVertical: 10,
+                        }}
+                        onPress={() =>
+                          navigation.navigate('EditProfile', {
+                            userDetail: userDetail,
+                            userInfo: userInfo,
+                          })
+                        }
+                      />
+                      <CustomBtn
+                        lbl={'Profile Review'}
+                        lblStyle={{
+                          textTransform: 'capitalize',
+                        }}
+                        style={{paddingHorizontal: 30, paddingVertical: 10}}
+                        onPress={() => navigation.navigate('TopReviewNav')}
+                      />
+                    </View>
+                  </View>
+                  <View style={styles.line}></View>
+
                   <Text style={{color: Colors.primary.lightGray}}>
                     No posts available
                   </Text>
-                ) : (
-                  <ActivityIndicator size={24} color={Colors.primary.black} />
-                )}
-              </View>
-            )}
-          </View>
-        </ScrollView>
+                </>
+              ) : (
+                <ActivityIndicator size={24} color={Colors.primary.black} />
+              )}
+            </View>
+          )}
+        </View>
       </SafeAreaView>
       <CustomModal
         visible={isLogoutModalVisible}

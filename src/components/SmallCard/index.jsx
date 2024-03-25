@@ -13,7 +13,7 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import profileImg from '../../assets/Images/profileImg.jpg';
 import {Colors} from '../../constants/theme';
 
-function SmallCard({profile}) {
+function SmallCard({profile, jobData}) {
   return (
     <>
       {profile ? (
@@ -23,11 +23,22 @@ function SmallCard({profile}) {
             borderColor: Colors.primary.sub,
             borderRadius: 12,
             padding: 10,
-            marginBottom: 10
+            marginBottom: 10,
           }}>
           <View style={styles.row}>
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
-              <Image source={profileImg} style={styles.cardImg} />
+              <Image
+                source={
+                  jobData?.profile_image
+                    ? {uri: jobData.profile_image}
+                    : jobData?.client?.image
+                    ? {uri: jobData?.client?.image}
+                    : jobData?.freelancer?.image
+                    ? {uri: jobData?.freelancer?.image}
+                    : {profileImg}
+                }
+                style={styles.cardImg}
+              />
               <Text
                 style={[styles.smallTxt, {marginLeft: 5, fontWeight: '600'}]}>
                 John William |
@@ -57,7 +68,10 @@ function SmallCard({profile}) {
               <View style={{flexDirection: 'row', alignItems: 'center'}}>
                 <Image source={profileImg} style={styles.cardImg} />
                 <Text style={[styles.smallTxt, {marginLeft: 5}]}>
-                  John William
+                  {jobData?.first_name} {jobData?.last_name}
+                  {jobData?.client?.first_name} {jobData?.client?.last_name}
+                  {jobData?.freelancer?.first_name}{' '}
+                  {jobData?.freelancer?.last_name}{' '}
                 </Text>
               </View>
               <MaterialIcons
@@ -68,10 +82,11 @@ function SmallCard({profile}) {
             </View>
             <View style={[styles.row, {marginTop: 10}]}>
               <Text style={[styles.smallTxt, {width: '70%'}]}>
-                Create web page design on figma for freelancing web
-                sites...........{' '}
+                {jobData?.job_description}
               </Text>
-              <Text style={[styles.smallTxt, {fontWeight: '600'}]}>$90</Text>
+              <Text style={[styles.smallTxt, {fontWeight: '600'}]}>
+                ${jobData?.payment_amount}
+              </Text>
             </View>
           </View>
         </View>

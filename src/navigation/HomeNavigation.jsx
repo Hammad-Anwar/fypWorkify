@@ -7,6 +7,7 @@ import EditProfile from '../screens/Home/EditProfile';
 import ChangePassword from '../screens/Home/ChangePassword';
 import TopReviewNav from './TopReviewNav';
 import EditPost from '../screens/Home/EditPost';
+import FeaturedPost from '../screens/Home/FeaturedPost';
 function HomeNavigation() {
   const Stack = createNativeStackNavigator();
   return (
@@ -51,6 +52,11 @@ function HomeNavigation() {
           options={{headerShown: false}}
           name="EditPost"
           component={EditPost}
+        />
+        <Stack.Screen
+          options={{headerShown: false}}
+          name="FeaturedPost"
+          component={FeaturedPost}
         />
       </Stack.Navigator>
     </>

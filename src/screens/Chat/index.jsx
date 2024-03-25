@@ -70,11 +70,19 @@ const Chat = ({navigation}) => {
         renderItem={({item, index}) => (
           <TouchableOpacity
             key={index}
-            style={{marginTop: 20, paddingLeft: 15}}
+            style={{
+              marginTop: 20,
+              paddingLeft: 10,
+              borderColor: Colors.primary.lightGray,
+              borderWidth: 2,
+              paddingVertical: 8,
+            }}
             onPress={() =>
               navigation.navigate('MessageBox', {
                 chatRoomId: item.chatroom_id,
-                username: item.user_account.user_name,
+                first_name: item.user_account.first_name,
+                last_name: item.user_account.last_name,
+                image: item?.user_account.image
               })
             }>
             <View style={{marginBottom: 2}} key={index}>
@@ -92,8 +100,11 @@ const Chat = ({navigation}) => {
                       </Text>
                     </View>
                   ) : null} */}
-                  {item.prof_pic ? (
-                    <Image style={styles.img} source={{uri: item.prof_pic}} />
+                  {item?.user_account.image ? (
+                    <Image
+                      style={styles.img}
+                      source={{uri: item?.user_account.image}}
+                    />
                   ) : (
                     <Image style={styles.img} source={image} />
                   )}

@@ -26,10 +26,10 @@ import {io} from 'socket.io-client';
 import {Colors} from '../../constants/theme';
 import apiRequest from '../../api/apiRequest';
 import urlType from '../../constants/UrlConstants';
-const MessageBox = () => {
+const MessageBox = ({navigation}) => {
   const bottomRef = useRef();
   const route = useRoute();
-  const {chatRoomId, username} = route.params;
+  const {chatRoomId, first_name, last_name, image} = route.params;
   const queryClient = useQueryClient();
   const userData = queryClient.getQueryData(['user']);
   const usr_id = userData?.user?.useraccount_id;
@@ -59,7 +59,7 @@ const MessageBox = () => {
       });
       socket.off('connect');
       socket.off('message', data => {
-        console.log('hammad ko apis nhi ati', data);
+        console.log('ajs', data);
       });
     };
   }, [socket]);
@@ -103,19 +103,34 @@ const MessageBox = () => {
           alignItems: 'center',
           marginVertical: 0,
           backgroundColor: 'white',
+          paddingBottom: 10,
+          borderLeftColor: Colors.primary.white,
+          borderRightColor: Colors.primary.white,
+          borderTopColor: Colors.primary.white,
+          borderBottomColor: Colors.primary.lightGray,
+          borderWidth: 2,
         }}>
+        <TouchableOpacity
+          style={{marginLeft: 10}}
+          onPress={() => navigation.goBack()}>
+          <MaterialCommunityIcons
+            name="chevron-left"
+            size={32}
+            color={Colors.primary.lightBlack}
+          />
+        </TouchableOpacity>
         <View
           style={{
             display: 'flex',
             flexDirection: 'row',
-            paddingLeft: 15,
+            paddingLeft: 10,
             alignContent: 'center',
           }}>
           <View>
-            {false ? (
+            {image ? (
               <Image
                 style={styles.imgAvatar}
-                source={{uri: itemData?.prof_pic}}
+                source={{uri: image}}
               />
             ) : (
               <Image style={styles.imgAvatar} source={avatar} />
@@ -123,12 +138,12 @@ const MessageBox = () => {
           </View>
           {/* {result[0]?.receiver_name} */}
           <View style={{justifyContent: 'center'}}>
-            <Text style={styles.paragraph}>{username}</Text>
+            <Text style={styles.paragraph}>
+              {first_name} {last_name}
+            </Text>
           </View>
         </View>
       </View>
-      {/* <CdlAppHeader name={result[0]?.receiver_name}/> */}
-
       <FlatList
         ref={bottomRef}
         // ref={ref => this.flatList = ref}
@@ -145,7 +160,8 @@ const MessageBox = () => {
                 <View style={styles.receivercol}>
                   <View>
                     <Text style={styles.view1}>
-                      {item?.user_account?.user_name}
+                      {item?.user_account?.first_name} {}
+                      {item?.user_account?.last_name}
                     </Text>
                   </View>
                   <View>
@@ -169,7 +185,8 @@ const MessageBox = () => {
                 <View style={styles.sendercol}>
                   <View>
                     <Text style={styles.sview1}>
-                      {item?.user_account?.user_name}
+                      {item?.user_account?.first_name} {}
+                      {item?.user_account?.last_name}
                     </Text>
                   </View>
                   <View>
@@ -200,7 +217,9 @@ const MessageBox = () => {
           paddingHorizontal: 20,
           paddingVertical: 10,
         }}>
-        <Text>{isTyping ? '...typing' : null}</Text>
+        <Text style={{color: Colors.primary.darkgray}}>
+          {isTyping ? '...typing' : null}
+        </Text>
       </View>
 
       <View
@@ -213,7 +232,7 @@ const MessageBox = () => {
           marginRight: 8,
           borderRadius: 20,
           marginBottom: 8,
-          borderColor: '#FA4415',
+          borderColor: Colors.primary.lightGray,
           borderWidth: 2,
         }}>
         <View style={{flexDirection: 'column'}}>
@@ -230,10 +249,10 @@ const MessageBox = () => {
                 alignItems: 'center',
                 height: '90%',
                 width: '88%',
-                backgroundColor: 'white',
-                borderColor: '#FA4415',
+                backgroundColor: Colors.primary.white,
                 marginLeft: 6,
                 padding: 10,
+                color: Colors.primary.black,
               }}
               value={message}
               onChangeText={e => {
@@ -244,16 +263,9 @@ const MessageBox = () => {
               <MaterialCommunityIcons
                 name={'send-outline'}
                 size={30}
-                color={Colors.primary.darkgray}
+                color={Colors.primary.lightBlack}
               />
             </TouchableOpacity>
-            {/* <Ionicons
-              style={styles.sendicon}
-              name="send-outline"
-              size={32}
-              color="#FA4415"
-              onPress={() => sendChatFun(message)}
-            /> */}
           </View>
         </View>
       </View>
@@ -311,8 +323,7 @@ const styles = StyleSheet.create({
   view1: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#FA4415',
-    // color: "black",
+    color: 'steelblue',
     textTransform: 'capitalize',
   },
   view2: {
@@ -351,7 +362,7 @@ const styles = StyleSheet.create({
   sview1: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#FA4415',
+    color: 'darkblue',
     // color: "black",
 
     textTransform: 'capitalize',
@@ -375,8 +386,8 @@ const styles = StyleSheet.create({
   },
 
   imgAvatar: {
-    height: 50,
-    width: 50,
+    height: 40,
+    width: 40,
     borderWidth: 1,
     borderRadius: 100 / 2,
     backgroundColor: '#FA4415',

@@ -3,6 +3,7 @@ import {
   ActivityIndicator,
   FlatList,
   Image,
+  RefreshControl,
   SafeAreaView,
   ScrollView,
   StatusBar,
@@ -49,6 +50,16 @@ function Home({navigation}) {
 
     fetchData();
   }, []);
+  const featuredData = useQuery({
+    queryKey: ['featuredPost'],
+    queryFn: async () => {
+      const response = await apiRequest(urlType.BACKEND, {
+        method: 'get',
+        url: `featuredJobs?status=true`,
+      });
+      return response.data;
+    },
+  });
   const userData = useQuery({
     queryKey: ['jobPost', userInfo?.userType, userInfo?.id],
     queryFn: async () => {
@@ -65,7 +76,8 @@ function Home({navigation}) {
         });
         return response.data;
       }
-    }, enabled: userInfo?.id ? true : false
+    },
+    enabled: userInfo?.id ? true : false,
   });
   userData.refetch();
 
@@ -86,7 +98,8 @@ function Home({navigation}) {
         console.error('Error fetching user detail:', error);
         throw error;
       }
-    },enabled: userInfo?.id && userInfo?.userType ? true : false 
+    },
+    enabled: userInfo?.id && userInfo?.userType ? true : false,
   });
   userDetail.refetch();
 
@@ -192,6 +205,12 @@ function Home({navigation}) {
             {userData.data && userData.data.length > 0 ? (
               <FlatList
                 data={userData.data}
+                refreshControl={
+                  <RefreshControl
+                    refreshing={userData.isLoading}
+                    onRefresh={() => userData.refetch()}
+                  />
+                }
                 keyExtractor={(item, index) => index.toString()}
                 renderItem={({item: jobData, index}) => (
                   <LargeCard key={index} jobData={jobData} />
@@ -200,23 +219,30 @@ function Home({navigation}) {
                   <>
                     <View style={[styles.row, {marginTop: 30}]}>
                       <Text style={styles.largeTxt}>Featured Posts</Text>
-                      <TouchableOpacity>
+                      <TouchableOpacity
+                        onPress={() => navigation.navigate('FeaturedPost')}>
                         <Text style={styles.smallTxt}>View all</Text>
                       </TouchableOpacity>
                     </View>
                     <FlatList
                       horizontal={true}
                       showsHorizontalScrollIndicator={false}
-                      data={[1, 2, 3]} // Replace this array with your data
+                      data={featuredData.data}
                       keyExtractor={(item, index) => index.toString()}
-                      renderItem={() => <SmallCard />}
+                      renderItem={({item: jobData, index}) => (
+                        <SmallCard key={index} jobData={jobData?.job} />
+                      )}
                     />
                     <View style={{marginVertical: 20}}>
                       <View style={styles.line}></View>
                     </View>
                   </>
                 }
-                ListFooterComponent={<><View style={{marginBottom: 140}}></View></>}
+                ListFooterComponent={
+                  <>
+                    <View style={{marginBottom: 140}}></View>
+                  </>
+                }
               />
             ) : (
               <View style={{alignItems: 'center', marginTop: 10}}>
@@ -239,6 +265,12 @@ function Home({navigation}) {
               {userData?.data && userData?.data.length > 0 ? (
                 <FlatList
                   data={userData?.data}
+                  refreshControl={
+                    <RefreshControl
+                      refreshing={userData.isLoading}
+                      onRefresh={() => userData.refetch()}
+                    />
+                  }
                   keyExtractor={(item, index) => index.toString()}
                   renderItem={({item: jobData, index}) => (
                     <LargeCard
