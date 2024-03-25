@@ -10,6 +10,7 @@ import {useQuery} from '@tanstack/react-query';
 import {useStateValue} from './context/GlobalContextProvider';
 import urlType from './constants/UrlConstants';
 import { navigationRef } from './api/RootNavigation';
+import apiRequest from './api/apiRequest';
 
 const Stack = createNativeStackNavigator();
 
@@ -24,11 +25,8 @@ function Main() {
         method: 'get',
         url: `usersMe`,
       });
-      if (result?.status === 200) {
-        return result.data.data;
-      } else {
-        return false;
-      }
+      console.log(result.data)
+      return result.data;
     },
     enabled: false,
   });

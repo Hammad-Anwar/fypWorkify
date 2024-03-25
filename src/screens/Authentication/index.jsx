@@ -23,23 +23,8 @@ function Authenticaion({navigation}) {
   const [{}, dispatch] = useStateValue();
   const [password, setPassword] = useState('');
 
-  const userQuery = useQuery({
-    queryKey: ['user'],
-    queryFn: async () => {
-      const result = await apiRequest(urlType.BACKEND, {
-        method: 'get',
-        url: `usersMe`,
-      });
-      if (result?.status === 200) {
-        return result.data.data;
-      } else {
-        return false;
-      }
-    },
-    enabled: false,
-  });
-
   const loginMutation = useMutation({
+    mutationKey:["user"],
     mutationFn: async data => {
       const response = await apiRequest(urlType.BACKEND, {
         method: 'post',
@@ -50,25 +35,14 @@ function Authenticaion({navigation}) {
       return response;
     },
     onSuccess: async e => {
-      if (e !== false) {
-        await userQuery.refetch();
+      if (e.status === 200) {
+        await AsyncStorage.setItem('@user', JSON.stringify(e.data.user));
+        await AsyncStorage.setItem('@auth_token', e.data.token);
         await dispatch({
           type: 'SET_LOGIN',
           isLogin: true,
         });
-      }
-      if (e.status === 200) {
-        await AsyncStorage.setItem('@user', JSON.stringify(e.data.user));
-        await AsyncStorage.setItem('@auth_token', e.data.token);
-      } else if (e.response.status === 404) {
-        showMessage({
-          message: e.response.message,
-          type: 'danger',
-          color: '#fff',
-          backgroundColor: 'red',
-          floating: true,
-        });
-      } else {
+      }  else {
         showMessage({
           message: e.response.message || 'An Error occured',
           type: 'danger',

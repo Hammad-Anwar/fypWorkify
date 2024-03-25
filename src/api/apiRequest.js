@@ -76,7 +76,7 @@ const apiRequest = async function (urlType, options) {
   return axios({
     baseURL: urlType,
     ...options,
-    headers: {Authorization: `Bearer ${authToken}`},
+    headers: {Authorization: `${authToken}`},
   })
     .then(onSuccess)
     .catch(onError);

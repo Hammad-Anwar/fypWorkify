@@ -4,19 +4,20 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import HomeNavigation from './HomeNavigation';
 import {Colors} from '../constants/theme';
 import AddPost from '../screens/AddPost';
+import ChatNavigation from './ChatNavigation';
 
 const Tab = createBottomTabNavigator();
 
 function BottomNavigation() {
   return (
     <Tab.Navigator
-      initialRouteName="Home"
+      initialRouteName="Homes"
       screenOptions={{
         tabBarActiveTintColor: Colors.primary.lightBlack,
         tabBarInactiveTintColor: Colors.primary.darkgray,
       }}>
       <Tab.Screen
-        name="Home"
+        name="Homes"
         component={HomeNavigation}
         options={{
           headerShown: false,
@@ -32,7 +33,7 @@ function BottomNavigation() {
       />
       <Tab.Screen
         name="Message"
-        component={""}
+        component={ChatNavigation}
         options={{
           headerShown: false,
           tabBarLabel: 'Messages',

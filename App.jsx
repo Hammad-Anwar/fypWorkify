@@ -1,10 +1,9 @@
 import React from 'react';
 import {QueryClient, QueryClientProvider} from '@tanstack/react-query';
-const queryClient = new QueryClient();
 import {GlobalContextProvider} from './src/context/GlobalContextProvider';
 import reducer, {initState} from './src/context/reducer';
 import Main from './src/Main';
-import {NavigationContainer} from '@react-navigation/native';
+const queryClient = new QueryClient();
 
 export default function App() {
   return (

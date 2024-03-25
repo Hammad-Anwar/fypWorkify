@@ -16,6 +16,7 @@ import {useQuery, useMutation} from '@tanstack/react-query';
 import apiRequest from '../../api/apiRequest';
 import urlType from '../../constants/UrlConstants';
 import {showMessage} from 'react-native-flash-message';
+import onShare from '../../constants/onShare';
 
 function LargeCard({jobData, isMyPost, postId, handleUpdate, userData}) {
   const [isDeleteModalVisible, setDeleteModalVisible] = useState(false);
@@ -190,7 +191,7 @@ function LargeCard({jobData, isMyPost, postId, handleUpdate, userData}) {
           />
           <Text style={[styles.txt]}> Message</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={{flexDirection: 'row', alignItems: 'center'}}>
+        <TouchableOpacity style={{flexDirection: 'row', alignItems: 'center'}} onPress={() => onShare("text")}>
           <MaterialCommunityIcons
             name="share-outline"
             size={20}

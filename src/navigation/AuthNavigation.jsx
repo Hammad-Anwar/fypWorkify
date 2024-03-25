@@ -5,7 +5,6 @@ import Authentication from '../screens/Authentication';
 import Signup from '../screens/Authentication/Signup';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import { StatusBar } from 'react-native';
-import BottomNavigation from './BottomNavigation';
 import MoreInfo from '../screens/Authentication/MoreInfo';
 import AddSkills from '../screens/Authentication/AddSkills';
 function AuthNavigation() {
@@ -43,11 +42,6 @@ function AuthNavigation() {
           name="AddSkills"
           component={AddSkills}
         />
-        {/* <Stack.Screen
-          options={{headerShown: false}}
-          name="BottomNavigation"
-          component={BottomNavigation}
-        /> */}
       </Stack.Navigator>
     </>
   );
