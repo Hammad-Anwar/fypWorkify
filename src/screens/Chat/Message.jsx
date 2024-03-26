@@ -66,7 +66,7 @@ const MessageBox = ({navigation}) => {
   const messagesData = useQuery({
     queryKey: ['messages', chatRoomId],
     queryFn: async () => {
-      const response = await apiRequest('http://192.168.100.34:5000/api/', {
+      const response = await apiRequest(urlType.BACKEND, {
         method: 'get',
         url: `messages?chatroom_id=${chatRoomId}`,
       });
