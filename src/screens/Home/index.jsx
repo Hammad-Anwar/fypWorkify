@@ -293,6 +293,11 @@ function Home({navigation}) {
                       </View>
                     </>
                   }
+                  ListFooterComponent={
+                    <>
+                      <View style={{marginBottom: 140}}></View>
+                    </>
+                  }
                 />
               ) : (
                 <View style={{alignItems: 'center', marginTop: 10}}>

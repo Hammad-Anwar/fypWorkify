@@ -66,7 +66,18 @@ function SmallCard({profile, jobData}) {
           <View style={[styles.smallCard]}>
             <View style={styles.row}>
               <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                <Image source={profileImg} style={styles.cardImg} />
+                <Image
+                  source={
+                    jobData?.profile_image
+                      ? {uri: jobData.profile_image}
+                      : jobData?.client?.image
+                      ? {uri: jobData?.client?.image}
+                      : jobData?.freelancer?.image
+                      ? {uri: jobData?.freelancer?.image}
+                      : {profileImg}
+                  }
+                  style={styles.cardImg}
+                />
                 <Text style={[styles.smallTxt, {marginLeft: 5}]}>
                   {jobData?.first_name} {jobData?.last_name}
                   {jobData?.client?.first_name} {jobData?.client?.last_name}
