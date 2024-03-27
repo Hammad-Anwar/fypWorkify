@@ -18,7 +18,7 @@ import urlType from '../../constants/UrlConstants';
 import {showMessage} from 'react-native-flash-message';
 import onShare from '../../constants/onShare';
 
-function LargeCard({jobData, isMyPost, postId, handleUpdate, userData}) {
+function LargeCard({jobData, isMyPost, postId, handleUpdate, userData, handleSendMessage}) {
   const [isDeleteModalVisible, setDeleteModalVisible] = useState(false);
 
   const deleteMutation = useMutation({
@@ -71,6 +71,7 @@ function LargeCard({jobData, isMyPost, postId, handleUpdate, userData}) {
     };
     return new Date(dateString).toLocaleString('en-US', options);
   };
+
   return (
     <View style={styles.container}>
       <View style={styles.row}>
@@ -183,7 +184,9 @@ function LargeCard({jobData, isMyPost, postId, handleUpdate, userData}) {
           />
           <Text style={[styles.txt]}> Saved</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={{flexDirection: 'row', alignItems: 'center'}}>
+        <TouchableOpacity
+          style={{flexDirection: 'row', alignItems: 'center'}}
+          onPress={handleSendMessage}>
           <FontAwesome
             name="send-o"
             size={18}
@@ -191,7 +194,9 @@ function LargeCard({jobData, isMyPost, postId, handleUpdate, userData}) {
           />
           <Text style={[styles.txt]}> Message</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={{flexDirection: 'row', alignItems: 'center'}} onPress={() => onShare("text")}>
+        <TouchableOpacity
+          style={{flexDirection: 'row', alignItems: 'center'}}
+          onPress={() => onShare('text')}>
           <MaterialCommunityIcons
             name="share-outline"
             size={20}

@@ -9,15 +9,11 @@ import {
   Image,
   View,
   TouchableOpacity,
-  ActivityIndicator,
-  Alert,
 } from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import avatar from '../../assets/Images/profileImg.jpg';
 import {useNavigation, useRoute} from '@react-navigation/native';
 import {
-  Mutation,
-  useMutation,
   useQuery,
   useQueryClient,
 } from '@tanstack/react-query';
@@ -29,14 +25,18 @@ import urlType from '../../constants/UrlConstants';
 const MessageBox = ({navigation}) => {
   const bottomRef = useRef();
   const route = useRoute();
-  const {chatRoomId, first_name, last_name, image} = route.params;
+  const {chatRoomId:chatRoomID, first_name, last_name, image, userId2, job_id} =
+    route.params;
+  const [chatRoomId, setChatRoomId] = useState(chatRoomID)
   const queryClient = useQueryClient();
   const userData = queryClient.getQueryData(['user']);
   const usr_id = userData?.user?.useraccount_id;
   const [socket, setSocket] = useState(io('http://192.168.100.34:5000/'));
   const [message, setmessage] = useState('');
-  const [isSending, setIsSending] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
+  // useEffect(() => {
+  //   queryClient.removeQueries({ queryKey: ['messages'] });
+  // },[navigation])
   useEffect(() => {
     // Event listener for 'typing' event
 
@@ -46,9 +46,11 @@ const MessageBox = ({navigation}) => {
     });
 
     socket.on('message', data => {
+      console.log('sd', data);
       queryClient.setQueryData(['messages', chatRoomId], prevData => {
         // Concatenate the new message with the existing messages data
-        return [...prevData, data];
+        setChatRoomId(data.chatroom_id)
+        return prevData !== undefined ? [...prevData, data] : [data];
       });
     });
 
@@ -72,16 +74,27 @@ const MessageBox = ({navigation}) => {
       });
       return response.data;
     },
+    enabled:chatRoomId === null? false : true ,
   });
   const emitTypingEvent = () => {
     socket.emit('typing', chatRoomId);
   };
   const sendMessage = () => {
-    socket.emit('send-message', {
-      user: usr_id,
-      chatroom_id: chatRoomId,
-      msg_text: message,
-    });
+    if (chatRoomId !== null) {
+      socket.emit('send-message', {
+        user: usr_id,
+        chatroom_id: chatRoomId,
+        msg_text: message,
+      });
+    } else {
+      socket.emit('join-room_and_send-message', {
+        userId1: usr_id,
+        userId2: userId2,
+        job_id: job_id,
+        msg_text: message,
+      });
+    }
+
     setmessage(''); // Clear the input field after sending message
     setIsTyping(false);
   };
@@ -128,10 +141,7 @@ const MessageBox = ({navigation}) => {
           }}>
           <View>
             {image ? (
-              <Image
-                style={styles.imgAvatar}
-                source={{uri: image}}
-              />
+              <Image style={styles.imgAvatar} source={{uri: image}} />
             ) : (
               <Image style={styles.imgAvatar} source={avatar} />
             )}

@@ -21,7 +21,7 @@ import CustomInput from '../../components/CustomInput';
 import {Colors} from '../../constants/theme';
 import SmallCard from '../../components/SmallCard';
 import LargeCard from '../../components/LargeCard';
-import {useQuery, useMutation} from '@tanstack/react-query';
+import {useQuery, useMutation, useQueryClient} from '@tanstack/react-query';
 import apiRequest from '../../api/apiRequest';
 import urlType from '../../constants/UrlConstants';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -29,7 +29,7 @@ import {showMessage} from 'react-native-flash-message';
 
 function Home({navigation}) {
   const [userInfo, setUserInfo] = useState(null);
-
+  const queryClient = useQueryClient();
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -132,7 +132,7 @@ function Home({navigation}) {
   // console.log("user Info", userInfo)
   // console.log('User data: ', userDetail);
   // console.log(userData.data);
-
+  console.log(userData.data);
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.row}>
@@ -213,7 +213,21 @@ function Home({navigation}) {
                 }
                 keyExtractor={(item, index) => index.toString()}
                 renderItem={({item: jobData, index}) => (
-                  <LargeCard key={index} jobData={jobData} />
+                  <LargeCard
+                    key={index}
+                    jobData={jobData}
+                    handleSendMessage={async () => {
+                      await queryClient.removeQueries({queryKey: ['messages']});
+                      navigation.navigate('MessageBox', {
+                        chatRoomId: null,
+                        first_name: jobData?.client?.first_name,
+                        last_name: jobData?.client?.last_name,
+                        image: jobData?.client?.image,
+                        userId2: jobData?.client?.user_id,
+                        job_id: jobData?.job_id,
+                      });
+                    }}
+                  />
                 )}
                 ListHeaderComponent={
                   <>

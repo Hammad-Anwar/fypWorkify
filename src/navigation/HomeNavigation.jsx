@@ -8,6 +8,7 @@ import ChangePassword from '../screens/Home/ChangePassword';
 import TopReviewNav from './TopReviewNav';
 import EditPost from '../screens/Home/EditPost';
 import FeaturedPost from '../screens/Home/FeaturedPost';
+import MessageBox from '../screens/Chat/Message';
 function HomeNavigation() {
   const Stack = createNativeStackNavigator();
   return (
@@ -43,11 +44,11 @@ function HomeNavigation() {
           name="ChangePassword"
           component={ChangePassword}
         />
-        {/* <Stack.Screen
+        <Stack.Screen
           options={{headerShown: false}}
-          name="Main"
-          component={Main}
-        /> */}
+          name="MessageBox"
+          component={MessageBox}
+        />
         <Stack.Screen
           options={{headerShown: false}}
           name="EditPost"
