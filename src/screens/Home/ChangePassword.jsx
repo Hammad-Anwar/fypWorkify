@@ -19,7 +19,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import {showMessage} from 'react-native-flash-message';
 
 function ChangePassword({route, navigation}) {
-  const {userDetail} = route.params;
+  const {user_id} = route.params;
   const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [retypePassword, setRetypePassword] = useState('');
@@ -73,7 +73,7 @@ function ChangePassword({route, navigation}) {
       newPassword === retypePassword
     ) {
       const data = {
-        user_id: parseInt(userDetail?.useraccount_id),
+        user_id: parseInt(user_id),
         oldPassword: oldPassword,
         newPassword: newPassword,
       };

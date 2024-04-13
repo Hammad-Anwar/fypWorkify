@@ -69,10 +69,13 @@ function AccountSetting({route, navigation}) {
           </TouchableOpacity>
           <Text style={styles.largeTxt}>Profile</Text>
           <TouchableOpacity
-            onPress={handleLogout}
-            // onPress={() => navigation.navigate('Authenticaion')}
-          >
-            <MaterialCommunityIcons name="power" size={30} color="red" />
+            // onPress={handleLogout}
+            onPress={() => navigation.navigate('MoreOptions')}>
+            <MaterialCommunityIcons
+              name="menu"
+              size={30}
+              color={Colors.primary.black}
+            />
           </TouchableOpacity>
         </View>
 

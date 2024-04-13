@@ -9,6 +9,8 @@ import TopReviewNav from './TopReviewNav';
 import EditPost from '../screens/Home/EditPost';
 import FeaturedPost from '../screens/Home/FeaturedPost';
 import MessageBox from '../screens/Chat/Message';
+import MoreOptions from '../screens/Home/MoreOptions';
+import SavedPost from '../screens/Home/SavedPost';
 function HomeNavigation() {
   const Stack = createNativeStackNavigator();
   return (
@@ -58,6 +60,16 @@ function HomeNavigation() {
           options={{headerShown: false}}
           name="FeaturedPost"
           component={FeaturedPost}
+        />
+        <Stack.Screen
+          options={{headerShown: false}}
+          name="MoreOptions"
+          component={MoreOptions}
+        />
+        <Stack.Screen
+          options={{headerShown: false}}
+          name="SavedPost"
+          component={SavedPost}
         />
       </Stack.Navigator>
     </>

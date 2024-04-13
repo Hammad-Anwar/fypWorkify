@@ -387,7 +387,7 @@ function EditProfile({route, navigation}) {
                 marginVertical: 10,
                 marginBottom: 40,
               }}>
-              <TouchableOpacity
+              {/* <TouchableOpacity
                 onPress={() =>
                   navigation.navigate('ChangePassword', {
                     userDetail: userDetail,
@@ -404,7 +404,7 @@ function EditProfile({route, navigation}) {
                   size={22}
                   color={Colors.primary.lightBlack}
                 />
-              </TouchableOpacity>
+              </TouchableOpacity> */}
             </View>
             <CustomBtn
               lbl={'Update'}

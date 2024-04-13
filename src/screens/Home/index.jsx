@@ -185,22 +185,6 @@ function Home({navigation}) {
       </View>
       {userInfo?.userType === 'freelancer' ? (
         <>
-          {/* <View style={[styles.row, {marginTop: 30}]}>
-              <Text style={styles.largeTxt}>Featured Posts</Text>
-              <TouchableOpacity>
-                <Text style={styles.smallTxt}>View all</Text>
-              </TouchableOpacity>
-            </View>
-            <ScrollView
-              horizontal={true}
-              showsHorizontalScrollIndicator={false}
-              style={{flex: 1}}>
-              <SmallCard />
-              <SmallCard />
-              <SmallCard />
-            </ScrollView>
-            <View style={{marginTop: 20}}>
-              <View style={styles.line}></View>*/}
           <View style={{marginTop: 20}}>
             {userData.data && userData.data.length > 0 ? (
               <FlatList
@@ -215,6 +199,7 @@ function Home({navigation}) {
                 renderItem={({item: jobData, index}) => (
                   <LargeCard
                     key={index}
+                    postId={jobData?.job_id}
                     jobData={jobData}
                     handleSendMessage={async () => {
                       await queryClient.removeQueries({queryKey: ['messages']});

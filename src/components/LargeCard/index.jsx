@@ -12,14 +12,47 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import profileImg from '../../assets/Images/profileImg.jpg';
 import CustomModal from '../CustomModal';
-import {useQuery, useMutation} from '@tanstack/react-query';
+import {useQuery,useQueryClient, useMutation} from '@tanstack/react-query';
 import apiRequest from '../../api/apiRequest';
 import urlType from '../../constants/UrlConstants';
 import {showMessage} from 'react-native-flash-message';
 import onShare from '../../constants/onShare';
 
-function LargeCard({jobData, isMyPost, postId, handleUpdate, userData, handleSendMessage}) {
+function LargeCard({
+  jobData,
+  isMyPost,
+  postId,
+  handleUpdate,
+  userData,
+  handleSendMessage,
+}) {
+  const queryClient = useQueryClient();
+  const userInfo = queryClient.getQueryData(['user']);
   const [isDeleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [isPostSaved, setIsPostSaved] = useState(jobData?.saved_post?.savedPost_status);
+
+  const toggleSavedPost = async (isSaved) => {
+    const data = {
+      useraccount_id: Number(userInfo?.user?.useraccount_id),
+      status: isSaved,
+      job_id: Number(postId),
+    };
+    setIsPostSaved(isSaved);
+    await savedPostMutation.mutate(data);
+  };
+
+  const savedPostMutation = useMutation({
+    mutationKey: ['savedPost'],
+    mutationFn: async data => {
+      const response = await apiRequest(urlType.BACKEND, {
+        method: 'post',
+        url: `savedPost`,
+        data,
+      });
+      // console.log(response);
+      return response;
+    },
+  });
 
   const deleteMutation = useMutation({
     mutationFn: async id => {
@@ -176,13 +209,15 @@ function LargeCard({jobData, isMyPost, postId, handleUpdate, userData, handleSen
       </View>
       <View style={styles.line}></View>
       <View style={[styles.row, {marginTop: 8, paddingHorizontal: 10}]}>
-        <TouchableOpacity style={{flexDirection: 'row', alignItems: 'center'}}>
+        <TouchableOpacity
+          style={{flexDirection: 'row', alignItems: 'center'}}
+          onPress={ () => toggleSavedPost(!isPostSaved)}>
           <MaterialCommunityIcons
-            name="bookmark-outline"
+            name={isPostSaved ? 'bookmark' : 'bookmark-outline'}
             size={20}
             color={Colors.primary.darkgray}
           />
-          <Text style={[styles.txt]}> Saved</Text>
+          <Text style={[styles.txt]}>{isPostSaved ? 'Unsaved' : 'Saved'}</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={{flexDirection: 'row', alignItems: 'center'}}

@@ -20,16 +20,15 @@ import apiRequest from '../../api/apiRequest';
 import urlType from '../../constants/UrlConstants';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {showMessage} from 'react-native-flash-message';
-import CustomModal from '../../components/CustomModal';
-import {useStateValue} from '../../context/GlobalContextProvider';
 
-function FeaturedPost({navigation}) {
+function SavedPost({route, navigation}) {
+  const {user_id} = route.params;
   const userData = useQuery({
-    queryKey: ['featuredPost'],
+    queryKey: ['savedPost'],
     queryFn: async () => {
       const response = await apiRequest(urlType.BACKEND, {
         method: 'get',
-        url: `featuredJobs?status=true`,
+        url: `savedPostsByUserId?user_id=${user_id}`,
       });
       return response.data;
     },
@@ -38,14 +37,16 @@ function FeaturedPost({navigation}) {
     <>
       <SafeAreaView style={styles.container}>
         <View style={[styles.row]}>
-          <TouchableOpacity onPress={() => navigation.goBack()}>
+          <TouchableOpacity
+            style={{marginRight: '28%'}}
+            onPress={() => navigation.goBack()}>
             <MaterialCommunityIcons
               name="chevron-left"
               size={32}
               color={Colors.primary.lightBlack}
             />
           </TouchableOpacity>
-          <Text style={[styles.largeTxt, {marginLeft: 90}]}>Featured Post</Text>
+          <Text style={[styles.largeTxt]}>Saved Post</Text>
         </View>
 
         <View style={{marginTop: 20, marginBottom: 40}}>
@@ -60,14 +61,18 @@ function FeaturedPost({navigation}) {
               }
               keyExtractor={(item, index) => index.toString()}
               renderItem={({item: jobData, index}) => (
-                <LargeCard key={index} jobData={jobData?.job} postId={jobData?.job?.job_id} />
+                <LargeCard
+                  key={index}
+                  jobData={jobData?.job}
+                  postId={jobData?.job?.job_id}
+                />
               )}
             />
           ) : (
             <View style={{alignItems: 'center', marginTop: 10}}>
               {userData.data ? (
                 <Text style={{color: Colors.primary.lightGray}}>
-                  No posts available
+                  No saved posts available
                 </Text>
               ) : (
                 <ActivityIndicator size={24} color={Colors.primary.black} />
@@ -119,4 +124,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default FeaturedPost;
+export default SavedPost;
