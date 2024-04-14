@@ -11,6 +11,9 @@ import FeaturedPost from '../screens/Home/FeaturedPost';
 import MessageBox from '../screens/Chat/Message';
 import MoreOptions from '../screens/Home/MoreOptions';
 import SavedPost from '../screens/Home/SavedPost';
+import Dispute from '../screens/Dispute';
+import NewDispute from '../screens/Dispute/NewDispute';
+import Complain from '../screens/Dispute/Complains';
 function HomeNavigation() {
   const Stack = createNativeStackNavigator();
   return (
@@ -70,6 +73,21 @@ function HomeNavigation() {
           options={{headerShown: false}}
           name="SavedPost"
           component={SavedPost}
+        />
+        <Stack.Screen
+          options={{headerShown: false}}
+          name="Dispute"
+          component={Dispute}
+        />
+        <Stack.Screen
+          options={{headerShown: false}}
+          name="NewDispute"
+          component={NewDispute}
+        />
+        <Stack.Screen
+          options={{headerShown: false}}
+          name="Complain"
+          component={Complain}
         />
       </Stack.Navigator>
     </>

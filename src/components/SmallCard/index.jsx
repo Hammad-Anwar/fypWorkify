@@ -13,7 +13,7 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import profileImg from '../../assets/Images/profileImg.jpg';
 import {Colors} from '../../constants/theme';
 
-function SmallCard({profile, jobData}) {
+function SmallCard({profile, jobData, dispute, onPress}) {
   return (
     <>
       {profile ? (
@@ -27,10 +27,7 @@ function SmallCard({profile, jobData}) {
           }}>
           <View style={styles.row}>
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
-              <Image
-                source={profileImg        }
-                style={styles.cardImg}
-              />
+              <Image source={profileImg} style={styles.cardImg} />
               <Text
                 style={[styles.smallTxt, {marginLeft: 5, fontWeight: '600'}]}>
                 John William |
@@ -53,6 +50,27 @@ function SmallCard({profile, jobData}) {
             </View>
           </View>
         </View>
+      ) : dispute ? (
+        <TouchableOpacity onPress={onPress}
+          style={{
+            borderWidth: 1,
+            borderColor: Colors.primary.sub,
+            borderRadius: 12,
+            padding: 10,
+            marginBottom: 10,
+          }}>
+          <View style={styles.row}>
+            <Text style={[styles.smallTxt, {fontWeight: '600'}]}>
+              Complain Title
+            </Text>
+            <Text style={[styles.smallTxt, {fontWeight: '600'}]}>4d</Text>
+          </View>
+          <View style={{marginTop: 10}}>
+            <Text style={[styles.smallTxt, {width: '100%'}]}>
+              Create web page design on figma for freelancing web sites....
+            </Text>
+          </View>
+        </TouchableOpacity>
       ) : (
         <View>
           <View style={[styles.smallCard]}>

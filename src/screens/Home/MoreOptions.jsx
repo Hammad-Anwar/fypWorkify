@@ -91,11 +91,11 @@ function MoreOptions({route, navigation}) {
           <SettingCard
             iconName={'bookmark-outline'}
             text={'Dispute Center'}
-            // onPress={() => {
-            //   navigation.navigate('SavedPost', {
-            //     user_id: userData?.user?.useraccount_id,
-            //   });
-            // }}
+            onPress={() => {
+              navigation.navigate('Dispute', {
+                user_id: userData?.user?.useraccount_id,
+              });
+            }}
           />
           <SettingCard
             iconName={'bookmark-outline'}
