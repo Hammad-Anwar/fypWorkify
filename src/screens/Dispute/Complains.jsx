@@ -205,7 +205,7 @@ function Complain({navigation, route}) {
         <View style={{alignItems: 'center', marginTop: 10}}>
           {complainData?.data?.dispute_complains ? (
             <Text style={{color: Colors.primary.lightGray}}>
-              No Active Dispute available
+              We are working on your request!
             </Text>
           ) : (
             <ActivityIndicator size={24} color={Colors.primary.black} />
