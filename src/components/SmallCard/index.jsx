@@ -13,7 +13,15 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import profileImg from '../../assets/Images/profileImg.jpg';
 import {Colors} from '../../constants/theme';
 
-function SmallCard({profile, jobData, dispute, onPress}) {
+function SmallCard({
+  profile,
+  jobData,
+  dispute,
+  onPress,
+  complain_title,
+  complain_msg,
+  time,
+}) {
   return (
     <>
       {profile ? (
@@ -51,7 +59,8 @@ function SmallCard({profile, jobData, dispute, onPress}) {
           </View>
         </View>
       ) : dispute ? (
-        <TouchableOpacity onPress={onPress}
+        <TouchableOpacity
+          onPress={onPress}
           style={{
             borderWidth: 1,
             borderColor: Colors.primary.sub,
@@ -61,13 +70,13 @@ function SmallCard({profile, jobData, dispute, onPress}) {
           }}>
           <View style={styles.row}>
             <Text style={[styles.smallTxt, {fontWeight: '600'}]}>
-              Complain Title
+              {complain_title}
             </Text>
-            <Text style={[styles.smallTxt, {fontWeight: '600'}]}>4d</Text>
+            <Text style={[styles.smallTxt, {fontWeight: '600'}]}>{time}</Text>
           </View>
           <View style={{marginTop: 10}}>
-            <Text style={[styles.smallTxt, {width: '100%'}]}>
-              Create web page design on figma for freelancing web sites....
+            <Text style={[styles.smallTxt, {width: '100%'}]} numberOfLines={2} ellipsizeMode="tail">
+              {complain_msg}
             </Text>
           </View>
         </TouchableOpacity>

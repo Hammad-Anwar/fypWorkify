@@ -31,7 +31,7 @@ function MoreOptions({route, navigation}) {
   const userData = queryClient.getQueryData(['user']);
   const [{}, dispatch] = useStateValue();
   const [isLogoutModalVisible, setLogoutModalVisible] = useState(false);
-  console.log('sds', userData?.user?.useraccount_id);
+  // console.log('sds', userData?.user?.useraccount_id);
   const handleLogout = () => {
     setLogoutModalVisible(true);
   };
@@ -89,7 +89,7 @@ function MoreOptions({route, navigation}) {
           </View>
           <View style={styles.line}></View>
           <SettingCard
-            iconName={'bookmark-outline'}
+            iconName={'alert-rhombus-outline'}
             text={'Dispute Center'}
             onPress={() => {
               navigation.navigate('Dispute', {
@@ -107,7 +107,7 @@ function MoreOptions({route, navigation}) {
             }}
           />
           <SettingCard
-            iconName={'bookmark-outline'}
+            iconName={'account-lock-open-outline'}
             text={'Change password'}
             onPress={() => {
               navigation.navigate('ChangePassword', {
@@ -116,7 +116,7 @@ function MoreOptions({route, navigation}) {
             }}
           />
           <SettingCard
-            iconName={'power'}
+            iconName={'exit-to-app'}
             textColor={'red'}
             text={'Sign Out'}
             iconColor={'red'}

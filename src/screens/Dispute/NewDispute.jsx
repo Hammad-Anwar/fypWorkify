@@ -9,6 +9,10 @@ import {
   View,
 } from 'react-native';
 import {Colors} from '../../constants/theme';
+import {showMessage} from 'react-native-flash-message';
+import {useQuery, useQueryClient, useMutation} from '@tanstack/react-query';
+import apiRequest from '../../api/apiRequest';
+import urlType from '../../constants/UrlConstants';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import ImageCropPicker from 'react-native-image-crop-picker';
 import img from '../../assets/Images/empty.jpg';
@@ -16,7 +20,70 @@ import CustomBtn from '../../components/CustomBtn';
 import CustomInput from '../../components/CustomInput';
 
 function NewDispute({navigation}) {
+  const queryClient = useQueryClient();
+  const userData = queryClient.getQueryData(['user']);
   const [imageUri, setImageUri] = useState(null);
+  const [complain_title, setComplain_title] = useState('');
+  const [complain_msg, setComplain_msg] = useState('');
+  // console.log('sds', userData?.user?.useraccount_id);
+
+  const disputeMutation = useMutation({
+    mutationKey: ['dispute'],
+    mutationFn: async data => {
+      const response = await apiRequest(urlType.BACKEND, {
+        method: 'post',
+        url: `dispute`,
+        data,
+      });
+      // console.log(response);
+      return response;
+    },
+    onSuccess: async e => {
+      if (e.status === 200) {
+        showMessage({
+          message: e.message,
+          type: 'success',
+          color: '#fff',
+          backgroundColor: Colors.primary.green,
+          floating: true,
+        });
+        navigation.goBack();
+        setComplain_msg('')
+        setComplain_title('')
+        setImageUri(null)
+      } else {
+        showMessage({
+          message: e.response.message || 'An Error occured',
+          type: 'danger',
+          color: '#fff',
+          backgroundColor: 'red',
+          floating: true,
+        });
+      }
+    },
+  });
+
+  const handleSubmit = async () => {
+    if (complain_title.length > 0 && complain_msg.length > 0) {
+      const data = {
+        complain_title: complain_title,
+        complain_msg: complain_msg,
+        complain_img: imageUri,
+        useraccount_id: parseInt(userData?.user?.useraccount_id),
+      };
+      await disputeMutation.mutate(data);
+      // console.log(loginMutation.isLoading);
+      console.log(data);
+    } else {
+      showMessage({
+        message: 'Please Fill All Fields',
+        type: 'danger',
+        color: '#fff',
+        backgroundColor: 'red',
+        floating: true,
+      });
+    }
+  };
   const chooseImage = async () => {
     try {
       const image = await ImageCropPicker.openPicker({
@@ -60,11 +127,10 @@ function NewDispute({navigation}) {
             style={{
               backgroundColor: Colors.primary.sub,
             }}
-
-            // value={description}
-            // onChangeText={text => {
-            //   setDescription(text);
-            // }}
+            value={complain_title}
+            onChangeText={text => {
+              setComplain_title(text);
+            }}
           />
         </View>
         <View style={{marginTop: 20}}>
@@ -77,11 +143,10 @@ function NewDispute({navigation}) {
             style={{
               backgroundColor: Colors.primary.sub,
             }}
-
-            // value={description}
-            // onChangeText={text => {
-            //   setDescription(text);
-            // }}
+            value={complain_msg}
+            onChangeText={text => {
+              setComplain_msg(text);
+            }}
           />
         </View>
       </View>
@@ -110,8 +175,8 @@ function NewDispute({navigation}) {
       <View style={{marginVertical: 40}}>
         <CustomBtn
           lbl="Submit"
-          // onPress={handleLogin}
-          // loading={loginMutation.isPending}
+          onPress={handleSubmit}
+          loading={disputeMutation.isPending}
         />
       </View>
     </SafeAreaView>

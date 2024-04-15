@@ -1,6 +1,9 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {
+  ActivityIndicator,
+  FlatList,
   Image,
+  RefreshControl,
   SafeAreaView,
   ScrollView,
   StyleSheet,
@@ -12,7 +15,78 @@ import {Colors} from '../../constants/theme';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import CustomBtn from '../../components/CustomBtn';
 import CustomInput from '../../components/CustomInput';
-function Complain({navigation}) {
+import {useQuery, useQueryClient, useMutation} from '@tanstack/react-query';
+import apiRequest from '../../api/apiRequest';
+import urlType from '../../constants/UrlConstants';
+import moment from 'moment';
+import {showMessage} from 'react-native-flash-message';
+function Complain({navigation, route}) {
+  const {dispute_data} = route.params;
+  const [complainRespond, setComplainRespond] = useState('');
+
+  const complainData = useQuery({
+    queryKey: ['disputeComplains', dispute_data?.dispute_id],
+    queryFn: async () => {
+      const response = await apiRequest(urlType.BACKEND, {
+        method: 'get',
+        url: `disputeComplains?dispute_id=${dispute_data?.dispute_id}`,
+      });
+      return response.data;
+    },
+    enabled: dispute_data?.dispute_id ? true : false,
+  });
+
+  const complainMutation = useMutation({
+    mutationKey: ['complain'],
+    mutationFn: async data => {
+      const response = await apiRequest(urlType.BACKEND, {
+        method: 'post',
+        url: `disputeComplain`,
+        data,
+      });
+      return response;
+    },
+    onSuccess: async e => {
+      if (e.status === 200) {
+        showMessage({
+          message: e.message,
+          type: 'success',
+          color: '#fff',
+          backgroundColor: Colors.primary.green,
+          floating: true,
+        });
+        complainData.refetch();
+        setComplainRespond('');
+      } else {
+        showMessage({
+          message: e.response.message || 'An Error occured',
+          type: 'danger',
+          color: '#fff',
+          backgroundColor: 'red',
+          floating: true,
+        });
+      }
+    },
+  });
+
+  const handleSubmit = async () => {
+    if (complainRespond.length > 0) {
+      const data = {
+        dispute_id: parseInt(dispute_data?.dispute_id),
+        useraccount_id: parseInt(dispute_data?.useraccount_id),
+        complain_msg: complainRespond,
+      };
+      await complainMutation.mutate(data);
+    } else {
+      showMessage({
+        message: 'Please Fill All Fields',
+        type: 'danger',
+        color: '#fff',
+        backgroundColor: 'red',
+        floating: true,
+      });
+    }
+  };
   return (
     <SafeAreaView style={styles.container}>
       <View style={[styles.row, {marginBottom: 20}]}>
@@ -27,18 +101,118 @@ function Complain({navigation}) {
         </TouchableOpacity>
         <Text style={styles.largeTxt}>Complain Details</Text>
       </View>
-      {/* <View style={styles.line}></View> */}
-      <Text style={[styles.smallTxt]}>Complain Title</Text>
 
-      <View
-        style={{
-          marginTop: 10,
-          backgroundColor: Colors.primary.lightGray,
-          padding: 20,
-          borderRadius: 12,
-        }}>
-        <Text style={[styles.smallTxt, {textAlign: 'right'}]}>Complain details..</Text>
-      </View>
+      {complainData?.data?.dispute_complains &&
+      complainData?.data?.dispute_complains.length > 0 ? (
+        <FlatList
+          data={complainData?.data?.dispute_complains}
+          // refreshControl={
+          //   <RefreshControl
+          //     refreshing={complainData?.data?.isLoading}
+          //     onRefresh={() => complainData?.data?.refetch()}
+          //   />
+          // }
+          keyExtractor={(item, index) => index.toString()}
+          renderItem={({item: data, index}) => (
+            <>
+              {data?.useraccount_id === dispute_data?.useraccount_id ? (
+                <View style={{alignItems: 'flex-end'}}>
+                  <View
+                    key={index}
+                    style={{
+                      width: '80%',
+                      marginTop: 10,
+                      backgroundColor: Colors.primary.lightGray,
+                      paddingLeft: 20,
+                      paddingRight: 10,
+                      paddingTop: 10,
+                      borderRadius: 12,
+                    }}>
+                    <Text style={[styles.smallTxt]}>{data?.complain_msg}</Text>
+                    <Text
+                      style={[
+                        styles.smallTxt,
+                        {textAlign: 'right', fontSize: 12, marginBottom: 5},
+                      ]}>
+                      Send By You
+                    </Text>
+                  </View>
+                </View>
+              ) : (
+                <View style={{alignItems: 'flex-start'}}>
+                  <View
+                    key={index}
+                    style={{
+                      width: '80%',
+                      marginTop: 10,
+                      backgroundColor: Colors.primary.lightGray,
+                      paddingLeft: 20,
+                      paddingRight: 10,
+                      paddingTop: 10,
+                      borderRadius: 12,
+                    }}>
+                    <Text style={[styles.smallTxt]}>{data?.complain_msg}</Text>
+                    <Text
+                      style={[
+                        styles.smallTxt,
+                        {textAlign: 'right', fontSize: 12, marginBottom: 5},
+                      ]}>
+                      Send By Admin
+                    </Text>
+                  </View>
+                </View>
+              )}
+            </>
+          )}
+          ListHeaderComponent={
+            <>
+              <View
+                style={{flexDirection: 'row', justifyContent: 'space-between'}}>
+                <Text style={[styles.smallTxt]}>
+                  {complainData?.data?.complain_title}
+                </Text>
+                <Text style={[styles.smallTxt]}>
+                  {moment(complainData?.data?.created_at).format('DD-MM-YYYY')}
+                </Text>
+              </View>
+              <View
+                style={{
+                  marginTop: 10,
+                  padding: 20,
+                  borderRadius: 12,
+                  borderColor: Colors.primary.darkgray,
+                  borderWidth: 2,
+                }}>
+                <View style={{alignItems: 'center'}}>
+                  <Image
+                    source={{uri: complainData?.data?.complain_img}}
+                    style={styles.imgStyle}
+                  />
+                </View>
+                <Text style={[styles.smallTxt, {textAlign: 'left'}]}>
+                  {complainData?.data?.complain_msg}
+                </Text>
+              </View>
+            </>
+          }
+          ListFooterComponent={
+            <>
+              <View style={{marginBottom: 40}}></View>
+            </>
+          }
+        />
+      ) : (
+        <View style={{alignItems: 'center', marginTop: 10}}>
+          {complainData?.data?.dispute_complains ? (
+            <Text style={{color: Colors.primary.lightGray}}>
+              No Active Dispute available
+            </Text>
+          ) : (
+            <ActivityIndicator size={24} color={Colors.primary.black} />
+          )}
+        </View>
+      )}
+
       <View style={styles.line}></View>
 
       <CustomInput
@@ -49,18 +223,17 @@ function Complain({navigation}) {
         style={{
           backgroundColor: Colors.primary.sub,
         }}
-
-        // value={description}
-        // onChangeText={text => {
-        //   setDescription(text);
-        // }}
+        value={complainRespond}
+        onChangeText={text => {
+          setComplainRespond(text);
+        }}
       />
 
-      <View style={{marginTop: 20}}>
+      <View style={{marginTop: 20, marginBottom: 10}}>
         <CustomBtn
           lbl="Send"
-          // onPress={() => navigation.navigate("NewDispute")}
-          // loading={loginMutation.isPending}
+          onPress={handleSubmit}
+          loading={complainMutation.isPending}
         />
       </View>
     </SafeAreaView>
@@ -85,7 +258,7 @@ const styles = StyleSheet.create({
     color: Colors.primary.lightBlack,
   },
   smallTxt: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '500',
     color: Colors.primary.darkgray,
   },
@@ -94,6 +267,12 @@ const styles = StyleSheet.create({
     height: 2,
     width: '100%',
     backgroundColor: Colors.primary.lightGray,
+  },
+  imgStyle: {
+    width: 120,
+    height: 120,
+    borderRadius: 12,
+    marginBottom: 10,
   },
 });
 

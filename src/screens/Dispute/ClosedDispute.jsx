@@ -7,22 +7,67 @@ import {
   Text,
   TouchableOpacity,
   View,
+  ActivityIndicator,
+  FlatList,
+  RefreshControl,
 } from 'react-native';
 import {Colors} from '../../constants/theme';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import SmallCard from '../../components/SmallCard';
+import {useQuery, useQueryClient, useMutation} from '@tanstack/react-query';
+import apiRequest from '../../api/apiRequest';
+import urlType from '../../constants/UrlConstants';
+import moment from 'moment';
 
 function ClosedDispute({navigation}) {
+  const queryClient = useQueryClient();
+  const userData = queryClient.getQueryData(['user']);
+  const disputesData = useQuery({
+    queryKey: ['closeddisputes'],
+    queryFn: async () => {
+      const response = await apiRequest(urlType.BACKEND, {
+        method: 'get',
+        url: `closedDisputes?useraccount_id=${userData?.user?.useraccount_id}`,
+      });
+      return response.data;
+    },
+  });
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.line}></View>
 
-      <ScrollView style={styles.scrollContent}>
-        <View>
-          <SmallCard profile={true} />
-          <SmallCard profile={true} />
-        </View>
-      </ScrollView>
+      <View>
+        {disputesData.data && disputesData.data.length > 0 ? (
+          <FlatList
+            data={disputesData.data}
+            refreshControl={
+              <RefreshControl
+                refreshing={disputesData.isLoading}
+                onRefresh={() => disputesData.refetch()}
+              />
+            }
+            keyExtractor={(item, index) => index.toString()}
+            renderItem={({item: data, index}) => (
+              <SmallCard
+                complain_title={data?.complain_title}
+                complain_msg={data?.complain_msg}
+                time={moment(data?.created_at).format('DD-MM-YYYY')}
+                key={index}
+                dispute={true}
+              />
+            )}
+          />
+        ) : (
+          <View style={{alignItems: 'center', marginTop: 10}}>
+            {disputesData.data ? (
+              <Text style={{color: Colors.primary.lightGray}}>
+                No Closed Dispute available
+              </Text>
+            ) : (
+              <ActivityIndicator size={24} color={Colors.primary.black} />
+            )}
+          </View>
+        )}
+      </View>
     </SafeAreaView>
   );
 }
