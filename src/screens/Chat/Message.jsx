@@ -13,27 +13,34 @@ import {
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import avatar from '../../assets/Images/profileImg.jpg';
 import {useNavigation, useRoute} from '@react-navigation/native';
-import {
-  useQuery,
-  useQueryClient,
-} from '@tanstack/react-query';
+import {useQuery, useQueryClient} from '@tanstack/react-query';
 import moment from 'moment';
 import {io} from 'socket.io-client';
 import {Colors} from '../../constants/theme';
 import apiRequest from '../../api/apiRequest';
 import urlType from '../../constants/UrlConstants';
+import CustomBtn from '../../components/CustomBtn';
 const MessageBox = ({navigation}) => {
   const bottomRef = useRef();
   const route = useRoute();
-  const {chatRoomId:chatRoomID, first_name, last_name, image, userId2, job_id} =
-    route.params;
-  const [chatRoomId, setChatRoomId] = useState(chatRoomID)
+  const {
+    chatRoomId: chatRoomID,
+    first_name,
+    last_name,
+    image,
+    userId2,
+    job_id,
+    postData
+  } = route.params;
+  const [chatRoomId, setChatRoomId] = useState(chatRoomID);
   const queryClient = useQueryClient();
   const userData = queryClient.getQueryData(['user']);
   const usr_id = userData?.user?.useraccount_id;
+  const role_id = userData?.user?.user_account?.role_id;
   const [socket, setSocket] = useState(io('http://192.168.100.34:5000/'));
   const [message, setmessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  console.log("sdasd", postData)
   // useEffect(() => {
   //   queryClient.removeQueries({ queryKey: ['messages'] });
   // },[navigation])
@@ -49,7 +56,7 @@ const MessageBox = ({navigation}) => {
       console.log('sd', data);
       queryClient.setQueryData(['messages', chatRoomId], prevData => {
         // Concatenate the new message with the existing messages data
-        setChatRoomId(data.chatroom_id)
+        setChatRoomId(data.chatroom_id);
         return prevData !== undefined ? [...prevData, data] : [data];
       });
     });
@@ -74,7 +81,7 @@ const MessageBox = ({navigation}) => {
       });
       return response.data;
     },
-    enabled:chatRoomId === null? false : true ,
+    enabled: chatRoomId === null ? false : true,
   });
   const emitTypingEvent = () => {
     socket.emit('typing', chatRoomId);
@@ -113,7 +120,7 @@ const MessageBox = ({navigation}) => {
       <View
         style={{
           flexDirection: 'row',
-          alignItems: 'center',
+          justifyContent: 'space-between',
           marginVertical: 0,
           backgroundColor: 'white',
           paddingBottom: 10,
@@ -123,36 +130,57 @@ const MessageBox = ({navigation}) => {
           borderBottomColor: Colors.primary.lightGray,
           borderWidth: 2,
         }}>
-        <TouchableOpacity
-          style={{marginLeft: 10}}
-          onPress={() => navigation.goBack()}>
-          <MaterialCommunityIcons
-            name="chevron-left"
-            size={32}
-            color={Colors.primary.lightBlack}
-          />
-        </TouchableOpacity>
         <View
           style={{
-            display: 'flex',
             flexDirection: 'row',
-            paddingLeft: 10,
-            alignContent: 'center',
+            alignItems: 'center',
           }}>
-          <View>
-            {image ? (
-              <Image style={styles.imgAvatar} source={{uri: image}} />
-            ) : (
-              <Image style={styles.imgAvatar} source={avatar} />
-            )}
-          </View>
-          {/* {result[0]?.receiver_name} */}
-          <View style={{justifyContent: 'center'}}>
-            <Text style={styles.paragraph}>
-              {first_name} {last_name}
-            </Text>
+          <TouchableOpacity
+            style={{marginLeft: 10}}
+            onPress={() => navigation.goBack()}>
+            <MaterialCommunityIcons
+              name="chevron-left"
+              size={32}
+              color={Colors.primary.lightBlack}
+            />
+          </TouchableOpacity>
+
+          <View
+            style={{
+              display: 'flex',
+              flexDirection: 'row',
+              paddingLeft: 10,
+              alignContent: 'center',
+            }}>
+            <View>
+              {image ? (
+                <Image style={styles.imgAvatar} source={{uri: image}} />
+              ) : (
+                <Image style={styles.imgAvatar} source={avatar} />
+              )}
+            </View>
+            {/* {result[0]?.receiver_name} */}
+            <View style={{justifyContent: 'center'}}>
+              <Text style={styles.paragraph}>
+                {first_name} {last_name}
+              </Text>
+            </View>
           </View>
         </View>
+        {role_id === 1 ? (
+          <CustomBtn
+            lbl={'Send Proposal'}
+            style={{
+              paddingHorizontal: 10,
+              paddingVertical: 10,
+              marginRight: 10,
+            }}
+            lblStyle={{textTransform: 'none'}}
+            onPress={() => navigation.navigate("SendProposal", {postData})}
+          />
+        ) : role_id === 2 ? (
+          <></>
+        ) : null}
       </View>
       <FlatList
         ref={bottomRef}
@@ -260,15 +288,18 @@ const MessageBox = ({navigation}) => {
                 height: '90%',
                 width: '88%',
                 backgroundColor: Colors.primary.white,
-                marginLeft: 6,
-                padding: 10,
+                marginLeft: 10,
+                padding: 8,
                 color: Colors.primary.black,
+                fontSize: 16,
               }}
+              placeholder="Message..."
               value={message}
               onChangeText={e => {
                 handleTyping(e);
               }}
-              placeholder="  Message.."></TextInput>
+              placeholderTextColor={Colors.primary.darkgray}
+            />
             <TouchableOpacity onPress={sendMessage}>
               <MaterialCommunityIcons
                 name={'send-outline'}

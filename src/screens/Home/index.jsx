@@ -158,27 +158,27 @@ function Home({navigation}) {
         </TouchableOpacity>
       </View>
       <View style={styles.row}>
-        <CustomInput
-          isIcon={true}
-          placeholder="Search for a job..."
-          isIconName="magnify"
-          keyboardType="default"
-          style={{
-            backgroundColor: Colors.primary.sub,
-            width: '78%',
-            padding: 0,
-          }}
-          containerStyle={{
-            backgroundColor: Colors.primary.sub,
-            paddingRight: 0,
-          }}
-        />
+        <View style={{flex: 1}}>
+          <CustomInput
+            isIcon={true}
+            placeholder="Search for a job..."
+            isIconName="magnify"
+            keyboardType="default"
+            style={{
+              backgroundColor: Colors.primary.sub,
+            }}
+            containerStyle={{
+              backgroundColor: Colors.primary.sub,
+            }}
+          />
+        </View>
         <TouchableOpacity
           style={{
             backgroundColor: Colors.primary.main,
             padding: 12,
             borderRadius: 12,
             marginTop: 20,
+            marginLeft: 10,
           }}>
           <Image source={filterIcon} style={styles.iconStyle} />
         </TouchableOpacity>

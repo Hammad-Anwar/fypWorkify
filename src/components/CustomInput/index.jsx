@@ -34,9 +34,7 @@ function CustomInput({
     setIsPasswordVisible(!isPasswordVisible);
   };
   return (
-    <View>
-      {/* <View> {lbl ? <Text style={styles.styleTxt}>{lbl}</Text> : null}</View> */}
-      <View></View>
+    <View >
       {isIcon ? (
         <View style={[styles.innerContainer, containerStyle]}>
           <MaterialCommunityIcons name={isIconName} size={20} color={Colors.primary.darkgray} />

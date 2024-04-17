@@ -29,6 +29,7 @@ const Chat = ({navigation}) => {
       return response.data;
     },
   });
+  console.log('gih', chatRoomData.data)
   let filteredChatRooms = chatRoomData.data;
   if (searchVal)
     filteredChatRooms = chatRoomData.data.filter(item => {
@@ -43,17 +44,19 @@ const Chat = ({navigation}) => {
     });
   return (
     <SafeAreaView style={styles.container}>
+      <View style={[styles.row]}>
+        <Text style={styles.largeTxt}>Chat Room</Text>
+      </View>
       <CustomInput
         isIcon={true}
         placeholder="Search..."
         keyboardType="default"
+        isIconName="magnify"
         style={{
           backgroundColor: Colors.primary.sub,
-          padding: 0,
         }}
         containerStyle={{
           backgroundColor: Colors.primary.sub,
-          paddingRight: 0,
         }}
         onChangeText={e => setSearchVal(e)}
       />
@@ -82,7 +85,8 @@ const Chat = ({navigation}) => {
                 chatRoomId: item.chatroom_id,
                 first_name: item.user_account.first_name,
                 last_name: item.user_account.last_name,
-                image: item?.user_account.image
+                image: item?.user_account.image,
+                postData: item,
               })
             }>
             <View style={{marginBottom: 2}} key={index}>
@@ -130,8 +134,18 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.primary.white,
-    padding: 20,
-    paddingTop: 0,
+    paddingHorizontal: 20,
+    paddingTop: 10,
+  },
+  row: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignContent: 'center',
+  },
+  largeTxt: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: Colors.primary.lightBlack,
   },
   paragraph: {
     display: 'flex',
@@ -139,18 +153,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     fontSize: 18,
     fontWeight: 'bold',
-    color: '#34495e',
+    color: Colors.primary.lightBlack,
     marginLeft: 10,
-    borderTopColor: 'transparent',
-    borderRightColor: 'transparent',
-    borderLeftColor: 'transparent',
+    // borderTopColor: 'transparent',
+    // borderRightColor: 'transparent',
+    // borderLeftColor: 'transparent',
   },
-  card: {
-    outline: 'transparent',
-  },
+  // card: {
+  //   outline: 'transparent',
+  // },
   flat: {
     backgroundColor: 'white',
-
     marginLeft: -25,
     marginRight: -25,
     borderTopColor: 'transparent',
@@ -162,11 +175,10 @@ const styles = StyleSheet.create({
     width: 50,
     borderWidth: 1,
     borderRadius: 100 / 2,
-    backgroundColor: '#FA4415',
-    borderColor: '#737373',
+    borderColor: Colors.primary.darkgray,
   },
   view: {
-    margin: -10,
+    // margin: -10,
     border: '2px solid black',
     display: 'flex',
     flexDirection: 'row',

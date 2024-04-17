@@ -12,7 +12,7 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import FontAwesome from 'react-native-vector-icons/FontAwesome';
 import profileImg from '../../assets/Images/profileImg.jpg';
 import CustomModal from '../CustomModal';
-import {useQuery,useQueryClient, useMutation} from '@tanstack/react-query';
+import {useQuery, useQueryClient, useMutation} from '@tanstack/react-query';
 import apiRequest from '../../api/apiRequest';
 import urlType from '../../constants/UrlConstants';
 import {showMessage} from 'react-native-flash-message';
@@ -29,9 +29,11 @@ function LargeCard({
   const queryClient = useQueryClient();
   const userInfo = queryClient.getQueryData(['user']);
   const [isDeleteModalVisible, setDeleteModalVisible] = useState(false);
-  const [isPostSaved, setIsPostSaved] = useState(jobData?.saved_post?.savedPost_status);
+  const [isPostSaved, setIsPostSaved] = useState(
+    jobData?.saved_post?.savedPost_status,
+  );
 
-  const toggleSavedPost = async (isSaved) => {
+  const toggleSavedPost = async isSaved => {
     const data = {
       useraccount_id: Number(userInfo?.user?.useraccount_id),
       status: isSaved,
@@ -180,6 +182,31 @@ function LargeCard({
         <Text style={styles.txt}>{jobData?.job_description}</Text>
       </View>
       <View style={{marginTop: 10}}>
+        {jobData?.task.map((task, index) => (
+          <View
+            key={index}
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              marginBottom: 10,
+            }}>
+            <View
+              style={{
+                padding: 6,
+                borderRadius: 3,
+                marginRight: 5,
+                backgroundColor:
+                  task.status === 'progress'
+                    ? 'yellow'
+                    : task.status === 'complete'
+                    ? 'green'
+                    : 'black',
+              }}></View>
+            <Text style={styles.txt}>{task.task_description}</Text>
+          </View>
+        ))}
+      </View>
+      <View style={{marginTop: 10}}>
         {jobData?.image ? (
           <Image
             source={{uri: jobData?.image}}
@@ -211,7 +238,7 @@ function LargeCard({
       <View style={[styles.row, {marginTop: 8, paddingHorizontal: 10}]}>
         <TouchableOpacity
           style={{flexDirection: 'row', alignItems: 'center'}}
-          onPress={ () => toggleSavedPost(!isPostSaved)}>
+          onPress={() => toggleSavedPost(!isPostSaved)}>
           <MaterialCommunityIcons
             name={isPostSaved ? 'bookmark' : 'bookmark-outline'}
             size={20}

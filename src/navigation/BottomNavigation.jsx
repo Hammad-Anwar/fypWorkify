@@ -5,6 +5,7 @@ import HomeNavigation from './HomeNavigation';
 import {Colors} from '../constants/theme';
 import AddPost from '../screens/AddPost';
 import ChatNavigation from './ChatNavigation';
+import Order from '../screens/Order';
 
 const Tab = createBottomTabNavigator();
 
@@ -79,7 +80,7 @@ function BottomNavigation() {
       />
       <Tab.Screen
         name="Order"
-        component={""}
+        component={Order}
         options={{
           headerShown: false,
           tabBarLabel: 'Orders',

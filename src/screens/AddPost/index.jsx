@@ -1,5 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {
+  Button,
   Image,
   SafeAreaView,
   ScrollView,
@@ -7,7 +8,6 @@ import {
   StyleSheet,
   Text,
   TextInput,
-  Touchable,
   TouchableOpacity,
   View,
 } from 'react-native';
@@ -33,6 +33,26 @@ const AddPost = ({navigation}) => {
   const [isChecked, setIsChecked] = useState(false);
   const [imageUri, setImageUri] = useState(null);
   const [userId, setUserId] = useState(null);
+
+  const [isMultiple, setIsMultiple] = useState(false);
+  const [inputs, setInputs] = useState(['']);
+
+  const handleSwitchChange = value => {
+    setIsMultiple(value);
+    if (!value) {
+      setInputs(['']);
+    }
+  };
+
+  const handleAddInput = () => {
+    setInputs([...inputs, '']);
+  };
+
+  const handleDeleteInput = index => {
+    const newInputs = [...inputs];
+    newInputs.splice(index, 1);
+    setInputs(newInputs);
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -127,7 +147,9 @@ const AddPost = ({navigation}) => {
           payment: amount,
           feature_job: isChecked,
         },
+        task_descriptions: inputs,
       };
+      console.log('testing', data);
       await addPostMutation.mutate(data);
     } else {
       showMessage({
@@ -203,6 +225,92 @@ const AddPost = ({navigation}) => {
               setDescription(text);
             }}
           />
+        </View>
+        <View style={{marginTop: 20}}>
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              marginBottom: 20,
+            }}>
+            <TouchableOpacity
+              style={{
+                backgroundColor: isMultiple ? '#DAE4E1' : '#1E1E1E',
+                padding: 10,
+                paddingHorizontal: 20,
+                borderRadius: 6,
+                borderTopRightRadius: 0,
+                borderBottomRightRadius: 0,
+              }}
+              onPress={() => handleSwitchChange(false)}>
+              <Text style={{color: isMultiple ? '#000' : '#fff'}}>Single</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={{
+                backgroundColor: isMultiple ? '#1E1E1E' : '#DAE4E1',
+                padding: 10,
+                borderRadius: 6,
+                paddingHorizontal: 20,
+                borderTopLeftRadius: 0,
+                borderBottomLeftRadius: 0,
+              }}
+              onPress={() => handleSwitchChange(true)}>
+              <Text style={{color: isMultiple ? '#fff' : '#000'}}>
+                Multiple
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          {isMultiple && (
+            <View>
+              {inputs.map((input, index) => (
+                <View
+                  key={index}
+                  style={{
+                    flex: 1,
+                    flexDirection: 'row',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginBottom: 10,
+                  }}>
+                  <View style={{flex: 1}}>
+                    <CustomInput
+                      placeholder="Wirte the tasks"
+                      keyboardType="default"
+                      value={input}
+                      onChangeText={text => {
+                        const newInputs = [...inputs];
+                        newInputs[index] = text;
+                        setInputs(newInputs);
+                      }}
+                    />
+                  </View>
+                  {index > 0 && (
+                    <TouchableOpacity
+                      style={{
+                        backgroundColor: Colors.primary.white,
+                        padding: 10,
+                        borderRadius: 6,
+                        marginLeft: 10,
+                      }}
+                      onPress={() => handleDeleteInput(index)}>
+                      <MaterialCommunityIcons
+                        name="delete"
+                        size={24}
+                        color={Colors.primary.red}
+                      />
+                    </TouchableOpacity>
+                  )}
+                </View>
+              ))}
+              <CustomBtn
+                style={{paddingVertical: 10}}
+                lbl={'Add'}
+                onPress={handleAddInput}
+              />
+            </View>
+          )}
         </View>
         <View style={{marginTop: 20}}>
           <Text style={styles.smallTxt}>Duration</Text>
@@ -287,8 +395,8 @@ const AddPost = ({navigation}) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingHorizontal: 30,
-    paddingTop: 30,
+    paddingHorizontal: 20,
+    paddingTop: 10,
   },
   containerImg: {
     position: 'relative',
@@ -310,11 +418,11 @@ const styles = StyleSheet.create({
     // marginRight: 180,
     flexDirection: 'row',
     justifyContent: 'flex-start',
-    marginVertical: 20,
+    marginBottom: 20,
   },
   heading: {
-    fontSize: 26,
-    fontWeight: '700',
+    fontSize: 22,
+    fontWeight: '600',
     color: '#000',
   },
   smallTxt: {
