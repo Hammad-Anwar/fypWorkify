@@ -21,11 +21,17 @@ import urlType from '../../constants/UrlConstants';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {showMessage} from 'react-native-flash-message';
 import ImageCropPicker from 'react-native-image-crop-picker';
+import CustomCheckBox from '../../components/CustomCheckBox';
 
 function SendProposal({route, navigation}) {
-  const {postData} = route.params;
+  const {jobData} = route.params;
+  const [isChecked, setIsChecked] = useState(false);
 
-  console.log(postData);
+  const handleCheckboxChange = () => {
+    setIsChecked(!isChecked);
+  };
+
+  console.log(jobData);
   const formatDate = dateString => {
     const options = {
       year: 'numeric',
@@ -182,7 +188,7 @@ function SendProposal({route, navigation}) {
         <View style={styles.row}>
           <TouchableOpacity
             style={{marginRight: '25%'}}
-            onPress={() => navigation.goBack()}>
+            onPress={() => navigation.navigate('Chat')}>
             <MaterialCommunityIcons
               name="chevron-left"
               size={32}
@@ -196,8 +202,8 @@ function SendProposal({route, navigation}) {
             <View style={[styles.row, {justifyContent: 'flex-start'}]}>
               <Image
                 source={
-                  postData?.user_account?.image
-                    ? {uri: postData?.user_account.image}
+                  jobData?.profile_image
+                    ? {uri: jobData?.profile_image}
                     : {profileImg}
                 }
                 style={styles.cardImg}
@@ -213,16 +219,14 @@ function SendProposal({route, navigation}) {
                       color: Colors.primary.lightBlack,
                     },
                   ]}>
-                  {postData?.user_account?.first_name}{' '}
-                  {postData?.user_account?.last_name}
+                  {jobData?.first_name} {jobData?.last_name}
                 </Text>
                 <Text style={[styles.txt]}>
-                  {formatDate(postData?.user_account?.updated_at)} |{' '}
-                  <>{postData?.chatroom?.job?.skill_category?.skill_name}</>{' '}
+                  {formatDate(jobData?.updated_at)} | <>{jobData?.skill_name}</>{' '}
                 </Text>
               </View>
             </View>
-            {postData?.chatroom?.job?.feature_job?.status ? (
+            {jobData?.feature_job ? (
               <MaterialIcons name="star" size={24} color={Colors.primary.red} />
             ) : null}
           </View>
@@ -235,14 +239,12 @@ function SendProposal({route, navigation}) {
               marginTop: 10,
             }}>
             <View>
-              <Text style={styles.txt}>
-                {postData?.chatroom?.job?.job_description}
-              </Text>
+              <Text style={styles.txt}>{jobData?.job_description}</Text>
             </View>
             <View>
-              {postData?.chatroom?.job?.image ? (
+              {jobData?.image ? (
                 <Image
-                  source={{uri: postData?.chatroom?.job?.image}}
+                  source={{uri: jobData?.image}}
                   style={{width: 100, height: 100, resizeMode: 'contain'}}
                 />
               ) : null}
@@ -263,7 +265,7 @@ function SendProposal({route, navigation}) {
                   styles.txt,
                   {color: Colors.primary.lightBlack, fontWeight: '600'},
                 ]}>
-                ${postData?.chatroom?.job?.payment?.payment_amount}
+                ${jobData?.payment_amount}
               </Text>
             </View>
             <View style={[styles.row, {justifyContent: 'flex-start'}]}>
@@ -273,38 +275,71 @@ function SendProposal({route, navigation}) {
                   styles.txt,
                   {color: Colors.primary.lightBlack, fontWeight: '600'},
                 ]}>
-                {postData?.chatroom?.job?.duration}
+                {jobData?.duration}
               </Text>
             </View>
           </View>
         </View>
 
+        <View style={{marginTop: 10}}>
+          <Text style={[styles.smallTxt, {marginBottom: 5}]}>Select Task</Text>
+          {jobData?.task.map((task, index) => (
+            <View
+              key={index}
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginBottom: 10,
+              }}>
+              <CustomCheckBox
+                label={task.task_description}
+                simpleCheckBox={true}
+                isChecked={isChecked}
+                onChange={handleCheckboxChange}
+              />
+            </View>
+          ))}
+        </View>
+        <View style={{marginTop: 20}}>
+          <Text style={styles.smallTxt}>Proposal Description</Text>
+          <CustomInput
+            style={{backgroundColor: Colors.primary.sub, marginTop: 5}}
+            placeholder="Write the proposal desription"
+            keyboardType="default"
+            // value={overview}
+            // onChangeText={text => {
+            //   setOverview(text);
+            // }}
+            multiline={true}
+            numberOfLines={4}
+          />
+        </View>
         <View>
           <View
             style={{
-              marginTop: 10,
+              marginTop: 20,
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              alignItems: 'center',
             }}>
-            <Text style={styles.smallTxt}>Your Name</Text>
-
-            <View
-              style={{
-                marginTop: 5,
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-              }}>
+            <View>
+              <Text style={styles.smallTxt}>Duration</Text>
               <CustomInput
-                placeholder={'First Name'}
-                keyboardType={'default'}
+                placeholder={'Time Peroid in days'}
+                keyboardType={'numeric'}
                 style={{backgroundColor: Colors.primary.sub, width: 160}}
                 //   value={first_name}
                 //   onChangeText={text => {
                 //     setFirst_name(text);
                 //   }}
               />
+            </View>
+            <View>
+              <Text style={styles.smallTxt}>Amount</Text>
+
               <CustomInput
-                placeholder={'Last Name'}
-                keyboardType={'default'}
+                placeholder={'Price'}
+                keyboardType={'numeric'}
                 style={{backgroundColor: Colors.primary.sub, width: 160}}
                 //   value={last_name}
                 //   onChangeText={text => {
@@ -313,18 +348,17 @@ function SendProposal({route, navigation}) {
               />
             </View>
           </View>
-          <View style={{marginTop: 20}}>
-            <Text style={styles.smallTxt}>Overview</Text>
+
+          <View>
+            <Text style={[styles.smallTxt, {marginTop: 10}]}>Revisions</Text>
             <CustomInput
-              style={{backgroundColor: Colors.primary.sub, marginTop: 5}}
-              placeholder="Write the overview of your profile"
-              keyboardType="default"
-              // value={overview}
-              // onChangeText={text => {
-              //   setOverview(text);
-              // }}
-              multiline={true}
-              numberOfLines={2}
+              placeholder={'Optional'}
+              keyboardType={'numeric'}
+              style={{backgroundColor: Colors.primary.sub, width: 160}}
+              //   value={last_name}
+              //   onChangeText={text => {
+              //     setLast_name(text);
+              //   }}
             />
           </View>
 

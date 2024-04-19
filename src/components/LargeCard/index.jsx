@@ -25,6 +25,8 @@ function LargeCard({
   handleUpdate,
   userData,
   handleSendMessage,
+  isProposal,
+  handleProposal
 }) {
   const queryClient = useQueryClient();
   const userInfo = queryClient.getQueryData(['user']);
@@ -235,38 +237,61 @@ function LargeCard({
         </Text>
       </View>
       <View style={styles.line}></View>
-      <View style={[styles.row, {marginTop: 8, paddingHorizontal: 10}]}>
-        <TouchableOpacity
-          style={{flexDirection: 'row', alignItems: 'center'}}
-          onPress={() => toggleSavedPost(!isPostSaved)}>
-          <MaterialCommunityIcons
-            name={isPostSaved ? 'bookmark' : 'bookmark-outline'}
-            size={20}
-            color={Colors.primary.darkgray}
-          />
-          <Text style={[styles.txt]}>{isPostSaved ? 'Unsaved' : 'Saved'}</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={{flexDirection: 'row', alignItems: 'center'}}
-          onPress={handleSendMessage}>
-          <FontAwesome
-            name="send-o"
-            size={18}
-            color={Colors.primary.darkgray}
-          />
-          <Text style={[styles.txt]}> Message</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={{flexDirection: 'row', alignItems: 'center'}}
-          onPress={() => onShare('text')}>
-          <MaterialCommunityIcons
-            name="share-outline"
-            size={20}
-            color={Colors.primary.darkgray}
-          />
-          <Text style={[styles.txt]}> Share</Text>
-        </TouchableOpacity>
-      </View>
+      {isProposal ? (
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'center',
+            marginTop: 8,
+            alignItems: 'center',
+          }}>
+          <TouchableOpacity
+            style={{flexDirection: 'row', alignItems: 'center'}}
+            onPress={handleProposal}>
+            <FontAwesome
+              name="send-o"
+              size={18}
+              color={Colors.primary.darkgray}
+            />
+            <Text style={[styles.txt, {marginLeft: 5}]}>Create Proposal</Text>
+          </TouchableOpacity>
+        </View>
+      ) : (
+        <View style={[styles.row, {marginTop: 8, paddingHorizontal: 10}]}>
+          <TouchableOpacity
+            style={{flexDirection: 'row', alignItems: 'center'}}
+            onPress={() => toggleSavedPost(!isPostSaved)}>
+            <MaterialCommunityIcons
+              name={isPostSaved ? 'bookmark' : 'bookmark-outline'}
+              size={20}
+              color={Colors.primary.darkgray}
+            />
+            <Text style={[styles.txt]}>
+              {isPostSaved ? 'Unsaved' : 'Saved'}
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={{flexDirection: 'row', alignItems: 'center'}}
+            onPress={handleSendMessage}>
+            <FontAwesome
+              name="send-o"
+              size={18}
+              color={Colors.primary.darkgray}
+            />
+            <Text style={[styles.txt]}> Message</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={{flexDirection: 'row', alignItems: 'center'}}
+            onPress={() => onShare('text')}>
+            <MaterialCommunityIcons
+              name="share-outline"
+              size={20}
+              color={Colors.primary.darkgray}
+            />
+            <Text style={[styles.txt]}> Share</Text>
+          </TouchableOpacity>
+        </View>
+      )}
     </View>
   );
 }

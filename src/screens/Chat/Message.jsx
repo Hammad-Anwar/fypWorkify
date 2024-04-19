@@ -9,6 +9,8 @@ import {
   Image,
   View,
   TouchableOpacity,
+  ActivityIndicator,
+  RefreshControl,
 } from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import avatar from '../../assets/Images/profileImg.jpg';
@@ -20,6 +22,8 @@ import {Colors} from '../../constants/theme';
 import apiRequest from '../../api/apiRequest';
 import urlType from '../../constants/UrlConstants';
 import CustomBtn from '../../components/CustomBtn';
+import {BottomSheet} from '../../components/BottomSheet';
+import LargeCard from '../../components/LargeCard';
 const MessageBox = ({navigation}) => {
   const bottomRef = useRef();
   const route = useRoute();
@@ -28,10 +32,15 @@ const MessageBox = ({navigation}) => {
     first_name,
     last_name,
     image,
-    userId2,
+    user,
     job_id,
-    postData
+    postData,
   } = route.params;
+  const [isVisible, setIsVisible] = useState(false);
+
+  const toggleModal = () => {
+    setIsVisible(!isVisible);
+  };
   const [chatRoomId, setChatRoomId] = useState(chatRoomID);
   const queryClient = useQueryClient();
   const userData = queryClient.getQueryData(['user']);
@@ -40,7 +49,7 @@ const MessageBox = ({navigation}) => {
   const [socket, setSocket] = useState(io('http://192.168.100.34:5000/'));
   const [message, setmessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
-  console.log("sdasd", postData)
+  console.log('sdasd', postData);
   // useEffect(() => {
   //   queryClient.removeQueries({ queryKey: ['messages'] });
   // },[navigation])
@@ -72,6 +81,17 @@ const MessageBox = ({navigation}) => {
       });
     };
   }, [socket]);
+  const userJobs = useQuery({
+    queryKey: ['userJobs'],
+    queryFn: async () => {
+      const response = await apiRequest(urlType.BACKEND, {
+        method: 'get',
+        url: `userJobs?user_id=${parseInt(user)}`,
+      });
+      return response.data;
+    },
+  });
+  // console.log("sdshi",userJobs.data)
   const messagesData = useQuery({
     queryKey: ['messages', chatRoomId],
     queryFn: async () => {
@@ -96,7 +116,7 @@ const MessageBox = ({navigation}) => {
     } else {
       socket.emit('join-room_and_send-message', {
         userId1: usr_id,
-        userId2: userId2,
+        userId2: user,
         job_id: job_id,
         msg_text: message,
       });
@@ -176,7 +196,8 @@ const MessageBox = ({navigation}) => {
               marginRight: 10,
             }}
             lblStyle={{textTransform: 'none'}}
-            onPress={() => navigation.navigate("SendProposal", {postData})}
+            // onPress={() => navigation.navigate("SendProposal", {postData})}
+            onPress={toggleModal}
           />
         ) : role_id === 2 ? (
           <></>
@@ -310,6 +331,50 @@ const MessageBox = ({navigation}) => {
           </View>
         </View>
       </View>
+      <BottomSheet isVisible={isVisible} setIsVisible={setIsVisible}>
+        {userJobs?.data && userJobs?.data.length > 0 ? (
+          <FlatList
+            data={userJobs?.data}
+            // refreshControl={
+            //   <RefreshControl
+            //     refreshing={userJobs.isLoading}
+            //     onRefresh={() => userJobs.refetch()}
+            //   />
+            // }
+            keyExtractor={(item, index) => index.toString()}
+            renderItem={({item: jobData, index}) => (
+              <LargeCard
+                key={index}
+                jobData={jobData}
+                isProposal={true}
+                handleProposal={() => navigation.navigate("SendProposal", {jobData})}
+              />
+            )}
+            ListHeaderComponent={
+              <>
+                <View style={{marginTop: 20}}>
+                  <Text style={styles.largeTxt}>Your Posts</Text>
+                </View>
+              </>
+            }
+            ListFooterComponent={
+              <>
+                <View style={{marginBottom: 100}}></View>
+              </>
+            }
+          />
+        ) : (
+          <View style={{alignItems: 'center', marginTop: 10}}>
+            {userJobs?.data ? (
+              <Text style={{color: Colors.primary.lightGray}}>
+                No posts available
+              </Text>
+            ) : (
+              <ActivityIndicator size={24} color={Colors.primary.black} />
+            )}
+          </View>
+        )}
+      </BottomSheet>
     </SafeAreaView>
   );
 };
@@ -433,5 +498,10 @@ const styles = StyleSheet.create({
     borderRadius: 100 / 2,
     backgroundColor: '#FA4415',
     borderColor: '#737373',
+  },
+  largeTxt: {
+    fontSize: 20,
+    fontWeight: '600',
+    color: Colors.primary.lightBlack,
   },
 });

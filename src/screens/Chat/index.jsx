@@ -83,6 +83,7 @@ const Chat = ({navigation}) => {
             onPress={() =>
               navigation.navigate('MessageBox', {
                 chatRoomId: item.chatroom_id,
+                user: item.user_account.user_id,
                 first_name: item.user_account.first_name,
                 last_name: item.user_account.last_name,
                 image: item?.user_account.image,

@@ -1,20 +1,36 @@
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import Icon from 'react-native-vector-icons/FontAwesome'; // You may need to install the library
-import { Colors } from '../../constants/theme';
+import React, {useState} from 'react';
+import {View, Text, TouchableOpacity, StyleSheet} from 'react-native';
+import Icon from 'react-native-vector-icons/FontAwesome'; 
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons'; 
+import {Colors} from '../../constants/theme';
 
-const CustomCheckBox = ({ label, onChange, isChecked }) => {
+const CustomCheckBox = ({label, onChange, isChecked, simpleCheckBox}) => {
   return (
-    <TouchableOpacity style={styles.container} onPress={onChange}>
-      <View style={styles.checkbox}>
-        {isChecked ? (
-          <Icon name="check-square-o" size={20} color="green" />
-        ) : (
-          <Icon name="square-o" size={20} color="gray" />
-        )}
-      </View>
-      <Text style={styles.label}>{label}</Text>
-    </TouchableOpacity>
+    <>
+      {simpleCheckBox ? (
+        <TouchableOpacity style={styles.container} onPress={onChange}>
+          <View style={styles.simplecheckbox}>
+            {isChecked ? (
+              <MaterialCommunityIcons name="checkbox-marked" size={24} color={Colors.primary.lightBlack} />
+            ) : (
+              <MaterialCommunityIcons name="checkbox-blank-outline" size={24} color={Colors.primary.lightBlack} />
+            )}
+          </View>
+          <Text style={styles.label}>{label}</Text>
+        </TouchableOpacity>
+      ) : (
+        <TouchableOpacity style={styles.container} onPress={onChange}>
+          <View style={styles.checkbox}>
+            {isChecked ? (
+              <Icon name="check-square-o" size={20} color="green" />
+            ) : (
+              <Icon name="square-o" size={20} color="gray" />
+            )}
+          </View>
+          <Text style={styles.label}>{label}</Text>
+        </TouchableOpacity>
+      )}
+    </>
   );
 };
 
@@ -23,6 +39,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     // marginBottom: 10,
+  },
+  simplecheckbox: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 8,
   },
   checkbox: {
     width: 24,
@@ -37,7 +58,7 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 16,
     color: Colors.primary.lightBlack,
-    fontWeight: '500'
+    fontWeight: '500',
   },
 });
 

@@ -1,5 +1,6 @@
 export const initState = {
   isLogin: false,
+  isPost: null
 };
 
 const reducer = (state, action) => {
@@ -8,6 +9,11 @@ const reducer = (state, action) => {
       return {
         ...state,
         isLogin: action.isLogin,
+      };
+    case "SET_POST":
+      return {
+        ...state,
+        isPost: action.isPost,
       };
     default:
       return state;
