@@ -353,7 +353,7 @@ const MessageBox = ({navigation}) => {
             ListHeaderComponent={
               <>
                 <View style={{marginTop: 20}}>
-                  <Text style={styles.largeTxt}>Your Posts</Text>
+                  <Text style={styles.largeTxt}>Available Posts</Text>
                 </View>
               </>
             }
@@ -500,7 +500,7 @@ const styles = StyleSheet.create({
     borderColor: '#737373',
   },
   largeTxt: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: '600',
     color: Colors.primary.lightBlack,
   },

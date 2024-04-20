@@ -37,6 +37,7 @@ function AccountSetting({route, navigation}) {
       });
       return response.data;
     },
+    enabled: userInfo?.id ? true : false,
   });
 
   const handleLogout = () => {

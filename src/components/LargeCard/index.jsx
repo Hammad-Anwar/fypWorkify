@@ -184,7 +184,7 @@ function LargeCard({
         <Text style={styles.txt}>{jobData?.job_description}</Text>
       </View>
       <View style={{marginTop: 10}}>
-        {jobData?.task.map((task, index) => (
+        {jobData?.task?.map((task, index) => (
           <View
             key={index}
             style={{

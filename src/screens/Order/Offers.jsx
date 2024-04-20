@@ -21,28 +21,34 @@ import moment from 'moment';
 function Offers({navigation}) {
   const queryClient = useQueryClient();
   const userData = queryClient.getQueryData(['user']);
-  const disputesData = useQuery({
-    queryKey: ['activedisputes'],
+  // const clientJobData = queryClient.getQueryData(['userDetail']);
+  // const freelancerJobData = queryClient.getQueryData(['closeddisputes']);
+  // console.log("client",clientJobData)
+  // console.log("freelancer",freelancerJobData)
+  // console.log("freelancer",userData)
+  const proposalData = useQuery({
+    queryKey: ['proposalByUser'],
     queryFn: async () => {
       const response = await apiRequest(urlType.BACKEND, {
         method: 'get',
-        url: `activeDisputes?useraccount_id=${userData?.user?.useraccount_id}`,
+        url: `proposalsByUser?useraccount_id=${userData?.user?.useraccount_id}`,
       });
       return response.data;
     },
   });
+  console.log('asd', proposalData);
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.line}></View>
 
       <View>
-        {disputesData.data && disputesData.data.length > 0 ? (
+        {proposalData.data && proposalData.data.length > 0 ? (
           <FlatList
-            data={disputesData.data}
+            data={proposalData.data}
             refreshControl={
               <RefreshControl
-                refreshing={disputesData.isLoading}
-                onRefresh={() => disputesData.refetch()}
+                refreshing={proposalData.isLoading}
+                onRefresh={() => proposalData.refetch()}
               />
             }
             keyExtractor={(item, index) => index.toString()}
@@ -59,7 +65,7 @@ function Offers({navigation}) {
           />
         ) : (
           <View style={{alignItems: 'center', marginTop: 10}}>
-            {disputesData.data ? (
+            {proposalData.data ? (
               <Text style={{color: Colors.primary.lightGray}}>
                 No Active Dispute available
               </Text>

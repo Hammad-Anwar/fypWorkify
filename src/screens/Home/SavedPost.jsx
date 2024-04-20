@@ -24,7 +24,7 @@ import {showMessage} from 'react-native-flash-message';
 function SavedPost({route, navigation}) {
   const {user_id} = route.params;
   const userData = useQuery({
-    queryKey: ['savedPost'],
+    queryKey: ['savedPost', user_id],
     queryFn: async () => {
       const response = await apiRequest(urlType.BACKEND, {
         method: 'get',
@@ -32,6 +32,7 @@ function SavedPost({route, navigation}) {
       });
       return response.data;
     },
+    enabled: user_id ? true : false,
   });
   return (
     <>

@@ -13,7 +13,9 @@ export const BottomSheet = ({isVisible, setIsVisible, ...props}) => {
         style={styles.modalContainer}
         backdropColor={'transparent'}>
         <View style={styles.mainView}>
-          <View style={styles.modalButton} />
+          <View style={{alignItems: 'center'}}>
+            <View style={styles.modalButton} />
+          </View>
           {props.children}
         </View>
       </Modal>
@@ -30,13 +32,11 @@ const styles = StyleSheet.create({
   mainView: {
     flexDirection: 'column',
     backgroundColor: 'white',
-    // paddingHorizontal: 20,
-    // paddingBottom: 40,
-    alignItems: 'center',
+    paddingHorizontal: 30,
+    // alignItems: 'center',
     borderTopRightRadius: 30,
     borderTopLeftRadius: 30,
-    height: '80%'
-
+    height: '90%',
   },
   modalButton: {
     height: 4,

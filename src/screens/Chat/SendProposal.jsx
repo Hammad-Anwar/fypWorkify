@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   Image,
   SafeAreaView,
@@ -14,23 +14,30 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import profileImg from '../../assets/Images/profileImg.jpg';
 import CustomBtn from '../../components/CustomBtn';
 import CustomInput from '../../components/CustomInput';
-import {Picker} from '@react-native-picker/picker';
-import {useQuery, useMutation} from '@tanstack/react-query';
+import {useQuery, useMutation, useQueryClient} from '@tanstack/react-query';
 import apiRequest from '../../api/apiRequest';
 import urlType from '../../constants/UrlConstants';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {showMessage} from 'react-native-flash-message';
-import ImageCropPicker from 'react-native-image-crop-picker';
 import CustomCheckBox from '../../components/CustomCheckBox';
 
 function SendProposal({route, navigation}) {
   const {jobData} = route.params;
-  const [isChecked, setIsChecked] = useState(false);
+  const queryClient = useQueryClient();
+  const userData = queryClient.getQueryData(['user']);
+  const [checkedTasks, setCheckedTasks] = useState({});
+  const [selectedTasks, setSelectedTasks] = useState([]);
+  const [description, setDescription] = useState('');
+  const [duration, setDuration] = useState('');
+  const [payment, setPayment] = useState('');
+  const [revisions, setRevisions] = useState('');
 
-  const handleCheckboxChange = () => {
-    setIsChecked(!isChecked);
+  const handleCheckboxChange = taskId => {
+    setCheckedTasks(prevCheckedTasks => ({
+      ...prevCheckedTasks,
+      [taskId]: !prevCheckedTasks[taskId],
+    }));
   };
-
   console.log(jobData);
   const formatDate = dateString => {
     const options = {
@@ -41,48 +48,20 @@ function SendProposal({route, navigation}) {
     return new Date(dateString).toLocaleString('en-US', options);
   };
 
-  //   const [first_name, setFirst_name] = useState('');
-  //   const [last_name, setLast_name] = useState('');
-  //   const [overview, setOverview] = useState('');
-  //   const [experience, setExperience] = useState('');
-  //   const [link, setLink] = useState('');
-  //   const [location, setLocation] = useState('');
-  //   const [imageUri, setImageUri] = useState();
+  useEffect(() => {
+    const checkedTaskIds = Object.keys(checkedTasks)
+      .filter(taskId => checkedTasks[taskId])
+      .map(taskId => parseInt(taskId, 10));
+    setSelectedTasks(checkedTaskIds);
+    console.log('Checked task IDs:', checkedTaskIds);
+  }, [checkedTasks]);
 
-  //   const userApiDetail = useQuery({
-  //     queryKey: ['userApiDetail', userInfo?.userType, userInfo?.id],
-  //     queryFn: async () => {
-  //       try {
-  //         const response = await apiRequest(urlType.BACKEND, {
-  //           method: 'get',
-  //           url: `user?id=${userInfo?.id}&userType=${userInfo?.userType}`,
-  //         });
-  //         if (response.data) {
-  //           setFirst_name(response?.data?.user_account?.first_name);
-  //           setLast_name(response?.data?.user_account?.last_name);
-  //           setOverview(response?.data?.overview);
-  //           setExperience(response?.data?.experience)
-  //           setLink(response?.data?.links);
-  //           setLocation(response?.data?.location);
-  //           setImageUri(response?.data?.user_account?.image);
-  //           return response.data;
-  //         } else {
-  //           throw new Error('Data not available');
-  //         }
-  //       } catch (error) {
-  //         console.error('Error fetching user detail:', error);
-  //         throw error;
-  //       }
-  //     },
-  //     enabled: userInfo ? true : false,
-  //   });
-  //   console.log('das',location)
-
-  const updateMutation = useMutation({
+  const proposalMutation = useMutation({
+    mutationKey: ['proposal'],
     mutationFn: async data => {
       const response = await apiRequest(urlType.BACKEND, {
-        method: 'put',
-        url: `user`,
+        method: 'post',
+        url: `proposals`,
         data,
       });
       return response;
@@ -97,7 +76,7 @@ function SendProposal({route, navigation}) {
           backgroundColor: Colors.primary.green,
           floating: true,
         });
-        // navigation.navigate('AddSkills');
+        navigation.navigate('Chat');
       } else if (e.status === 404) {
         showMessage({
           message: e.message,
@@ -118,69 +97,34 @@ function SendProposal({route, navigation}) {
     },
   });
 
-  //   const handleUpdate = async () => {
-
-  //     if (userInfo?.userType === 'freelancer') {
-  //       if (
-  //         overview.length > 0 &&
-  //         experience.length > 0 &&
-  //         link.length > 0 &&
-  //         countries.length > 0
-  //       ) {
-  //         const data = {
-  //           user_id: parseInt(userApiDetail?.data?.useraccount_id),
-  //           image: imageUri,
-  //           first_name: first_name,
-  //           last_name: last_name,
-  //           userData: {
-  //             overview: overview,
-  //             experience: experience,
-  //             links: link,
-  //             location: location,
-  //           },
-  //         };
-  //         await updateMutation.mutate(data);
-  //         userApiDetail.refetch();
-  //         // console.log(loginMutation.isLoading);
-  //         // console.log(data);
-  //       } else {
-  //         showMessage({
-  //           message: 'Please fill all the fields Or upload image',
-  //           type: 'danger',
-  //           color: '#fff',
-  //           backgroundColor: Colors.primary.red,
-  //           floating: true,
-  //         });
-  //       }
-  //     }
-  //     // Client
-  //     else if (userInfo?.userType === 'client') {
-  //       if (overview.length > 0 && countries.length > 0) {
-  //         const data = {
-  //           user_id: parseInt(userApiDetail?.data?.useraccount_id),
-  //           first_name: first_name,
-  //           last_name: last_name,
-  //           image: imageUri,
-  //           userData: {
-  //             overview: overview,
-  //             location: location,
-  //           },
-  //         };
-  //         await updateMutation.mutate(data);
-  //         userApiDetail.refetch();
-  //         // console.log(loginMutation.isLoading);
-  //         // console.log(data);
-  //       } else {
-  //         showMessage({
-  //           message: 'Please fill all the fields Or upload image',
-  //           type: 'danger',
-  //           color: '#fff',
-  //           backgroundColor: Colors.primary.red,
-  //           floating: true,
-  //         });
-  //       }
-  //     }
-  //   };
+  const handleSendProposal = async () => {
+    if (
+      description.length > 0 &&
+      revisions.length > 0 &&
+      payment.length > 0 &&
+      duration.length > 0
+    ) {
+      const data = {
+        useraccount_id: parseInt(userData?.user?.useraccount_id),
+        job_id: parseInt(jobData?.job_id),
+        description: description,
+        revisions: parseInt(revisions),
+        duration: parseInt(duration),
+        payment: parseInt(payment),
+        selectedTasks: selectedTasks,
+      };
+      await proposalMutation.mutate(data);
+      console.log(data);
+    } else {
+      showMessage({
+        message: 'Please fill all the fields Or upload image',
+        type: 'danger',
+        color: '#fff',
+        backgroundColor: Colors.primary.red,
+        floating: true,
+      });
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -283,7 +227,7 @@ function SendProposal({route, navigation}) {
 
         <View style={{marginTop: 10}}>
           <Text style={[styles.smallTxt, {marginBottom: 5}]}>Select Task</Text>
-          {jobData?.task.map((task, index) => (
+          {jobData?.task?.map((task, index) => (
             <View
               key={index}
               style={{
@@ -294,8 +238,8 @@ function SendProposal({route, navigation}) {
               <CustomCheckBox
                 label={task.task_description}
                 simpleCheckBox={true}
-                isChecked={isChecked}
-                onChange={handleCheckboxChange}
+                isChecked={checkedTasks[task.task_id] || false}
+                onChange={() => handleCheckboxChange(task.task_id)}
               />
             </View>
           ))}
@@ -306,10 +250,10 @@ function SendProposal({route, navigation}) {
             style={{backgroundColor: Colors.primary.sub, marginTop: 5}}
             placeholder="Write the proposal desription"
             keyboardType="default"
-            // value={overview}
-            // onChangeText={text => {
-            //   setOverview(text);
-            // }}
+            value={description}
+            onChangeText={text => {
+              setDescription(text);
+            }}
             multiline={true}
             numberOfLines={4}
           />
@@ -328,10 +272,10 @@ function SendProposal({route, navigation}) {
                 placeholder={'Time Peroid in days'}
                 keyboardType={'numeric'}
                 style={{backgroundColor: Colors.primary.sub, width: 160}}
-                //   value={first_name}
-                //   onChangeText={text => {
-                //     setFirst_name(text);
-                //   }}
+                value={duration}
+                onChangeText={text => {
+                  setDuration(text);
+                }}
               />
             </View>
             <View>
@@ -341,10 +285,10 @@ function SendProposal({route, navigation}) {
                 placeholder={'Price'}
                 keyboardType={'numeric'}
                 style={{backgroundColor: Colors.primary.sub, width: 160}}
-                //   value={last_name}
-                //   onChangeText={text => {
-                //     setLast_name(text);
-                //   }}
+                value={payment}
+                onChangeText={text => {
+                  setPayment(text);
+                }}
               />
             </View>
           </View>
@@ -355,18 +299,18 @@ function SendProposal({route, navigation}) {
               placeholder={'Optional'}
               keyboardType={'numeric'}
               style={{backgroundColor: Colors.primary.sub, width: 160}}
-              //   value={last_name}
-              //   onChangeText={text => {
-              //     setLast_name(text);
-              //   }}
+              value={revisions}
+              onChangeText={text => {
+                setRevisions(text);
+              }}
             />
           </View>
 
           <CustomBtn
             lbl={'Send Proposal'}
             style={{marginTop: 20, marginBottom: 60}}
-            // onPress={handleUpdate}
-            // loading={updateMutation.isPending}
+            onPress={handleSendProposal}
+            loading={proposalMutation.isPending}
           />
         </View>
       </ScrollView>
