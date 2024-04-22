@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {
   Image,
   SafeAreaView,
@@ -21,13 +21,23 @@ import moment from 'moment';
 function Offers({navigation}) {
   const queryClient = useQueryClient();
   const userData = queryClient.getQueryData(['user']);
-  // const clientJobData = queryClient.getQueryData(['userDetail']);
-  // const freelancerJobData = queryClient.getQueryData(['closeddisputes']);
-  // console.log("client",clientJobData)
-  // console.log("freelancer",freelancerJobData)
-  // console.log("freelancer",userData)
+  const [isMultiple, setIsMultiple] = useState(false);
+  const handleSwitchChange = value => {
+    setIsMultiple(value);
+  };
+
+  const receivedProposalData = useQuery({
+    queryKey: ['receivedProposalData'],
+    queryFn: async () => {
+      const response = await apiRequest(urlType.BACKEND, {
+        method: 'get',
+        url: `receivedProposals?useraccount_id=${userData?.user?.useraccount_id}`,
+      });
+      return response.data;
+    },
+  });
   const proposalData = useQuery({
-    queryKey: ['proposalByUser'],
+    queryKey: ['sentProposalData'],
     queryFn: async () => {
       const response = await apiRequest(urlType.BACKEND, {
         method: 'get',
@@ -36,45 +46,210 @@ function Offers({navigation}) {
       return response.data;
     },
   });
-  console.log('asd', proposalData);
+  console.log('asd', receivedProposalData?.data?.proposal);
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.line}></View>
+      {/* // Freelancer role_id = 1 */}
+      {userData?.user?.user_account?.role_id == 1 ? (
+        <View>
+          <View style={{marginTop: 10}}>
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginBottom: 20,
+              }}>
+              <TouchableOpacity
+                style={{
+                  backgroundColor: isMultiple ? '#DAE4E1' : '#1E1E1E',
+                  padding: 10,
+                  paddingHorizontal: 20,
+                  borderRadius: 20,
+                  marginRight: 10,
+                }}
+                onPress={() => handleSwitchChange(false)}>
+                <Text
+                  style={{
+                    color: isMultiple ? '#000' : '#fff',
+                    fontWeight: isMultiple ? '400' : '500',
+                    fontSize: 16,
+                  }}>
+                  Sent
+                </Text>
+              </TouchableOpacity>
 
-      <View>
-        {proposalData.data && proposalData.data.length > 0 ? (
-          <FlatList
-            data={proposalData.data}
-            refreshControl={
-              <RefreshControl
-                refreshing={proposalData.isLoading}
-                onRefresh={() => proposalData.refetch()}
-              />
-            }
-            keyExtractor={(item, index) => index.toString()}
-            renderItem={({item: data, index}) => (
-              <SmallCard
-                complain_title={data?.complain_title}
-                complain_msg={data?.complain_msg}
-                time={moment(data?.created_at).format('DD-MM-YYYY')}
-                key={index}
-                dispute={true}
-                onPress={() => navigation.navigate('Complain', {dispute_data: data})}
-              />
-            )}
-          />
-        ) : (
-          <View style={{alignItems: 'center', marginTop: 10}}>
-            {proposalData.data ? (
-              <Text style={{color: Colors.primary.lightGray}}>
-                No Active Dispute available
-              </Text>
+              <TouchableOpacity
+                style={{
+                  backgroundColor: isMultiple ? '#1E1E1E' : '#DAE4E1',
+                  padding: 10,
+                  borderRadius: 20,
+                  paddingHorizontal: 20,
+                }}
+                onPress={() => handleSwitchChange(true)}>
+                <Text
+                  style={{
+                    color: isMultiple ? '#fff' : '#000',
+                    fontWeight: isMultiple ? '500' : '400',
+                    fontSize: 16,
+                  }}>
+                  Received
+                </Text>
+              </TouchableOpacity>
+            </View>
+
+            {isMultiple ? (
+              // RECEIVED Proposal
+              <View>
+                {receivedProposalData?.proposal?.data &&
+                receivedProposalData?.proposal?.data.length > 0 ? (
+                  <FlatList
+                    data={receivedProposalData?.proposal?.data}
+                    refreshControl={
+                      <RefreshControl
+                        refreshing={receivedProposalData?.proposal.isLoading}
+                        onRefresh={() =>
+                          receivedProposalData?.proposal.refetch()
+                        }
+                      />
+                    }
+                    keyExtractor={(item, index) => index.toString()}
+                    renderItem={({item: data, index}) => (
+                      <SmallCard
+                        profile_image={data?.user_account?.image}
+                        first_name={data?.user_account?.first_name}
+                        last_name={data?.user_account?.last_name}
+                        proposal_description={data?.description}
+                        proposal_duration={data?.duration}
+                        proposal_revision={data?.revisions}
+                        proposal_payment={data?.payment?.payment_amount}
+                        proposal_status={data?.proposal_status}
+                        time={moment(data?.updated_at).format('DD-MM-YYYY')}
+                        key={index}
+                        isOffer={true}
+                        onPress={() =>
+                          navigation.navigate('Complain', {
+                            dispute_data: data,
+                          })
+                        }
+                      />
+                    )}
+                  />
+                ) : (
+                  <View style={{alignItems: 'center', marginTop: 10}}>
+                    {receivedProposalData?.data ? (
+                      <Text style={{color: Colors.primary.lightGray}}>
+                        No Offer Available.
+                      </Text>
+                    ) : (
+                      <ActivityIndicator
+                        size={24}
+                        color={Colors.primary.black}
+                      />
+                    )}
+                  </View>
+                )}
+              </View>
             ) : (
-              <ActivityIndicator size={24} color={Colors.primary.black} />
+              // SENT Proposal
+              <View>
+                {proposalData.data && proposalData.data.length > 0 ? (
+                  <FlatList
+                    data={proposalData.data}
+                    refreshControl={
+                      <RefreshControl
+                        refreshing={proposalData.isLoading}
+                        onRefresh={() => proposalData.refetch()}
+                      />
+                    }
+                    keyExtractor={(item, index) => index.toString()}
+                    renderItem={({item: data, index}) => (
+                      <SmallCard
+                        profile_image={data?.user_account?.image}
+                        first_name={data?.user_account?.first_name}
+                        last_name={data?.user_account?.last_name}
+                        proposal_description={data?.description}
+                        proposal_duration={data?.duration}
+                        proposal_revision={data?.revisions}
+                        proposal_payment={data?.payment?.payment_amount}
+                        proposal_status={data?.proposal_status}
+                        time={moment(data?.updated_at).format('DD-MM-YYYY')}
+                        key={index}
+                        isOffer={true}
+                        onPress={() =>
+                          navigation.navigate('Complain', {
+                            dispute_data: data,
+                          })
+                        }
+                      />
+                    )}
+                  />
+                ) : (
+                  <View style={{alignItems: 'center', marginTop: 10}}>
+                    {proposalData.data ? (
+                      <Text style={{color: Colors.primary.lightGray}}>
+                        No Offer Available.
+                      </Text>
+                    ) : (
+                      <ActivityIndicator
+                        size={24}
+                        color={Colors.primary.black}
+                      />
+                    )}
+                  </View>
+                )}
+              </View>
             )}
           </View>
-        )}
-      </View>
+        </View>
+      ) : (
+        // Client role_id = 2
+        <View>
+          {receivedProposalData.data &&
+          receivedProposalData.data.length > 0 ? (
+            <FlatList
+              data={receivedProposalData.data}
+              refreshControl={
+                <RefreshControl
+                  refreshing={receivedProposalData.isLoading}
+                  onRefresh={() => receivedProposalData.refetch()}
+                />
+              }
+              keyExtractor={(item, index) => index.toString()}
+              renderItem={({item: data, index}) => (
+                <SmallCard
+                  profile_image={data?.user_account?.image}
+                  first_name={data?.user_account?.first_name}
+                  last_name={data?.user_account?.last_name}
+                  proposal_description={data?.description}
+                  proposal_duration={data?.duration}
+                  proposal_revision={data?.revisions}
+                  proposal_payment={data?.payment?.payment_amount}
+                  proposal_status={data?.proposal_status}
+                  time={moment(data?.updated_at).format('DD-MM-YYYY')}
+                  key={index}
+                  isOffer={true}
+                  onPress={() =>
+                    navigation.navigate('Complain', {
+                      dispute_data: data,
+                    })
+                  }
+                />
+              )}
+            />
+          ) : (
+            <View style={{alignItems: 'center', marginTop: 10}}>
+              {receivedProposalData.data ? (
+                <Text style={{color: Colors.primary.lightGray}}>
+                  No Offer Available.
+                </Text>
+              ) : (
+                <ActivityIndicator size={24} color={Colors.primary.black} />
+              )}
+            </View>
+          )}
+        </View>
+      )}
     </SafeAreaView>
   );
 }
