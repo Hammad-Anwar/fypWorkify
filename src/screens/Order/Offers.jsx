@@ -25,7 +25,6 @@ function Offers({navigation}) {
   const handleSwitchChange = value => {
     setIsMultiple(value);
   };
-
   const receivedProposalData = useQuery({
     queryKey: ['receivedProposalData'],
     queryFn: async () => {
@@ -46,7 +45,62 @@ function Offers({navigation}) {
       return response.data;
     },
   });
-  console.log('asd', receivedProposalData?.data?.proposal);
+
+  const updateProposalStatusMutation = useMutation({
+    mutationFn: async data => {
+      const response = await apiRequest(urlType.BACKEND, {
+        method: 'put',
+        url: `proposal`,
+        data,
+      });
+      return response;
+    },
+    onSuccess: async e => {
+      if (e.status === 200) {
+        receivedProposalData.refetch();
+        showMessage({
+          message: e.message,
+          type: 'success',
+          color: '#fff',
+          backgroundColor: Colors.primary.green,
+          floating: true,
+        });
+      } else if (e.response.status === 404) {
+        showMessage({
+          message: e.message,
+          type: 'danger',
+          color: '#fff',
+          backgroundColor: 'red',
+          floating: true,
+        });
+      } else {
+        showMessage({
+          message: e.message || 'An Error occured',
+          type: 'danger',
+          color: '#fff',
+          backgroundColor: 'red',
+          floating: true,
+        });
+      }
+    },
+  });
+
+  const handleAcceptProposal = async (proposalId) => {
+    const data = {
+      proposal_id: parseInt(proposalId),
+      proposal_status: 'accept',
+    };
+    await updateProposalStatusMutation.mutate(data);
+    console.log(data);
+  };
+  const handleDeclineProposal = async (proposalId) => {
+    const data = {
+      proposal_id: parseInt(proposalId),
+      proposal_status: 'decline',
+    };
+    await updateProposalStatusMutation.mutate(data);
+    console.log(data);
+  };
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.line}></View>
@@ -97,20 +151,17 @@ function Offers({navigation}) {
                 </Text>
               </TouchableOpacity>
             </View>
-
             {isMultiple ? (
               // RECEIVED Proposal
               <View>
-                {receivedProposalData?.proposal?.data &&
-                receivedProposalData?.proposal?.data.length > 0 ? (
+                {receivedProposalData.data &&
+                receivedProposalData.data.length > 0 ? (
                   <FlatList
-                    data={receivedProposalData?.proposal?.data}
+                    data={receivedProposalData.data}
                     refreshControl={
                       <RefreshControl
-                        refreshing={receivedProposalData?.proposal.isLoading}
-                        onRefresh={() =>
-                          receivedProposalData?.proposal.refetch()
-                        }
+                        refreshing={receivedProposalData.isLoading}
+                        onRefresh={() => receivedProposalData.refetch()}
                       />
                     }
                     keyExtractor={(item, index) => index.toString()}
@@ -124,20 +175,24 @@ function Offers({navigation}) {
                         proposal_revision={data?.revisions}
                         proposal_payment={data?.payment?.payment_amount}
                         proposal_status={data?.proposal_status}
+                        proposal_tasks={data?.has_proposal_task}
                         time={moment(data?.updated_at).format('DD-MM-YYYY')}
+                        isReceived={true}
                         key={index}
                         isOffer={true}
-                        onPress={() =>
-                          navigation.navigate('Complain', {
-                            dispute_data: data,
-                          })
-                        }
+                        onAcceptPress={() => handleAcceptProposal(data?.proposal_id)}
+                        onDeclinePress={() => handleDeclineProposal(data?.proposal_id)}
+                        // onPress={() =>
+                        //   navigation.navigate('Complain', {
+                        //     dispute_data: data,
+                        //   })
+                        // }
                       />
                     )}
                   />
                 ) : (
                   <View style={{alignItems: 'center', marginTop: 10}}>
-                    {receivedProposalData?.data ? (
+                    {receivedProposalData.data ? (
                       <Text style={{color: Colors.primary.lightGray}}>
                         No Offer Available.
                       </Text>
@@ -152,7 +207,7 @@ function Offers({navigation}) {
               </View>
             ) : (
               // SENT Proposal
-              <View>
+              <View style={{marginBottom: 250}}>
                 {proposalData.data && proposalData.data.length > 0 ? (
                   <FlatList
                     data={proposalData.data}
@@ -173,14 +228,15 @@ function Offers({navigation}) {
                         proposal_revision={data?.revisions}
                         proposal_payment={data?.payment?.payment_amount}
                         proposal_status={data?.proposal_status}
+                        proposal_tasks={data?.has_proposal_task}
                         time={moment(data?.updated_at).format('DD-MM-YYYY')}
                         key={index}
                         isOffer={true}
-                        onPress={() =>
-                          navigation.navigate('Complain', {
-                            dispute_data: data,
-                          })
-                        }
+                        // onPress={() =>
+                        //   navigation.navigate('Complain', {
+                        //     dispute_data: data,
+                        //   })
+                        // }
                       />
                     )}
                   />
@@ -204,9 +260,8 @@ function Offers({navigation}) {
         </View>
       ) : (
         // Client role_id = 2
-        <View>
-          {receivedProposalData.data &&
-          receivedProposalData.data.length > 0 ? (
+        <View style={{paddingBottom: 60}}> 
+          {receivedProposalData.data && receivedProposalData.data.length > 0 ? (
             <FlatList
               data={receivedProposalData.data}
               refreshControl={
@@ -226,14 +281,19 @@ function Offers({navigation}) {
                   proposal_revision={data?.revisions}
                   proposal_payment={data?.payment?.payment_amount}
                   proposal_status={data?.proposal_status}
+                  proposal_tasks={data?.has_proposal_task}
                   time={moment(data?.updated_at).format('DD-MM-YYYY')}
+                  isReceived={true}
                   key={index}
                   isOffer={true}
-                  onPress={() =>
-                    navigation.navigate('Complain', {
-                      dispute_data: data,
-                    })
-                  }
+                  onAcceptPress={() => handleAcceptProposal(data?.proposal_id)}
+                  onDeclinePress={() => handleDeclineProposal(data?.proposal_id)}
+                  
+                  // onPress={() =>
+                  //   navigation.navigate('Complain', {
+                  //     dispute_data: data,
+                  //   })
+                  // }
                 />
               )}
             />

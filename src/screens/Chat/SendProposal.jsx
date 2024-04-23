@@ -226,21 +226,25 @@ function SendProposal({route, navigation}) {
         </View>
 
         <View style={{marginTop: 10}}>
-          <Text style={[styles.smallTxt, {marginBottom: 5}]}>Select Task</Text>
+          <Text style={[styles.smallTxt, {marginBottom: 5}]}>Available Task</Text>
           {jobData?.task?.map((task, index) => (
-            <View
-              key={index}
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                marginBottom: 10,
-              }}>
-              <CustomCheckBox
-                label={task.task_description}
-                simpleCheckBox={true}
-                isChecked={checkedTasks[task.task_id] || false}
-                onChange={() => handleCheckboxChange(task.task_id)}
-              />
+            <View key={index}>
+              {task?.status === 'none' ? (
+                <View
+                  key={index}
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    marginBottom: 10,
+                  }}>
+                  <CustomCheckBox
+                    label={task.task_description}
+                    simpleCheckBox={true}
+                    isChecked={checkedTasks[task.task_id] || false}
+                    onChange={() => handleCheckboxChange(task.task_id)}
+                  />
+                </View>
+              ) : null}
             </View>
           ))}
         </View>

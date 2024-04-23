@@ -12,6 +12,7 @@ import {
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import profileImg from '../../assets/Images/profileImg.jpg';
 import {Colors} from '../../constants/theme';
+import RemainingTime from '../RemainingTime';
 
 function SmallCard({
   profile,
@@ -30,6 +31,12 @@ function SmallCard({
   proposal_payment,
   proposal_revision,
   proposal_status,
+  proposal_tasks,
+  isReceived,
+  onDeclinePress,
+  onAcceptPress,
+  isOrder,
+  order_status,
 }) {
   return (
     <>
@@ -122,6 +129,26 @@ function SmallCard({
               {proposal_description}
             </Text>
           </View>
+          <View style={{marginTop: 10}}>
+            {proposal_tasks?.map((data, index) => (
+              <View
+                key={index}
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  marginBottom: 10,
+                }}>
+                <View
+                  style={{
+                    padding: 6,
+                    borderRadius: 6,
+                    marginRight: 5,
+                    backgroundColor: 'black',
+                  }}></View>
+                <Text style={styles.txt}>{data?.task?.task_description}</Text>
+              </View>
+            ))}
+          </View>
           <View style={styles.line}></View>
           <View style={[styles.row, {marginTop: 0}]}>
             <Text style={[styles.smallTxt, {fontWeight: '600'}]}>
@@ -138,47 +165,172 @@ function SmallCard({
             </Text>
           </View>
           <View style={styles.line}></View>
-          <View>
-            {proposal_status == 'waiting' ? (
-              <Text
-                style={[
-                  styles.smallTxt,
-                  {
-                    width: '100%',
-                    textAlign: 'center',
-                    color: Colors.primary.lightGray,
-                  },
-                ]}>
-                Hang tight! Your proposal is being considered by the client.
-              </Text>
-            ) : proposal_status == 'accept' ? (
-              <Text
-                style={[
-                  styles.smallTxt,
-                  {
-                    width: '100%',
-                    textAlign: 'center',
-                    color: Colors.primary.green,
-                  },
-                ]}>
-                Great news! The client has accepted your proposal.
-              </Text>
-            ) : (
-              <Text
-                style={[
-                  styles.smallTxt,
-                  {
-                    width: '100%',
-                    textAlign: 'center',
-                    color: Colors.primary.red,
-                  },
-                ]}>
-                Your proposal was not accepted this time. Keep applying for more
-                projects.
-              </Text>
-            )}
-          </View>
+          {isReceived ? (
+            <>
+              {proposal_status == 'waiting' ? (
+                <View style={[styles.row, {justifyContent: 'space-evenly'}]}>
+                  <TouchableOpacity
+                    onPress={onDeclinePress}
+                    style={[styles.btn, {backgroundColor: Colors.primary.red}]}>
+                    <Text style={styles.btntxt}>Decline</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity style={styles.btn} onPress={onAcceptPress}>
+                    <Text style={styles.btntxt}>Accept</Text>
+                  </TouchableOpacity>
+                </View>
+              ) : proposal_status == 'accept' ? (
+                <Text
+                  style={[
+                    styles.smallTxt,
+                    {
+                      width: '100%',
+                      textAlign: 'center',
+                      color: Colors.primary.green,
+                    },
+                  ]}>
+                  You accept this proposal.
+                </Text>
+              ) : (
+                <Text
+                  style={[
+                    styles.smallTxt,
+                    {
+                      width: '100%',
+                      textAlign: 'center',
+                      color: Colors.primary.red,
+                    },
+                  ]}>
+                  You decline this proposal.
+                </Text>
+              )}
+            </>
+          ) : (
+            <View>
+              {proposal_status == 'waiting' ? (
+                <Text
+                  style={[
+                    styles.smallTxt,
+                    {
+                      width: '100%',
+                      textAlign: 'center',
+                      color: Colors.primary.lightGray,
+                    },
+                  ]}>
+                  Hang tight! Your proposal is being considered by the client.
+                </Text>
+              ) : proposal_status == 'accept' ? (
+                <Text
+                  style={[
+                    styles.smallTxt,
+                    {
+                      width: '100%',
+                      textAlign: 'center',
+                      color: Colors.primary.green,
+                    },
+                  ]}>
+                  Great news! The client has accepted your proposal.
+                </Text>
+              ) : (
+                <Text
+                  style={[
+                    styles.smallTxt,
+                    {
+                      width: '100%',
+                      textAlign: 'center',
+                      color: Colors.primary.red,
+                    },
+                  ]}>
+                  Your proposal was not accepted this time. Keep applying for
+                  more projects.
+                </Text>
+              )}
+            </View>
+          )}
         </TouchableOpacity>
+      ) : isOrder ? (
+        <TouchableOpacity
+          onPress={onPress}
+          style={{
+            borderWidth: 1,
+            borderColor: Colors.primary.sub,
+            borderRadius: 12,
+            padding: 10,
+            marginBottom: 10,
+          }}>
+          <View style={styles.row}>
+            <View style={{flexDirection: 'row', alignItems: 'center'}}>
+              <Image
+                source={profile_image ? {uri: profile_image} : {profileImg}}
+                style={styles.cardImg}
+              />
+              <Text style={[styles.smallTxt, {marginLeft: 5}]}>
+                {first_name} {last_name}
+              </Text>
+            </View>
+            <Text style={[styles.smallTxt, {fontWeight: '600'}]}>{time}</Text>
+          </View>
+          <View style={{marginTop: 10}}>
+            <Text
+              style={[styles.smallTxt, {width: '100%'}]}
+              numberOfLines={2}
+              ellipsizeMode="tail">
+              {proposal_description}
+            </Text>
+          </View>
+          <View style={{marginTop: 10}}>
+            {proposal_tasks?.map((data, index) => (
+              <View
+                key={index}
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  marginBottom: 10,
+                }}>
+                <View
+                  style={{
+                    padding: 6,
+                    borderRadius: 6,
+                    marginRight: 5,
+                    backgroundColor: 'black',
+                  }}></View>
+                <Text style={styles.txt}>{data?.task?.task_description}</Text>
+              </View>
+            ))}
+          </View>
+          <View style={styles.line}></View>
+          <View style={[styles.row, {marginTop: 0}]}>
+            <Text style={[styles.smallTxt, {fontWeight: '600'}]}>
+              Revision: {proposal_revision}
+            </Text>
+            <Text style={[styles.smallTxt, {fontWeight: '600'}]}>
+              Price: ${proposal_payment}
+            </Text>
+          </View>
+          <View style={{alignItems: 'center', marginTop: 10}}>
+            <View
+              style={{
+                backgroundColor: 'yellow',
+                padding: 10,
+                borderRadius: 6,
+                paddingHorizontal: 30,
+              }}>
+              <Text
+                style={[
+                  styles.smallTxt,
+                  {fontWeight: '500', textTransform: 'uppercase'},
+                ]}>
+                {order_status}
+              </Text>
+            </View>
+          </View>
+          <View style={styles.line}></View>
+          <View style={{alignItems: 'center'}}>
+            {/* <Text style={[styles.smallTxt, {fontWeight: '600'}]}>
+              Remaing Time: 
+            </Text> */}
+            <RemainingTime durationInDays={proposal_duration}/>
+          </View>
+        </TouchableOpacity> 
       ) : (
         <View>
           <View style={[styles.smallCard]}>
@@ -259,6 +411,23 @@ const styles = StyleSheet.create({
     height: 1,
     width: '100%',
     backgroundColor: Colors.primary.lightGray,
+  },
+  btn: {
+    padding: 20,
+    paddingVertical: 10,
+    borderRadius: 12,
+    backgroundColor: Colors.primary.green,
+  },
+  btntxt: {
+    fontSize: 14,
+    color: Colors.primary.white,
+    fontWeight: '500',
+  },
+  txt: {
+    color: Colors.primary.darkgray,
+    fontSize: 12,
+    fontWeight: '500',
+    textAlign: 'justify',
   },
 });
 

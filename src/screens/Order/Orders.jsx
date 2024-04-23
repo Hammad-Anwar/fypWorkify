@@ -20,13 +20,25 @@ import moment from 'moment';
 
 function Orders({navigation}) {
   const queryClient = useQueryClient();
-  const userData = queryClient.getQueryData(['user']);
-  const disputesData = useQuery({
-    queryKey: ['activedisputes'],
+  const sentProposalData = queryClient.getQueryData(['sentProposalData']);
+  const receivedProposalData = queryClient.getQueryData([
+    'receivedProposalData',
+  ]);
+
+  // Extract proposal_id values from sentProposalData and receivedProposalData
+  const proposalIds = [
+    ...sentProposalData?.map(data => data.proposal_id),
+    ...receivedProposalData?.map(data => data.proposal_id),
+  ];
+
+  console.log('proposalIds:', proposalIds);
+  const contractData = useQuery({
+    queryKey: ['contractsByProposalIds'],
     queryFn: async () => {
       const response = await apiRequest(urlType.BACKEND, {
         method: 'get',
-        url: `activeDisputes?useraccount_id=${userData?.user?.useraccount_id}`,
+        url: `contractsByProposalIds`,
+        data: proposalIds,
       });
       return response.data;
     },
@@ -36,32 +48,44 @@ function Orders({navigation}) {
       <View style={styles.line}></View>
 
       <View>
-        {disputesData.data && disputesData.data.length > 0 ? (
+        {contractData.data && contractData.data.length > 0 ? (
           <FlatList
-            data={disputesData.data}
+            data={contractData.data}
             refreshControl={
               <RefreshControl
-                refreshing={disputesData.isLoading}
-                onRefresh={() => disputesData.refetch()}
+                refreshing={contractData.isLoading}
+                onRefresh={() => contractData.refetch()}
               />
             }
             keyExtractor={(item, index) => index.toString()}
             renderItem={({item: data, index}) => (
               <SmallCard
-                complain_title={data?.complain_title}
-                complain_msg={data?.complain_msg}
-                time={moment(data?.created_at).format('DD-MM-YYYY')}
+                profile_image={data?.proposal?.user_account?.image}
+                first_name={data?.proposal?.user_account?.first_name}
+                last_name={data?.proposal?.user_account?.last_name}
+                proposal_description={data?.proposal?.description}
+                proposal_duration={data?.proposal?.duration}
+                proposal_revision={data?.proposal?.revisions}
+                proposal_payment={data?.proposal?.payment?.payment_amount}
+                order_status={data?.contract_status}
+                proposal_tasks={data?.proposal?.has_proposal_task}
+                time={moment(data?.updated_at).format('DD-MM-YYYY')}
                 key={index}
-                dispute={true}
-                onPress={() => navigation.navigate('Complain', {dispute_data: data})}
+                isOrder={true}
+
+                // onPress={() =>
+                //   navigation.navigate('Complain', {
+                //     dispute_data: data,
+                //   })
+                // }
               />
             )}
           />
         ) : (
           <View style={{alignItems: 'center', marginTop: 10}}>
-            {disputesData.data ? (
+            {contractData.data ? (
               <Text style={{color: Colors.primary.lightGray}}>
-                No Active Dispute available
+                No Offer Available.
               </Text>
             ) : (
               <ActivityIndicator size={24} color={Colors.primary.black} />
