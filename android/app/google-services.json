@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "721699518156",
+    "project_id": "workify-dd488",
+    "storage_bucket": "workify-dd488.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:721699518156:android:6a3ba3d15b9a511611b469",
+        "android_client_info": {
+          "package_name": "com.fypworkify"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDqBCm2bgT_DKXZ-4e_R7gqLLsBslqnw9c"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -9,8 +9,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useQuery} from '@tanstack/react-query';
 import {useStateValue} from './context/GlobalContextProvider';
 import urlType from './constants/UrlConstants';
-import { navigationRef } from './api/RootNavigation';
+import {navigationRef} from './api/RootNavigation';
 import apiRequest from './api/apiRequest';
+import messaging from '@react-native-firebase/messaging';
+import {PermissionsAndroid} from 'react-native';
 
 const Stack = createNativeStackNavigator();
 
@@ -25,11 +27,28 @@ function Main() {
         method: 'get',
         url: `usersMe`,
       });
-      console.log(result.data)
+      console.log(result.data);
       return result.data;
     },
     enabled: false,
   });
+  useEffect(() => {
+    requestNotificationPermission();
+  }, []);
+
+  const requestNotificationPermission = async () => {
+    const granted = await PermissionsAndroid.request(
+      PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
+    );
+    if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+      const fcmToken = await messaging().getToken();
+      console.log(fcmToken);
+      console.log('found');
+    } else {
+      console.log('not found');
+    }
+  };
+
   useEffect(() => {
     checkUser();
   }, [isLogin]);
