@@ -136,14 +136,22 @@ function Home({navigation}) {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.row}>
-        <TouchableOpacity>
+        {/* <TouchableOpacity>
           <MaterialCommunityIcons
             name="menu"
             size={24}
             color={Colors.primary.darkgray}
           />
-        </TouchableOpacity>
-        <Text style={{color: Colors.primary.black}}>Workify</Text>
+        </TouchableOpacity> */}
+        <Text
+          style={{
+            color: Colors.primary.darkgray,
+            fontStyle: 'italic',
+            fontWeight: '500',
+            fontSize: 18,
+          }}>
+          Workify
+        </Text>
         <TouchableOpacity
           onPress={() => {
             navigation.navigate('AccountSetting', {
@@ -166,8 +174,10 @@ function Home({navigation}) {
             keyboardType="default"
             style={{
               backgroundColor: Colors.primary.sub,
+              padding: 2,
             }}
             containerStyle={{
+              padding: 0,
               backgroundColor: Colors.primary.sub,
             }}
           />
@@ -175,7 +185,7 @@ function Home({navigation}) {
         <TouchableOpacity
           style={{
             backgroundColor: Colors.primary.main,
-            padding: 12,
+            padding: 10,
             borderRadius: 12,
             marginTop: 20,
             marginLeft: 10,
@@ -185,7 +195,7 @@ function Home({navigation}) {
       </View>
       {userInfo?.userType === 'freelancer' ? (
         <>
-          <View style={{marginTop: 20}}>
+          <View style={{marginTop: 10}}>
             {userData.data && userData.data.length > 0 ? (
               <FlatList
                 data={userData.data}
@@ -216,7 +226,7 @@ function Home({navigation}) {
                 )}
                 ListHeaderComponent={
                   <>
-                    <View style={[styles.row, {marginTop: 30}]}>
+                    <View style={[styles.row, {marginTop: 20}]}>
                       <Text style={styles.largeTxt}>Featured Posts</Text>
                       <TouchableOpacity
                         onPress={() => navigation.navigate('FeaturedPost')}>

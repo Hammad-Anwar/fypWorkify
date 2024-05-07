@@ -91,7 +91,7 @@ function Offers({navigation}) {
       proposal_status: 'accept',
     };
     await updateProposalStatusMutation.mutate(data);
-    console.log(data);
+    // console.log(data);
   };
   const handleDeclineProposal = async (proposalId) => {
     const data = {
@@ -99,7 +99,7 @@ function Offers({navigation}) {
       proposal_status: 'decline',
     };
     await updateProposalStatusMutation.mutate(data);
-    console.log(data);
+    // console.log(data);
   };
   return (
     <SafeAreaView style={styles.container}>
@@ -154,10 +154,10 @@ function Offers({navigation}) {
             {isMultiple ? (
               // RECEIVED Proposal
               <View>
-                {receivedProposalData.data &&
-                receivedProposalData.data.length > 0 ? (
+                {receivedProposalData?.data &&
+                receivedProposalData?.data.length > 0 ? (
                   <FlatList
-                    data={receivedProposalData.data}
+                    data={receivedProposalData?.data}
                     refreshControl={
                       <RefreshControl
                         refreshing={receivedProposalData.isLoading}
@@ -208,9 +208,9 @@ function Offers({navigation}) {
             ) : (
               // SENT Proposal
               <View style={{marginBottom: 250}}>
-                {proposalData.data && proposalData.data.length > 0 ? (
+                {proposalData?.data && proposalData?.data.length > 0 ? (
                   <FlatList
-                    data={proposalData.data}
+                    data={proposalData?.data}
                     refreshControl={
                       <RefreshControl
                         refreshing={proposalData.isLoading}
@@ -242,7 +242,7 @@ function Offers({navigation}) {
                   />
                 ) : (
                   <View style={{alignItems: 'center', marginTop: 10}}>
-                    {proposalData.data ? (
+                    {proposalData?.data ? (
                       <Text style={{color: Colors.primary.lightGray}}>
                         No Offer Available.
                       </Text>
@@ -261,9 +261,9 @@ function Offers({navigation}) {
       ) : (
         // Client role_id = 2
         <View style={{paddingBottom: 60}}> 
-          {receivedProposalData.data && receivedProposalData.data.length > 0 ? (
+          {receivedProposalData?.data && receivedProposalData?.data.length > 0 ? (
             <FlatList
-              data={receivedProposalData.data}
+              data={receivedProposalData?.data}
               refreshControl={
                 <RefreshControl
                   refreshing={receivedProposalData.isLoading}
@@ -299,7 +299,7 @@ function Offers({navigation}) {
             />
           ) : (
             <View style={{alignItems: 'center', marginTop: 10}}>
-              {receivedProposalData.data ? (
+              {receivedProposalData?.data ? (
                 <Text style={{color: Colors.primary.lightGray}}>
                   No Offer Available.
                 </Text>

@@ -6,6 +6,7 @@ import {Colors} from '../constants/theme';
 import AddPost from '../screens/AddPost';
 import ChatNavigation from './ChatNavigation';
 import Order from '../screens/Order';
+import Notification from '../screens/Notification';
 
 const Tab = createBottomTabNavigator();
 
@@ -63,8 +64,8 @@ function BottomNavigation() {
         }}
       />
       <Tab.Screen
-        name="Notifications"
-        component={""}
+        name="Notification"
+        component={Notification}
         options={{
           headerShown: false,
           tabBarLabel: 'Updates',

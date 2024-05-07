@@ -17,7 +17,8 @@ import {Colors} from '../../constants/theme';
 import {useQuery} from '@tanstack/react-query';
 import apiRequest from '../../api/apiRequest';
 import urlType from '../../constants/UrlConstants';
-const Chat = ({navigation}) => {
+import SmallCard from '../../components/SmallCard';
+const Notification = ({navigation}) => {
   const [searchVal, setSearchVal] = useState('');
   const chatRoomData = useQuery({
     queryKey: ['chatroom'],
@@ -29,7 +30,6 @@ const Chat = ({navigation}) => {
       return response.data;
     },
   });
-  console.log('gih', chatRoomData.data)
   let filteredChatRooms = chatRoomData.data;
   if (searchVal)
     filteredChatRooms = chatRoomData.data.filter(item => {
@@ -45,7 +45,7 @@ const Chat = ({navigation}) => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={[styles.row]}>
-        <Text style={styles.largeTxt}>Chat Room</Text>
+        <Text style={styles.largeTxt}>Notifications</Text>
       </View>
       <CustomInput
         isIcon={true}
@@ -58,81 +58,32 @@ const Chat = ({navigation}) => {
         }}
         containerStyle={{
           backgroundColor: Colors.primary.sub,
-          padding: 0,
-
         }}
         onChangeText={e => setSearchVal(e)}
       />
-      <FlatList
-        style={styles.flat}
-        showsVerticalScrollIndicator={false}
-        data={filteredChatRooms}
-        refreshControl={
-          <RefreshControl
-            refreshing={chatRoomData.isFetching}
-            onRefresh={() => chatRoomData.refetch()}
-          />
-        }
-        renderItem={({item, index}) => (
-          <TouchableOpacity
-            key={index}
-            style={{
-              marginTop: 20,
-              paddingLeft: 10,
-              borderColor: Colors.primary.lightGray,
-              borderWidth: 2,
-              paddingVertical: 8,
-            }}
-            onPress={() =>
-              navigation.navigate('MessageBox', {
-                chatRoomId: item.chatroom_id,
-                user: item.user_account.user_id,
-                first_name: item.user_account.first_name,
-                last_name: item.user_account.last_name,
-                image: item?.user_account.image,
-                postData: item,
-              })
-            }>
-            <View style={{marginBottom: 2}} key={index}>
-              <View
-                style={{
-                  display: 'flex',
-                  flexDirection: 'row',
-                  paddingLeft: 15,
-                }}>
-                <View>
-                  {/* {item?.unread_count ? (
-                    <View style={styles.badge}>
-                      <Text style={{color: 'white', textAlign: 'center'}}>
-                        {item?.unread_count ? item?.unread_count : 0}
-                      </Text>
-                    </View>
-                  ) : null} */}
-                  {item?.user_account.image ? (
-                    <Image
-                      style={styles.img}
-                      source={{uri: item?.user_account.image}}
-                    />
-                  ) : (
-                    <Image style={styles.img} source={image} />
-                  )}
-                </View>
-                <View style={{justifyContent: 'center'}}>
-                  <Text
-                    style={
-                      styles.paragraph
-                    }>{`${item.user_account?.first_name} ${item.user_account?.last_name}`}</Text>
-                </View>
-              </View>
+      <View style={{marginTop: 20}}>
+        <FlatList
+          style={styles.flat}
+          showsVerticalScrollIndicator={false}
+          data={filteredChatRooms}
+          refreshControl={
+            <RefreshControl
+              refreshing={chatRoomData.isFetching}
+              onRefresh={() => chatRoomData.refetch()}
+            />
+          }
+          renderItem={({item, index}) => (
+            <View style={{paddingHorizontal: 20}}>
+              <SmallCard profile={true} />
             </View>
-          </TouchableOpacity>
-        )}
-      />
+          )}
+        />
+      </View>
     </SafeAreaView>
   );
 };
 
-export default Chat;
+export default Notification;
 
 const styles = StyleSheet.create({
   container: {
@@ -159,13 +110,8 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: Colors.primary.lightBlack,
     marginLeft: 10,
-    // borderTopColor: 'transparent',
-    // borderRightColor: 'transparent',
-    // borderLeftColor: 'transparent',
   },
-  // card: {
-  //   outline: 'transparent',
-  // },
+
   flat: {
     backgroundColor: 'white',
     marginLeft: -25,
