@@ -42,7 +42,7 @@ function Main() {
     );
     if (granted === PermissionsAndroid.RESULTS.GRANTED) {
       const fcmToken = await messaging().getToken();
-      console.log(fcmToken);
+      console.log(fcmToken); 
       console.log('found');
     } else {
       console.log('not found');

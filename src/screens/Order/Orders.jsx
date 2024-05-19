@@ -27,8 +27,8 @@ function Orders({navigation}) {
 
   // Extract proposal_id values from sentProposalData and receivedProposalData
   const proposalIds = [
-    ...sentProposalData?.map(data => data.proposal_id),
-    ...receivedProposalData?.map(data => data.proposal_id),
+    ...sentProposalData?.map(data => data?.proposal_id),
+    ...receivedProposalData?.map(data => data?.proposal_id),
   ];
 
   console.log('proposalIds:', proposalIds);
@@ -48,9 +48,9 @@ function Orders({navigation}) {
       <View style={styles.line}></View>
 
       <View>
-        {contractData.data && contractData.data.length > 0 ? (
+        {contractData?.data && contractData?.data.length > 0 ? (
           <FlatList
-            data={contractData.data}
+            data={contractData?.data}
             refreshControl={
               <RefreshControl
                 refreshing={contractData.isLoading}
@@ -83,7 +83,7 @@ function Orders({navigation}) {
           />
         ) : (
           <View style={{alignItems: 'center', marginTop: 10}}>
-            {contractData.data ? (
+            {contractData?.data ? (
               <Text style={{color: Colors.primary.lightGray}}>
                 No Offer Available.
               </Text>

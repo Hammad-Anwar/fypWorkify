@@ -32,7 +32,7 @@ function Offers({navigation}) {
         method: 'get',
         url: `receivedProposals?useraccount_id=${userData?.user?.useraccount_id}`,
       });
-      return response.data;
+      return response?.data;
     },
   });
   const proposalData = useQuery({
@@ -42,7 +42,7 @@ function Offers({navigation}) {
         method: 'get',
         url: `proposalsByUser?useraccount_id=${userData?.user?.useraccount_id}`,
       });
-      return response.data;
+      return response?.data;
     },
   });
 
@@ -192,7 +192,7 @@ function Offers({navigation}) {
                   />
                 ) : (
                   <View style={{alignItems: 'center', marginTop: 10}}>
-                    {receivedProposalData.data ? (
+                    {receivedProposalData?.data ? (
                       <Text style={{color: Colors.primary.lightGray}}>
                         No Offer Available.
                       </Text>
