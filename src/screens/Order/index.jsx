@@ -1,7 +1,5 @@
 import React from 'react';
 import {createMaterialTopTabNavigator} from '@react-navigation/material-top-tabs';
-// import ProfileReview from '../screens/Home/ProfileReview';
-// import OtherReview from '../screens/Home/OtherReview';
 import {
   Image,
   SafeAreaView,
@@ -13,9 +11,9 @@ import {
 } from 'react-native';
 import {Colors} from '../../constants/theme';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import CustomBtn from '../../components/CustomBtn';
 import Offers from './Offers';
 import Orders from './Orders';
+import OrderNavigation from '../../navigation/OrderNavigation';
 
 const Tab = createMaterialTopTabNavigator();
 

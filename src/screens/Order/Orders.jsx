@@ -27,8 +27,8 @@ function Orders({navigation}) {
 
   // Extract proposal_id values from sentProposalData and receivedProposalData
   const proposalIds = [
-    ...sentProposalData?.map(data => data?.proposal_id),
-    ...receivedProposalData?.map(data => data?.proposal_id),
+    ...(sentProposalData?.map(data => data?.proposal_id) || []),
+    ...(receivedProposalData?.map(data => data?.proposal_id) || []),
   ];
 
   console.log('proposalIds:', proposalIds);
@@ -42,6 +42,7 @@ function Orders({navigation}) {
       });
       return response.data;
     },
+    enabled: proposalIds.length > 0,
   });
   return (
     <SafeAreaView style={styles.container}>
@@ -72,12 +73,11 @@ function Orders({navigation}) {
                 time={moment(data?.updated_at).format('DD-MM-YYYY')}
                 key={index}
                 isOrder={true}
-
-                // onPress={() =>
-                //   navigation.navigate('Complain', {
-                //     dispute_data: data,
-                //   })
-                // }
+                onPress={() =>
+                  navigation.navigate('OrderDetail', {
+                    contract_id: data?.contract_id,
+                  })
+                }    
               />
             )}
           />
