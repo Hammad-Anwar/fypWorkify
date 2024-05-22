@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   Image,
   SafeAreaView,
@@ -26,12 +26,11 @@ import profileImg from '../../assets/Images/profileImg.jpg';
 import SettingCard from '../../components/SettingCard';
 
 function MoreOptions({route, navigation}) {
-  //   const {userInfo, userDetail} = route.params;
   const queryClient = useQueryClient();
   const userData = queryClient.getQueryData(['user']);
   const [{}, dispatch] = useStateValue();
   const [isLogoutModalVisible, setLogoutModalVisible] = useState(false);
-  // console.log('sds', userData?.user?.useraccount_id);
+  console.log('sds', userData?.user?.user_account?.user_id);
   const handleLogout = () => {
     setLogoutModalVisible(true);
   };
@@ -44,6 +43,51 @@ function MoreOptions({route, navigation}) {
       isLogin: false,
     });
     setLogoutModalVisible(false);
+  };
+
+  const userApiData = useQuery({
+    queryKey: ['userById', userData?.user?.user_account?.user_id],
+    queryFn: async () => {
+      const response = await apiRequest(urlType.BACKEND, {
+        method: 'get',
+        url: `userById?id=${userData?.user?.user_account?.user_id}`,
+      });
+      return response?.data;
+    },
+  });
+
+  const verificationMutation = useMutation({
+    mutationFn: async e => {
+      const response = await apiRequest(urlType.BACKEND, {
+        method: 'put',
+        url: `updateUserStatus`,
+        data: e,
+      });
+      return response;
+    },
+    onSuccess: async e => {
+      if (e.status === 200) {
+        showMessage({
+          message: 'Verification Request Send',
+          type: 'success',
+          color: '#fff',
+          backgroundColor: Colors.primary.green,
+          floating: true,
+        });
+        userApiData.refetch()
+      } else {
+        showMessage({
+          message: e.response.message || 'An Error occured',
+          type: 'danger',
+          color: '#fff',
+          backgroundColor: 'red',
+          floating: true,
+        });
+      }
+    },
+  });
+  const handleStatus = async e => {
+    await verificationMutation.mutate(e);
   };
 
   return (
@@ -88,6 +132,42 @@ function MoreOptions({route, navigation}) {
             </View>
           </View>
           <View style={styles.line}></View>
+          {userApiData?.data?.status === 'unverified' ? (
+            <SettingCard
+              iconName={'alert-rhombus-outline'}
+              text={'Verification Request'}
+              onPress={() =>
+                handleStatus({
+                  id: parseInt(userData?.user?.user_account?.user_id),
+                  status: 'verification request',
+                })
+              }
+            />
+          ) : userApiData?.data?.status === 'verification request' ? (
+            <SettingCard
+              iconName={'alert-rhombus-outline'}
+              text={'Verification Request'}
+              onPress={() => {
+                showMessage({
+                  message: 'Account Verified Request Send Already',
+                  type: 'warning',
+                  floating: true,
+                });
+              }}
+            />
+          ) : userApiData?.data?.status === 'verified' ? (
+            <SettingCard
+              iconName={'alert-rhombus-outline'}
+              text={'Account Verified'}
+              onPress={() => {
+                showMessage({
+                  message: 'Account Already Verified',
+                  type: 'info',
+                  floating: true,
+                });
+              }}
+            />
+          ) : null}
           <SettingCard
             iconName={'alert-rhombus-outline'}
             text={'Dispute Center'}

@@ -70,14 +70,14 @@ function Orders({navigation}) {
                 proposal_payment={data?.proposal?.payment?.payment_amount}
                 order_status={data?.contract_status}
                 proposal_tasks={data?.proposal?.has_proposal_task}
-                time={moment(data?.updated_at).format('DD-MM-YYYY')}
+                time={moment(data?.created_at).format('MMMM, DD YYYY')}
                 key={index}
                 isOrder={true}
                 onPress={() =>
                   navigation.navigate('OrderDetail', {
                     contract_id: data?.contract_id,
                   })
-                }    
+                }
               />
             )}
           />
@@ -85,7 +85,7 @@ function Orders({navigation}) {
           <View style={{alignItems: 'center', marginTop: 10}}>
             {contractData?.data ? (
               <Text style={{color: Colors.primary.lightGray}}>
-                No Offer Available.
+                No Order Available.
               </Text>
             ) : (
               <ActivityIndicator size={24} color={Colors.primary.black} />

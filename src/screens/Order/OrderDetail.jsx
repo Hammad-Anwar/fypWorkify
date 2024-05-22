@@ -15,16 +15,16 @@ import {Colors} from '../../constants/theme';
 import SmallCard from '../../components/SmallCard';
 import {useQuery, useQueryClient, useMutation} from '@tanstack/react-query';
 import apiRequest from '../../api/apiRequest';
-import urlType from '../../constants/UrlConstants';  
+import urlType from '../../constants/UrlConstants';
 import moment from 'moment';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import CustomBtn from '../../components/CustomBtn';
 import LargeCard from '../../components/LargeCard';
 
 function OrderDetail({route, navigation}) {
-    const {contract_id} = route.params;
+  const {contract_id} = route.params;
   const contractData = useQuery({
-    queryKey: ['contractData'],
+    queryKey: ['contractData', contract_id],
     queryFn: async () => {
       const response = await apiRequest(urlType.BACKEND, {
         method: 'get',
@@ -32,8 +32,9 @@ function OrderDetail({route, navigation}) {
       });
       return response.data;
     },
+    enabled: contract_id ? true : false,
   });
-  console.log("first", contractData.data)
+  console.log('first', contractData?.data);
   return (
     <SafeAreaView style={styles.container}>
       <View style={[styles.row, {justifyContent: 'space-between'}]}>
@@ -45,47 +46,94 @@ function OrderDetail({route, navigation}) {
           />
         </TouchableOpacity>
         <Text style={[styles.largeTxt]}>Order Details</Text>
-        <TouchableOpacity>
-          <MaterialCommunityIcons
-            name="clipboard-remove-outline"
-            size={32}
-            color={Colors.primary.red}
-          />
-        </TouchableOpacity>
+        {contractData?.data?.contract_status === 'working' ||
+        contractData?.data?.contract_status === 'order cancel' ||
+        contractData?.data?.contract_status === 'cancel request' ? (
+          <TouchableOpacity
+            onPress={() =>
+              navigation.navigate('CancelOrder', {
+                contract: contractData?.data,
+              })
+            }>
+            <MaterialCommunityIcons
+              name="clipboard-remove-outline"
+              size={32}
+              color={Colors.primary.red}
+            />
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity>
+            <MaterialCommunityIcons
+              name="clipboard-remove-outline"
+              size={32}
+              color={Colors.primary.white}
+            />
+          </TouchableOpacity>
+        )}
       </View>
 
-      <View style={{marginTop: 20, marginBottom: 40}}>
-        <Text style={[styles.largeTxt,{fontSize: 18}]}>Job Post</Text>
-        {/* {userData.data && userData.data.length > 0 ? (
-          <FlatList
-            data={userData.data}
-            refreshControl={
-              <RefreshControl
-                refreshing={userData.isLoading}
-                onRefresh={() => userData.refetch()}
-              />
-            }
-            keyExtractor={(item, index) => index.toString()}
-            renderItem={({item: jobData, index}) => (
-              <LargeCard
-                key={index}
-                jobData={jobData?.job}
-                postId={jobData?.job?.job_id}
-              />
-            )}
-          />
-        ) : (
-          <View style={{alignItems: 'center', marginTop: 10}}>
-            {userData.data ? (
-              <Text style={{color: Colors.primary.lightGray}}>
-                No posts available
-              </Text>
-            ) : (
-              <ActivityIndicator size={24} color={Colors.primary.black} />
-            )}
+      <ScrollView style={{flex: 1, marginTop: 20, marginBottom: 0}}>
+        <View style={[styles.row, {justifyContent: 'space-between'}]}>
+          <Text style={[styles.largeTxt, {fontSize: 18}]}>Job Post</Text>
+          <View
+            style={[
+              (contractData?.data?.contract_status === 'working' ||
+              contractData?.data?.contract_status === 'complete request'
+                ? {backgroundColor: Colors.primary.main}
+                : contractData?.data?.contract_status === 'complete'
+                ? {backgroundColor: Colors.primary.green}
+                : contractData?.data?.contract_status === 'order cancel' ||
+                  contractData?.data?.contract_status === 'cancel request'
+                ? {backgroundColor: Colors.primary.red}
+                : null),
+              {padding: 10, borderRadius: 8},
+            ]}>
+            <Text
+              style={[
+                styles.largeTxt,
+                {fontSize: 16, textTransform: 'capitalize'},
+              ]}>
+              {contractData?.data?.contract_status}
+            </Text>
           </View>
-        )} */}
-      </View>
+        </View>
+        <LargeCard jobData={contractData?.data?.proposal?.job} isOrder={true} />
+        <Text style={[styles.largeTxt, {fontSize: 18, marginVertical: 10}]}>
+          Proposal Details
+        </Text>
+        <SmallCard
+          profile_image={contractData?.data?.proposal?.user_account?.image}
+          first_name={contractData?.data?.proposal?.user_account?.first_name}
+          last_name={contractData?.data?.proposal?.user_account?.last_name}
+          proposal_description={contractData?.data?.proposal?.description}
+          proposal_duration={contractData?.data?.proposal?.duration}
+          proposal_revision={contractData?.data?.proposal?.revisions}
+          proposal_payment={
+            contractData?.data?.proposal?.payment?.payment_amount
+          }
+          proposal_status={contractData?.data?.proposal?.proposal_status}
+          proposal_tasks={contractData?.data?.proposal?.has_proposal_task}
+          time={moment(contractData?.data?.proposal?.updated_at).format(
+            'MMMM, DD YYYY',
+          )}
+          isOffer={true}
+        />
+        {contractData?.data?.contract_status === 'working' ? (
+          <CustomBtn
+            lbl={'Work Delivered'}
+            style={{marginVertical: 20}}
+            // onPress={handleAddPost}
+            // loading={addPostMutation.isPending}
+          />
+        ) : contractData?.data?.contract_status === 'complete' ? (
+          <CustomBtn
+            lbl={'Give Feedback'}
+            style={{marginVertical: 20}}
+            // onPress={handleAddPost}
+            // loading={addPostMutation.isPending}
+          />
+        ) : null}
+      </ScrollView>
     </SafeAreaView>
   );
 }

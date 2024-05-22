@@ -24,7 +24,7 @@ function Offers({navigation}) {
   const [isMultiple, setIsMultiple] = useState(false);
   const handleSwitchChange = value => {
     setIsMultiple(value);
-  };
+  };   
   const receivedProposalData = useQuery({
     queryKey: ['receivedProposalData'],
     queryFn: async () => {
@@ -176,7 +176,7 @@ function Offers({navigation}) {
                         proposal_payment={data?.payment?.payment_amount}
                         proposal_status={data?.proposal_status}
                         proposal_tasks={data?.has_proposal_task}
-                        time={moment(data?.updated_at).format('DD-MM-YYYY')}
+                        time={moment(data?.updated_at).format('MMMM, DD YYYY')}
                         isReceived={true}
                         key={index}
                         isOffer={true}
@@ -229,7 +229,7 @@ function Offers({navigation}) {
                         proposal_payment={data?.payment?.payment_amount}
                         proposal_status={data?.proposal_status}
                         proposal_tasks={data?.has_proposal_task}
-                        time={moment(data?.updated_at).format('DD-MM-YYYY')}
+                        time={moment(data?.updated_at).format('MMMM, DD YYYY')}
                         key={index}
                         isOffer={true}
                         // onPress={() =>
@@ -282,7 +282,7 @@ function Offers({navigation}) {
                   proposal_payment={data?.payment?.payment_amount}
                   proposal_status={data?.proposal_status}
                   proposal_tasks={data?.has_proposal_task}
-                  time={moment(data?.updated_at).format('DD-MM-YYYY')}
+                  time={moment(data?.updated_at).format('MMMM, DD YYYY')}
                   isReceived={true}
                   key={index}
                   isOffer={true}

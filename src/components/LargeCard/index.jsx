@@ -26,7 +26,8 @@ function LargeCard({
   userData,
   handleSendMessage,
   isProposal,
-  handleProposal
+  handleProposal,   
+  isOrder,
 }) {
   const queryClient = useQueryClient();
   const userInfo = queryClient.getQueryData(['user']);
@@ -256,7 +257,7 @@ function LargeCard({
             <Text style={[styles.txt, {marginLeft: 5}]}>Create Proposal</Text>
           </TouchableOpacity>
         </View>
-      ) : (
+      ) : isOrder ? null : (
         <View style={[styles.row, {marginTop: 8, paddingHorizontal: 10}]}>
           <TouchableOpacity
             style={{flexDirection: 'row', alignItems: 'center'}}

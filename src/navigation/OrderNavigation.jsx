@@ -4,6 +4,7 @@ import {StatusBar} from 'react-native';
 import Orders from '../screens/Order/Orders';
 import OrderDetail from '../screens/Order/OrderDetail';
 import Order from '../screens/Order';
+import CancelOrder from '../screens/Order/CancelOrder';
 function OrderNavigation() {
   const Stack = createNativeStackNavigator();
   return (
@@ -19,15 +20,20 @@ function OrderNavigation() {
           name="Order"      
           component={Order}
         />
-        <Stack.Screen
+        {/* <Stack.Screen
           options={{headerShown: false}}
           name="Orders"      
           component={Orders}
-        />
+        /> */}
         <Stack.Screen
           options={{headerShown: false}}
           name="OrderDetail"
           component={OrderDetail}
+        />
+        <Stack.Screen
+          options={{headerShown: false}}
+          name="CancelOrder"
+          component={CancelOrder}
         />
         
       </Stack.Navigator>
