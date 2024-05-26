@@ -17,14 +17,33 @@ import urlType from '../../constants/UrlConstants';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {showMessage} from 'react-native-flash-message';
 import {useStateValue} from '../../context/GlobalContextProvider';
+import messaging from '@react-native-firebase/messaging';
+import {PermissionsAndroid} from 'react-native';
 
 function Authenticaion({navigation}) {
   const [email, setEmail] = useState('');
   const [{}, dispatch] = useStateValue();
   const [password, setPassword] = useState('');
+  const [fcmToken, setFcmToken] = useState('');
+
+  useEffect(() => {
+    requestNotificationPermission();
+  }, []);
+
+  const requestNotificationPermission = async () => {
+    const granted = await PermissionsAndroid.request(
+      PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
+    );
+    if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+      const fcmToken = await messaging().getToken();
+      setFcmToken(fcmToken);
+    } else {
+      console.log('not found');
+    }
+  };
 
   const loginMutation = useMutation({
-    mutationKey:["user"],
+    mutationKey: ['user'],
     mutationFn: async data => {
       const response = await apiRequest(urlType.BACKEND, {
         method: 'post',
@@ -42,7 +61,7 @@ function Authenticaion({navigation}) {
           type: 'SET_LOGIN',
           isLogin: true,
         });
-      }  else {
+      } else {
         showMessage({
           message: e.response.message || 'An Error occured',
           type: 'danger',
@@ -61,6 +80,7 @@ function Authenticaion({navigation}) {
         const data = {
           email: email,
           password: password,
+          fcmToken
         };
         await loginMutation.mutate(data);
         console.log(loginMutation.isLoading);

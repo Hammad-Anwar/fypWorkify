@@ -149,8 +149,8 @@ const AddPost = ({navigation}) => {
         },
         task_descriptions: inputs,
       };
-      console.log('testing', data);
-      await addPostMutation.mutate(data);
+      console.log('testing data', data);
+      // await addPostMutation.mutate(data);
     } else {
       showMessage({
         message: 'Please fill all the fields',
@@ -168,8 +168,9 @@ const AddPost = ({navigation}) => {
         width: 400,
         height: 400,
         cropping: true,
+        includeBase64: true,     
       });
-      setImageUri(image.path);
+      setImageUri(`data:${image.mime};base64,${image.data}`);
     } catch (error) {
       console.log('ImagePicker Error: ', error);
     }

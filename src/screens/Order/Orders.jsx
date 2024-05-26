@@ -30,7 +30,7 @@ function Orders({navigation}) {
     ...(sentProposalData?.map(data => data?.proposal_id) || []),
     ...(receivedProposalData?.map(data => data?.proposal_id) || []),
   ];
-
+ 
   console.log('proposalIds:', proposalIds);
   const contractData = useQuery({
     queryKey: ['contractsByProposalIds'],

@@ -129,7 +129,7 @@ function OrderDetail({route, navigation}) {
           <CustomBtn
             lbl={'Give Feedback'}
             style={{marginVertical: 20}}
-            // onPress={handleAddPost}
+            onPress={() => navigation.navigate('ss', {jobId: contractData?.data?.proposal?.job?.job_id} )}
             // loading={addPostMutation.isPending}
           />
         ) : null}
