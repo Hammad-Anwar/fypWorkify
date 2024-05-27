@@ -149,8 +149,8 @@ const AddPost = ({navigation}) => {
         },
         task_descriptions: inputs,
       };
-      console.log('testing data', data);
-      // await addPostMutation.mutate(data);
+      // console.log('testing data', data);
+      await addPostMutation.mutate(data);
     } else {
       showMessage({
         message: 'Please fill all the fields',
@@ -165,8 +165,8 @@ const AddPost = ({navigation}) => {
   const chooseImage = async () => {
     try {
       const image = await ImageCropPicker.openPicker({
-        width: 400,
-        height: 400,
+        width: 720,
+        height: 720,
         cropping: true,
         includeBase64: true,     
       });

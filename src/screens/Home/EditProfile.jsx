@@ -20,6 +20,7 @@ import urlType from '../../constants/UrlConstants';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {showMessage} from 'react-native-flash-message';
 import ImageCropPicker from 'react-native-image-crop-picker';
+import img from '../../assets/Images/empty.jpg';
 
 function EditProfile({route, navigation}) {
   const {userDetail, userInfo} = route.params;
@@ -30,7 +31,7 @@ function EditProfile({route, navigation}) {
   const [experience, setExperience] = useState('');
   const [link, setLink] = useState('');
   const [location, setLocation] = useState('');
-  const [imageUri, setImageUri] = useState();
+  const [imageUri, setImageUri] = useState(null);
 
   const userApiDetail = useQuery({
     queryKey: ['userApiDetail', userInfo?.userType, userInfo?.id],
@@ -44,10 +45,10 @@ function EditProfile({route, navigation}) {
           setFirst_name(response?.data?.user_account?.first_name);
           setLast_name(response?.data?.user_account?.last_name);
           setOverview(response?.data?.overview);
-          setExperience(response?.data?.experience)
+          setExperience(response?.data?.experience);
           setLink(response?.data?.links);
           setLocation(response?.data?.location);
-          setImageUri(response?.data?.user_account?.image);
+          setImageUri(response?.data?.user_account?.image || null);
           return response.data;
         } else {
           throw new Error('Data not available');
@@ -59,7 +60,7 @@ function EditProfile({route, navigation}) {
     },
     enabled: userInfo ? true : false,
   });
-  console.log('das',location)
+  console.log('das', location);
 
   const updateMutation = useMutation({
     mutationFn: async data => {
@@ -191,11 +192,12 @@ function EditProfile({route, navigation}) {
   const chooseImage = async () => {
     try {
       const image = await ImageCropPicker.openPicker({
-        width: 150,
-        height: 150,
+        width: 250,
+        height: 250,
         cropping: true,
+        includeBase64: true,
       });
-      setImageUri(image.path);
+      setImageUri(`data:${image.mime};base64,${image.data}`);
     } catch (error) {
       console.log('ImagePicker Error: ', error);
     }
@@ -205,12 +207,7 @@ function EditProfile({route, navigation}) {
     if (imageUri) {
       return <Image source={{uri: imageUri}} style={styles.imgStyle} />;
     } else {
-      return (
-        <Image
-          source={{uri: userApiDetail?.data?.user_account?.image}}
-          style={styles.imgStyle}
-        />
-      );
+      return <Image source={img} style={styles.imgStyle} />;
     }
   };
   // console.log('detail', userDetail);

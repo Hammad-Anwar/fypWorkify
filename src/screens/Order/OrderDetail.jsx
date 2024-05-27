@@ -134,7 +134,7 @@ function OrderDetail({route, navigation}) {
           />
         ) : null}
       </ScrollView>
-    </SafeAreaView>
+    </SafeAreaView> 
   );
 }
 const styles = StyleSheet.create({

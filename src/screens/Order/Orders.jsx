@@ -9,7 +9,7 @@ import {
   View,
   ActivityIndicator,
   FlatList,
-  RefreshControl,
+  RefreshControl, 
 } from 'react-native';
 import {Colors} from '../../constants/theme';
 import SmallCard from '../../components/SmallCard';
