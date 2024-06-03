@@ -16,6 +16,9 @@ import RemainingTime from '../RemainingTime';
 
 function SmallCard({
   profile,
+  review_comment,
+  rating,
+  job_skill,
   jobData,
   dispute,
   onPress,
@@ -51,21 +54,25 @@ function SmallCard({
           }}>
           <View style={styles.row}>
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
-              <Image source={profileImg} style={styles.cardImg} />
+              {profile_image ? (
+                <Image source={{uri: profile_image}} style={styles.cardImg} />
+              ) : (
+                <Image source={profileImg} style={styles.cardImg} />
+              )}
               <Text
                 style={[styles.smallTxt, {marginLeft: 5, fontWeight: '600'}]}>
-                John William |
+                {first_name} {last_name} |
               </Text>
-              <Text style={[styles.smallTxt, {marginLeft: 5}]}>React js</Text>
+              <Text style={[styles.smallTxt, {marginLeft: 5}]}>{job_skill}</Text>
             </View>
-            <Text style={[styles.smallTxt, {fontWeight: '600'}]}>4d</Text>
+            <Text style={[styles.smallTxt, {fontWeight: '600'}]}>{time}</Text>
           </View>
           <View style={{marginTop: 10}}>
             <Text style={[styles.smallTxt, {width: '100%'}]}>
-              Create web page design on figma for freelancing web sites.
+              {review_comment}
             </Text>
             <View style={[styles.row, {justifyContent: 'flex-end'}]}>
-              <Text style={[styles.smallTxt, {fontWeight: '600'}]}>4.5</Text>
+              <Text style={[styles.smallTxt, {fontWeight: '600'}]}>{rating}</Text>
               <MaterialIcons
                 name="star"
                 size={20}
@@ -111,10 +118,11 @@ function SmallCard({
           }}>
           <View style={styles.row}>
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
-              <Image
-                source={profile_image ? {uri: profile_image} : {profileImg}}
-                style={styles.cardImg}
-              />
+              {profile_image ? (
+                <Image source={{uri: profile_image}} style={styles.cardImg} />
+              ) : (
+                <Image source={profileImg} style={styles.cardImg} />
+              )}
               <Text style={[styles.smallTxt, {marginLeft: 5}]}>
                 {first_name} {last_name}
               </Text>
@@ -328,9 +336,9 @@ function SmallCard({
             {/* <Text style={[styles.smallTxt, {fontWeight: '600'}]}>
               Remaing Time: 
             </Text> */}
-            <RemainingTime durationInDays={proposal_duration}/>
+            <RemainingTime durationInDays={proposal_duration} />
           </View>
-        </TouchableOpacity> 
+        </TouchableOpacity>
       ) : (
         <View>
           <View style={[styles.smallCard]}>
@@ -380,8 +388,8 @@ const styles = StyleSheet.create({
     height: '100%',
   },
   cardImg: {
-    width: 24,
-    height: 24,
+    width: 28,
+    height: 28,
     borderRadius: 25,
   },
   row: {

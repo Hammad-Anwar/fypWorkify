@@ -23,24 +23,26 @@ import {PermissionsAndroid} from 'react-native';
 function Authenticaion({navigation}) {
   const [email, setEmail] = useState('');
   const [{}, dispatch] = useStateValue();
+  const [fcmState] = useStateValue();
   const [password, setPassword] = useState('');
-  const [fcmToken, setFcmToken] = useState('');
+  // const [fcmToken, setFcmToken] = useState('');
 
-  useEffect(() => {
-    requestNotificationPermission();
-  }, []);
+  // useEffect(() => {
+  //   requestNotificationPermission();
+  // }, []);
 
-  const requestNotificationPermission = async () => {
-    const granted = await PermissionsAndroid.request(
-      PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
-    );
-    if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-      const fcmToken = await messaging().getToken();
-      setFcmToken(fcmToken);
-    } else {
-      console.log('not found');
-    }
-  };
+  // const requestNotificationPermission = async () => {
+  //   const granted = await PermissionsAndroid.request(
+  //     PermissionsAndroid.PERMISSIONS.POST_NOTIFICATIONS,
+  //   );
+  //   if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+  //     const fcmToken = await messaging().getToken();
+  //     setFcmToken(fcmToken);
+  //     console.log("Check token", fcmState.isFcmToken)
+  //   } else {
+  //     console.log('not found');
+  //   }
+  // };
 
   const loginMutation = useMutation({
     mutationKey: ['user'],
@@ -80,7 +82,7 @@ function Authenticaion({navigation}) {
         const data = {
           email: email,
           password: password,
-          fcmToken
+          fcmToken: fcmState.isFcmToken
         };
         await loginMutation.mutate(data);
         console.log(loginMutation.isLoading);

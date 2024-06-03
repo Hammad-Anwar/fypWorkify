@@ -26,7 +26,7 @@ function Offers({navigation}) {
     setIsMultiple(value);
   };   
   const receivedProposalData = useQuery({
-    queryKey: ['receivedProposalData'],
+    queryKey: ['receivedProposalData', userData?.user?.useraccount_id],
     queryFn: async () => {
       const response = await apiRequest(urlType.BACKEND, {
         method: 'get',
@@ -36,7 +36,7 @@ function Offers({navigation}) {
     },
   });
   const proposalData = useQuery({
-    queryKey: ['sentProposalData'],
+    queryKey: ['sentProposalData', userData?.user?.useraccount_id],
     queryFn: async () => {
       const response = await apiRequest(urlType.BACKEND, {
         method: 'get',

@@ -48,9 +48,9 @@ function NewDispute({navigation}) {
           floating: true,
         });
         navigation.goBack();
-        setComplain_msg('')
-        setComplain_title('')
-        setImageUri(null)
+        setComplain_msg('');
+        setComplain_title('');
+        setImageUri(null);
       } else {
         showMessage({
           message: e.response.message || 'An Error occured',
@@ -73,7 +73,7 @@ function NewDispute({navigation}) {
       };
       await disputeMutation.mutate(data);
       // console.log(loginMutation.isLoading);
-      console.log(data);
+      // console.log(data);
     } else {
       showMessage({
         message: 'Please Fill All Fields',
@@ -87,11 +87,12 @@ function NewDispute({navigation}) {
   const chooseImage = async () => {
     try {
       const image = await ImageCropPicker.openPicker({
-        width: 400,
-        height: 400,
+        width: 720,
+        height: 720,
         cropping: true,
+        includeBase64: true,
       });
-      setImageUri(image.path);
+      setImageUri(`data:${image.mime};base64,${image.data}`);
     } catch (error) {
       console.log('ImagePicker Error: ', error);
     }

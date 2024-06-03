@@ -34,7 +34,18 @@ function OrderDetail({route, navigation}) {
     },
     enabled: contract_id ? true : false,
   });
-  console.log('first', contractData?.data);
+  const feedbackCheckData = useQuery({
+    queryKey: ['feedbackCheckData', contractData?.data?.proposal?.job?.job_id],
+    queryFn: async () => {
+      const response = await apiRequest(urlType.BACKEND, {
+        method: 'get',
+        url: `checkReviewByUserIdAndJobId?job_id=${contractData?.data?.proposal?.job?.job_id}`,
+      });
+      return response.data; 
+    },
+    enabled: contractData?.data?.proposal?.job?.job_id ? true : false,
+  });
+  console.log('feedback', feedbackCheckData.data);
   return (
     <SafeAreaView style={styles.container}>
       <View style={[styles.row, {justifyContent: 'space-between'}]}>
@@ -77,21 +88,24 @@ function OrderDetail({route, navigation}) {
           <Text style={[styles.largeTxt, {fontSize: 18}]}>Job Post</Text>
           <View
             style={[
-              (contractData?.data?.contract_status === 'working' ||
+              contractData?.data?.contract_status === 'working' ||
               contractData?.data?.contract_status === 'complete request'
-                ? {backgroundColor: Colors.primary.main}
+                ? {backgroundColor: Colors.primary.main, borderRadius: 8}
                 : contractData?.data?.contract_status === 'complete'
-                ? {backgroundColor: Colors.primary.green}
+                ? {backgroundColor: Colors.primary.green, borderRadius: 8}
                 : contractData?.data?.contract_status === 'order cancel' ||
                   contractData?.data?.contract_status === 'cancel request'
-                ? {backgroundColor: Colors.primary.red}
-                : null),
-              {padding: 10, borderRadius: 8},
+                ? {backgroundColor: Colors.primary.red, borderRadius: 8}
+                : null,
+              {padding: 10},
             ]}>
             <Text
               style={[
-                styles.largeTxt,
-                {fontSize: 16, textTransform: 'capitalize'},
+                {fontSize: 16, fontWeight: '600', textTransform: 'capitalize'},
+                contractData?.data?.contract_status === 'working' ||
+                contractData?.data?.contract_status === 'complete request'
+                  ? {color: Colors.primary.lightBlack}
+                  : {color: Colors.primary.white},
               ]}>
               {contractData?.data?.contract_status}
             </Text>
@@ -126,15 +140,31 @@ function OrderDetail({route, navigation}) {
             // loading={addPostMutation.isPending}
           />
         ) : contractData?.data?.contract_status === 'complete' ? (
-          <CustomBtn
-            lbl={'Give Feedback'}
-            style={{marginVertical: 20}}
-            onPress={() => navigation.navigate('ss', {jobId: contractData?.data?.proposal?.job?.job_id} )}
-            // loading={addPostMutation.isPending}
-          />
+          feedbackCheckData.data === null ? (
+            <CustomBtn
+              lbl={'Give Feedback'}
+              style={{marginVertical: 20}}
+              onPress={() =>
+                navigation.navigate('Feedback', {
+                  jobId: contractData?.data?.proposal?.job?.job_id,
+                  jobUserId:
+                    contractData?.data?.proposal?.job?.freelancer_id === null
+                      ? contractData?.data?.proposal?.job?.client?.user_id
+                      : contractData?.data?.proposal?.job?.freelancer?.user_id,
+                  proposalUserId: contractData?.data?.proposal?.useraccount_id,
+                })
+              }
+            />
+          ) : (
+            <CustomBtn
+              lbl={'Feedback ALready Send'}
+              style={{marginVertical: 20, backgroundColor: Colors.primary.sub}}
+              disabled={true}
+            />
+          )
         ) : null}
       </ScrollView>
-    </SafeAreaView> 
+    </SafeAreaView>
   );
 }
 const styles = StyleSheet.create({

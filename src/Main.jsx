@@ -13,6 +13,7 @@ import {navigationRef} from './api/RootNavigation';
 import apiRequest from './api/apiRequest';
 import messaging from '@react-native-firebase/messaging';
 import {PermissionsAndroid} from 'react-native';
+import notifee, {AuthorizationStatus, AndroidImportance} from '@notifee/react-native';
 
 const Stack = createNativeStackNavigator();
 
@@ -20,6 +21,7 @@ function Main() {
   // const [loading, setLoading] = useState(true);
   const [loading, setLoading] = useState(false);
   const [{isLogin}, dispatch] = useStateValue();
+  const [{}, dispatchToken] = useStateValue();
   const userQuery = useQuery({
     queryKey: ['user'],
     queryFn: async () => {
@@ -32,9 +34,36 @@ function Main() {
     },
     enabled: false,
   });
+
   useEffect(() => {
     requestNotificationPermission();
+    requestUserPermission();
+    createNotificationChannel();
+    // Handle foreground messages
+    const unsubscribe = messaging().onMessage(async remoteMessage => {
+      await notifee.displayNotification({
+        title: remoteMessage.notification.title,
+        body: remoteMessage.notification.body,
+        android: {
+          channelId: 'default',
+          pressAction: {
+            id: 'default',
+          },
+        },
+      });
+    });
+
+    return unsubscribe;
   }, []);
+
+  // Function to create notification channel on Android
+  async function createNotificationChannel() {
+    await notifee.createChannel({
+      id: 'default',
+      name: 'Default Channel',
+      importance: AndroidImportance.HIGH,
+    });
+  }
 
   const requestNotificationPermission = async () => {
     const granted = await PermissionsAndroid.request(
@@ -42,10 +71,30 @@ function Main() {
     );
     if (granted === PermissionsAndroid.RESULTS.GRANTED) {
       const fcmToken = await messaging().getToken();
-      console.log(fcmToken); 
+      console.log(fcmToken);
       console.log('found');
+      dispatchToken({type: 'SET_FCMTOKEN', isFcmToken: fcmToken});
     } else {
       console.log('not found');
+    }
+  };
+
+  const requestUserPermission = async () => {
+    const authStatus = await messaging().requestPermission();
+    const enabled =
+      authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+      authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+
+    if (enabled) {
+      console.log('Authorization status:', authStatus);
+    }
+
+    const settings = await notifee.requestPermission();
+
+    if (settings.authorizationStatus >= AuthorizationStatus.AUTHORIZED) {
+      console.log('Permission settings:', settings);
+    } else {
+      console.log('User declined permissions');
     }
   };
 

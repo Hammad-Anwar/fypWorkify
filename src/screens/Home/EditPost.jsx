@@ -147,7 +147,7 @@ const EditPost = ({route, navigation}) => {
         feature_job: isChecked,
       };
       await updatePostMutation.mutate(data);
-      console.log(data);
+      // console.log(data);
     } else {
       showMessage({
         message: 'Please fill all the fields',
@@ -162,11 +162,12 @@ const EditPost = ({route, navigation}) => {
   const chooseImage = async () => {
     try {
       const image = await ImageCropPicker.openPicker({
-        width: 400,
-        height: 400,
+        width: 720,
+        height: 720,
         cropping: true,
+        includeBase64: true,
       });
-      setImageUri(image.path);
+      setImageUri(`data:${image.mime};base64,${image.data}`);
     } catch (error) {
       console.log('ImagePicker Error: ', error);
     }

@@ -9,7 +9,7 @@ import {
   View,
   ActivityIndicator,
   FlatList,
-  RefreshControl, 
+  RefreshControl,
 } from 'react-native';
 import {Colors} from '../../constants/theme';
 import SmallCard from '../../components/SmallCard';
@@ -20,17 +20,22 @@ import moment from 'moment';
 
 function Orders({navigation}) {
   const queryClient = useQueryClient();
-  const sentProposalData = queryClient.getQueryData(['sentProposalData']);
+  const userData = queryClient.getQueryData(['user']);
+  const sentProposalData = queryClient.getQueryData([
+    'sentProposalData',
+    userData?.user?.useraccount_id,
+  ]);
   const receivedProposalData = queryClient.getQueryData([
     'receivedProposalData',
+    userData?.user?.useraccount_id,    
   ]);
-
+  //  ss
   // Extract proposal_id values from sentProposalData and receivedProposalData
   const proposalIds = [
     ...(sentProposalData?.map(data => data?.proposal_id) || []),
     ...(receivedProposalData?.map(data => data?.proposal_id) || []),
   ];
- 
+
   console.log('proposalIds:', proposalIds);
   const contractData = useQuery({
     queryKey: ['contractsByProposalIds'],

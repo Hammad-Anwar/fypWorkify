@@ -132,7 +132,7 @@ function Home({navigation}) {
   // console.log("user Info", userInfo)
   // console.log('User data: ', userDetail);
   // console.log(userData.data);
-  console.log(userData.data);
+  // console.log(userData.data);
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.row}>

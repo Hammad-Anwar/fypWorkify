@@ -5,6 +5,7 @@ import Orders from '../screens/Order/Orders';
 import OrderDetail from '../screens/Order/OrderDetail';
 import Order from '../screens/Order';
 import CancelOrder from '../screens/Order/CancelOrder';
+import Feedback from '../screens/Order/Feedback';
 function OrderNavigation() {
   const Stack = createNativeStackNavigator();
   return (
@@ -34,6 +35,11 @@ function OrderNavigation() {
           options={{headerShown: false}}
           name="CancelOrder"
           component={CancelOrder}
+        />
+        <Stack.Screen
+          options={{headerShown: false}}
+          name="Feedback"
+          component={Feedback}
         />
         
       </Stack.Navigator>

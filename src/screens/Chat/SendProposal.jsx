@@ -106,6 +106,7 @@ function SendProposal({route, navigation}) {
     ) {
       const data = {
         useraccount_id: parseInt(userData?.user?.useraccount_id),
+        jobUser_id: parseInt(jobData?.user_id),
         job_id: parseInt(jobData?.job_id),
         description: description,
         revisions: parseInt(revisions),
