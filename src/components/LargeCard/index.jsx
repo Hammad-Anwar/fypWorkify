@@ -26,7 +26,7 @@ function LargeCard({
   userData,
   handleSendMessage,
   isProposal,
-  handleProposal,   
+  handleProposal,
   isOrder,
 }) {
   const queryClient = useQueryClient();
@@ -114,19 +114,24 @@ function LargeCard({
     <View style={styles.container}>
       <View style={styles.row}>
         <View style={[styles.row, {justifyContent: 'flex-start'}]}>
-          <Image
-            // source={profileImg}
-            source={
-              jobData?.profile_image
-                ? {uri: jobData.profile_image}
-                : jobData?.client?.image
-                ? {uri: jobData?.client?.image}
-                : jobData?.freelancer?.image
-                ? {uri: jobData?.freelancer?.image}
-                : {profileImg}
-            }
-            style={styles.cardImg}
-          />
+          {jobData?.profile_image ? (
+            <Image
+              source={{uri: jobData.profile_image}}
+              style={styles.cardImg}
+            />
+          ) : jobData?.client?.image ? (
+            <Image
+              source={{uri: jobData?.client?.image}}
+              style={styles.cardImg}
+            />
+          ) : jobData?.freelancer?.image ? (
+            <Image
+              source={{uri: jobData?.freelancer?.image}}
+              style={styles.cardImg}
+            />
+          ) : (
+            <Image source={profileImg} style={styles.cardImg} />
+          )}
 
           <View style={{marginLeft: 10}}>
             <Text

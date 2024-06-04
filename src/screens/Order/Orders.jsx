@@ -21,19 +21,42 @@ import moment from 'moment';
 function Orders({navigation}) {
   const queryClient = useQueryClient();
   const userData = queryClient.getQueryData(['user']);
-  const sentProposalData = queryClient.getQueryData([
-    'sentProposalData',
-    userData?.user?.useraccount_id,
-  ]);
-  const receivedProposalData = queryClient.getQueryData([
-    'receivedProposalData',
-    userData?.user?.useraccount_id,    
-  ]);
-  //  ss
+  // const sentProposalData = queryClient.getQueryData([
+  //   'sentProposalData',
+  //   userData?.user?.useraccount_id,
+  // ]);
+  // const receivedProposalData = queryClient.getQueryData([
+  //   'receivedProposalData',
+  //   userData?.user?.useraccount_id,
+  // ]);
+
+  const receivedProposalData = useQuery({
+    queryKey: ['receivedProposalData', userData?.user?.useraccount_id],
+    queryFn: async () => {
+      const response = await apiRequest(urlType.BACKEND, {
+        method: 'get',
+        url: `receivedProposals?useraccount_id=${userData?.user?.useraccount_id}`,
+      });
+      return response?.data;
+    },
+    
+  });
+  const sentProposalData = useQuery({
+    queryKey: ['sentProposalData', userData?.user?.useraccount_id],
+    queryFn: async () => {
+      const response = await apiRequest(urlType.BACKEND, {
+        method: 'get',
+        url: `proposalsByUser?useraccount_id=${userData?.user?.useraccount_id}`,
+      });
+      return response?.data;
+    },
+  });
+  // console.log("first",  sentProposalData.data)
+
   // Extract proposal_id values from sentProposalData and receivedProposalData
   const proposalIds = [
-    ...(sentProposalData?.map(data => data?.proposal_id) || []),
-    ...(receivedProposalData?.map(data => data?.proposal_id) || []),
+    ...(sentProposalData?.data?.map(data => data?.proposal_id) || []),
+    ...(receivedProposalData?.data?.map(data => data?.proposal_id) || []),
   ];
 
   console.log('proposalIds:', proposalIds);

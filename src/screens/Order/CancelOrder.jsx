@@ -20,11 +20,14 @@ import apiRequest from '../../api/apiRequest';
 import urlType from '../../constants/UrlConstants';
 import moment from 'moment';
 import {showMessage} from 'react-native-flash-message';
+import ImageCropPicker from 'react-native-image-crop-picker';
+import emptyImg from '../../assets/Images/empty.jpg';
 function CancelOrder({navigation, route}) {
   const {contract} = route.params;
   const queryClient = useQueryClient();
   const userData = queryClient.getQueryData(['user']);
   const [messageRequest, setMessageRequest] = useState('');
+  const [imageUri, setImageUri] = useState(null);
 
   const contractData = useQuery({
     queryKey: ['contractCancelData', contract?.contract_id],
@@ -59,6 +62,7 @@ function CancelOrder({navigation, route}) {
         });
         contractData.refetch();
         setMessageRequest('');
+        setImageUri(null)
       } else {
         showMessage({
           message: e.response.message || 'An Error occured',
@@ -77,8 +81,10 @@ function CancelOrder({navigation, route}) {
         contract_id: parseInt(contractData?.data?.contract_id),
         user_id: parseInt(userData?.user?.useraccount_id),
         message: messageRequest,
+        img: imageUri
       };
       await cancelContractMutation.mutate(data);
+      // console.log("da", data)   
     } else {
       showMessage({
         message: 'Please Fill the Input Field',
@@ -87,6 +93,27 @@ function CancelOrder({navigation, route}) {
         backgroundColor: 'red',
         floating: true,
       });
+    }
+  };
+  const chooseImage = async () => {
+    try {
+      const image = await ImageCropPicker.openPicker({
+        width: 720,
+        height: 720,
+        cropping: true,
+        includeBase64: true,
+      });
+      setImageUri(`data:${image.mime};base64,${image.data}`);
+    } catch (error) {
+      console.log('ImagePicker Error: ', error);
+    }
+  };
+
+  const renderImage = () => {
+    if (imageUri) {
+      return <Image source={{uri: imageUri}} style={styles.selectImgStyle} />;
+    } else {
+      return <Image source={emptyImg} style={styles.selectImgStyle} />;
     }
   };
   return (
@@ -139,6 +166,23 @@ function CancelOrder({navigation, route}) {
                       Send By You
                     </Text>
                   </View>
+                  {data?.image === null ? null : (
+                    <View
+                      style={{
+                        // width: '80%',
+                        marginTop: 10,
+                        backgroundColor: Colors.primary.lightGray,
+                        padding: 5,
+                        borderRadius: 12,
+                      }}>
+                      <View style={{alignItems: 'center'}}>
+                        <Image
+                          source={{uri: data?.image}}
+                          style={styles.sentImgStyle}
+                        />
+                      </View>
+                    </View>
+                  )}
                 </View>
               ) : (
                 <View style={{alignItems: 'flex-start'}}>
@@ -186,20 +230,43 @@ function CancelOrder({navigation, route}) {
       )}
 
       <View style={styles.line}></View>
-
-      <CustomInput
-        placeholder="Write the reason of order cancel."
-        keyboardType="default"
-        multiline={true}
-        numberOfLines={3}
+      <View
         style={{
-          backgroundColor: Colors.primary.sub,
-        }}
-        value={messageRequest}
-        onChangeText={text => {
-          setMessageRequest(text);
-        }}
-      />
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+        }}>
+        <CustomInput
+          placeholder="Write the reason of order cancel."
+          keyboardType="default"
+          multiline={true}
+          numberOfLines={3}
+          style={{
+            backgroundColor: Colors.primary.sub,
+            width: 300,
+          }}
+          value={messageRequest}
+          onChangeText={text => {
+            setMessageRequest(text);
+          }}
+        />
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'center',
+          }}>
+          <TouchableOpacity style={[styles.containerImg]} onPress={chooseImage}>
+            {renderImage()}
+            <View style={styles.overlay}>
+              <MaterialCommunityIcons
+                name="camera"
+                size={24}
+                color={Colors.primary.lightBlack}
+              />
+            </View>
+          </TouchableOpacity>
+        </View>
+      </View>
 
       <View style={{marginTop: 20, marginBottom: 10}}>
         <CustomBtn
@@ -240,11 +307,32 @@ const styles = StyleSheet.create({
     width: '100%',
     backgroundColor: Colors.primary.lightGray,
   },
+  sentImgStyle: {
+    width: 180,
+    height: 180,
+    borderRadius: 12,
+    marginBottom: 10,
+  },
   imgStyle: {
     width: 120,
     height: 120,
     borderRadius: 12,
     marginBottom: 10,
+  },
+  containerImg: {
+    position: 'relative',
+    overflow: 'hidden',
+  },
+  selectImgStyle: {
+    width: 60,
+    height: 80,
+    resizeMode: 'cover',
+    borderRadius: 6,
+  },
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
 
