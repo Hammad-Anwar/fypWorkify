@@ -3,6 +3,7 @@ import {
   ActivityIndicator,
   FlatList,
   Image,
+  Modal,
   RefreshControl,
   SafeAreaView,
   ScrollView,
@@ -22,10 +23,13 @@ import moment from 'moment';
 import {showMessage} from 'react-native-flash-message';
 import ImageCropPicker from 'react-native-image-crop-picker';
 import emptyImg from '../../assets/Images/empty.jpg';
+import ImageViewer from 'react-native-image-zoom-viewer';
 function Complain({navigation, route}) {
   const {dispute_data} = route.params;
   const [complainRespond, setComplainRespond] = useState('');
   const [imageUri, setImageUri] = useState(null);
+  const [isVisible, setIsVisible] = useState(false);
+  const [imgUrl, setImgUrl] = useState('');
 
   const complainData = useQuery({
     queryKey: ['disputeComplains', dispute_data?.dispute_id],
@@ -60,7 +64,7 @@ function Complain({navigation, route}) {
         });
         complainData.refetch();
         setComplainRespond('');
-        setImageUri('')
+        setImageUri('');
       } else {
         showMessage({
           message: e.response.message || 'An Error occured',
@@ -173,12 +177,23 @@ function Complain({navigation, route}) {
 
                         borderRadius: 12,
                       }}>
-                      <View style={{alignItems: 'center'}}>
+                      <TouchableOpacity
+                        style={{alignItems: 'center'}}
+                        onPress={() => {
+                          setIsVisible(true);
+                          setImgUrl(data?.image);
+                        }}>
                         <Image
                           source={{uri: data?.image}}
                           style={styles.sentImgStyle}
                         />
-                      </View>
+                      </TouchableOpacity>
+                      <Modal visible={isVisible} transparent={true}>
+                        <ImageViewer
+                          imageUrls={[{url: imgUrl}]}
+                          onClick={() => setIsVisible(false)}
+                        />
+                      </Modal>
                     </View>
                   )}
                 </View>
@@ -229,14 +244,27 @@ function Complain({navigation, route}) {
                 }}>
                 <View style={{alignItems: 'center'}}>
                   {complainData?.data?.complain_img ? (
-                    <Image
-                      source={{uri: complainData?.data?.complain_img}}
-                      style={styles.imgStyle}
-                    />
+                    <TouchableOpacity
+                      onPress={() => {
+                        setIsVisible(true);
+                        setImgUrl(complainData?.data?.complain_img);
+                      }}>
+                      <Image
+                        source={{uri: complainData?.data?.complain_img}}
+                        style={styles.imgStyle}
+                      />
+                    </TouchableOpacity>
                   ) : (
                     <Image source={emptyImg} style={styles.imgStyle} />
                   )}
                 </View>
+
+                <Modal visible={isVisible} transparent={true}>
+                  <ImageViewer
+                    imageUrls={[{url: imgUrl}]}
+                    onClick={() => setIsVisible(false)}
+                  />
+                </Modal>
                 <Text style={[styles.smallTxt, {textAlign: 'left'}]}>
                   {complainData?.data?.complain_msg}
                 </Text>

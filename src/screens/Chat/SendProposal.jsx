@@ -20,6 +20,7 @@ import urlType from '../../constants/UrlConstants';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {showMessage} from 'react-native-flash-message';
 import CustomCheckBox from '../../components/CustomCheckBox';
+import moment from 'moment';
 
 function SendProposal({route, navigation}) {
   const {jobData} = route.params;
@@ -31,6 +32,7 @@ function SendProposal({route, navigation}) {
   const [duration, setDuration] = useState('');
   const [payment, setPayment] = useState('');
   const [revisions, setRevisions] = useState('');
+  // const [proposalStatus, setProposalStatus] = useState('');
 
   const handleCheckboxChange = taskId => {
     setCheckedTasks(prevCheckedTasks => ({
@@ -38,15 +40,7 @@ function SendProposal({route, navigation}) {
       [taskId]: !prevCheckedTasks[taskId],
     }));
   };
-  console.log(jobData);
-  const formatDate = dateString => {
-    const options = {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    };
-    return new Date(dateString).toLocaleString('en-US', options);
-  };
+  console.log('job Data', jobData.job_id);
 
   useEffect(() => {
     const checkedTaskIds = Object.keys(checkedTasks)
@@ -56,6 +50,50 @@ function SendProposal({route, navigation}) {
     console.log('Checked task IDs:', checkedTaskIds);
   }, [checkedTasks]);
 
+  const {data: jobProposalData} = useQuery({
+    queryKey: ['jobProposalData', jobData.job_id],
+    queryFn: async () => {
+      const response = await apiRequest(urlType.BACKEND, {
+        method: 'get',
+        url: `proposalsByJob?job_id=${parseInt(jobData.job_id)}`,
+      });
+
+      const jobProposalData = response.data;
+      const proposals = response.data.data.proposal;
+      let derivedStatus = '';
+
+      if (proposals) {
+        let hasAcceptedProposal = false;
+        let hasSentProposal = false;
+
+        proposals.forEach(proposal => {
+          if (proposal.has_proposal_task.length === 0) {
+            if (proposal.proposal_status === 'accept') {
+              hasAcceptedProposal = true;
+            } else if (
+              proposal.useraccount_id === userData?.user?.useraccount_id
+            ) {
+              hasSentProposal = true;
+            }
+          }
+        });
+
+        if (hasAcceptedProposal) {
+          derivedStatus = 'accept';
+        } else if (hasSentProposal) {
+          derivedStatus = 'already sent';
+        } else {
+          derivedStatus = 'not found';   
+        }
+      }
+
+      return {jobProposalData, derivedStatus};
+    },
+  });
+
+  // console.log('props', proposalStatus);
+  console.log('propsal Data', jobProposalData);
+  console.log('propsal Data', jobProposalData?.jobProposalData?.data?.proposal);
   const proposalMutation = useMutation({
     mutationKey: ['proposal'],
     mutationFn: async data => {
@@ -64,7 +102,7 @@ function SendProposal({route, navigation}) {
         url: `proposals`,
         data,
       });
-      return response;
+      return response;  
     },
     onSuccess: async e => {
       if (e.status === 200) {
@@ -167,7 +205,8 @@ function SendProposal({route, navigation}) {
                   {jobData?.first_name} {jobData?.last_name}
                 </Text>
                 <Text style={[styles.txt]}>
-                  {formatDate(jobData?.updated_at)} | <>{jobData?.skill_name}</>{' '}
+                  {moment(jobData?.updated_at).format('MMMM DD, YYYY')} |{' '}
+                  <>{jobData?.skill_name}</>{' '}
                 </Text>
               </View>
             </View>
@@ -227,7 +266,9 @@ function SendProposal({route, navigation}) {
         </View>
 
         <View style={{marginTop: 10}}>
-          <Text style={[styles.smallTxt, {marginBottom: 5}]}>Available Task</Text>
+          <Text style={[styles.smallTxt, {marginBottom: 5}]}>
+            Available Task
+          </Text>
           {jobData?.task?.map((task, index) => (
             <View key={index}>
               {task?.status === 'none' ? (
