@@ -29,6 +29,7 @@ function CancelOrder({navigation, route}) {
   const [messageRequest, setMessageRequest] = useState('');
   const [imageUri, setImageUri] = useState(null);
 
+  console.log('contract', contract?.contract_status);
   const contractData = useQuery({
     queryKey: ['contractCancelData', contract?.contract_id],
     queryFn: async () => {
@@ -62,7 +63,7 @@ function CancelOrder({navigation, route}) {
         });
         contractData.refetch();
         setMessageRequest('');
-        setImageUri(null)
+        setImageUri(null);
       } else {
         showMessage({
           message: e.response.message || 'An Error occured',
@@ -81,10 +82,10 @@ function CancelOrder({navigation, route}) {
         contract_id: parseInt(contractData?.data?.contract_id),
         user_id: parseInt(userData?.user?.useraccount_id),
         message: messageRequest,
-        img: imageUri
+        img: imageUri,
       };
       await cancelContractMutation.mutate(data);
-      // console.log("da", data)   
+      // console.log("da", data)
     } else {
       showMessage({
         message: 'Please Fill the Input Field',
@@ -230,51 +231,65 @@ function CancelOrder({navigation, route}) {
       )}
 
       <View style={styles.line}></View>
-      <View
-        style={{
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-        }}>
-        <CustomInput
-          placeholder="Write the reason of order cancel."
-          keyboardType="default"
-          multiline={true}
-          numberOfLines={3}
-          style={{
-            backgroundColor: Colors.primary.sub,
-            width: 300,
-          }}
-          value={messageRequest}
-          onChangeText={text => {
-            setMessageRequest(text);
-          }}
-        />
-        <View
-          style={{
-            flexDirection: 'row',
-            justifyContent: 'center',
-          }}>
-          <TouchableOpacity style={[styles.containerImg]} onPress={chooseImage}>
-            {renderImage()}
-            <View style={styles.overlay}>
-              <MaterialCommunityIcons
-                name="camera"
-                size={24}
-                color={Colors.primary.lightBlack}
-              />
-            </View>
-          </TouchableOpacity>
+      {contract?.contract_status === 'order cancel' ? (
+        <View style={{ marginBottom: 10}}>
+          <CustomBtn
+            lbl="Order Cancel"
+            disabled={true}
+            style={{backgroundColor: Colors.primary.sub}}
+          />
         </View>
-      </View>
+      ) : (
+        <>
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+            }}>
+            <CustomInput
+              placeholder="Write the reason of order cancel."
+              keyboardType="default"
+              multiline={true}
+              numberOfLines={3}
+              style={{
+                backgroundColor: Colors.primary.sub,
+                width: 300,
+              }}
+              value={messageRequest}
+              onChangeText={text => {
+                setMessageRequest(text);
+              }}
+            />
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'center',
+              }}>
+              <TouchableOpacity
+                style={[styles.containerImg]}
+                onPress={chooseImage}>
+                {renderImage()}
+                <View style={styles.overlay}>
+                  <MaterialCommunityIcons
+                    name="camera"
+                    size={24}
+                    color={Colors.primary.lightBlack}
+                  />
+                </View>
+              </TouchableOpacity>
+            </View>
+          </View>
 
-      <View style={{marginTop: 20, marginBottom: 10}}>
-        <CustomBtn
-          lbl="Request Send"
-          onPress={handleSubmit}
-          loading={cancelContractMutation.isPending}
-        />
-      </View>
+          <View style={{marginTop: 20, marginBottom: 10}}>
+            <CustomBtn
+              lbl="Request Send"
+              onPress={handleSubmit}
+              loading={cancelContractMutation.isPending}
+            />
+          </View>
+        </>
+      )}
     </SafeAreaView>
   );
 }

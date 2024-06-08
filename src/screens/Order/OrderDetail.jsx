@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {
   Image,
   SafeAreaView,
@@ -22,6 +22,10 @@ import CustomBtn from '../../components/CustomBtn';
 import LargeCard from '../../components/LargeCard';
 
 function OrderDetail({route, navigation}) {
+  const queryClient = useQueryClient();
+  const userData = queryClient.getQueryData(['user']);
+  const [revisionCounter, setRevisionCounter] = useState(1);
+
   const {contract_id} = route.params;
   const contractData = useQuery({
     queryKey: ['contractData', contract_id],
@@ -34,6 +38,7 @@ function OrderDetail({route, navigation}) {
     },
     enabled: contract_id ? true : false,
   });
+  console.log('user', contractData?.data?.proposal?.job);
   const feedbackCheckData = useQuery({
     queryKey: ['feedbackCheckData', contractData?.data?.proposal?.job?.job_id],
     queryFn: async () => {
@@ -41,10 +46,48 @@ function OrderDetail({route, navigation}) {
         method: 'get',
         url: `checkReviewByUserIdAndJobId?job_id=${contractData?.data?.proposal?.job?.job_id}`,
       });
-      return response.data; 
+      return response.data;
     },
     enabled: contractData?.data?.proposal?.job?.job_id ? true : false,
   });
+
+  const completeStatusMutation = useMutation({
+    mutationFn: async data => {
+      const response = await apiRequest(urlType.BACKEND, {
+        method: 'put',
+        url: `updateCompleteContractStatus`,
+        data,
+      });
+      return response;
+    },
+    onSuccess: async e => {
+      if (e.status === 200) {
+        contractData.refetch();
+        showMessage({
+          message: e.message,
+          type: 'success',
+          color: '#fff',
+          backgroundColor: Colors.primary.green,
+          floating: true,
+        });
+      } else {
+        showMessage({
+          message: e.message || 'An Error occured',
+          type: 'danger',
+          color: '#fff',
+          backgroundColor: 'red',
+          floating: true,
+        });
+      }
+    },
+  });
+  const handleCompleteStatus = async e => {
+    // if (e.status === 'working') {
+    //   setRevisionCounter(revisionCounter + 1);
+    // }
+
+    await completeStatusMutation.mutate(e);
+  };
   console.log('feedback', feedbackCheckData.data);
   return (
     <SafeAreaView style={styles.container}>
@@ -132,13 +175,109 @@ function OrderDetail({route, navigation}) {
           )}
           isOffer={true}
         />
-        {contractData?.data?.contract_status === 'working' ? (
+        {contractData?.data?.proposal?.useraccount_id ===
+        userData?.user?.useraccount_id ? (
+          // Post Worker User
+          contractData?.data?.contract_status === 'working' ? (
+            <CustomBtn
+              lbl={'Work Delivered'}
+              style={{marginVertical: 20}}
+              onPress={() =>
+                handleCompleteStatus({
+                  id: contractData?.data?.contract_id,
+                  status: 'complete request',
+                })
+              }
+              loading={completeStatusMutation.isPending}
+            />
+          ) : contractData?.data?.contract_status === 'complete request' ? (
+            <CustomBtn
+              lbl={'Wait for Approved'}
+              style={{marginVertical: 20, backgroundColor: Colors.primary.sub}}
+              disabled={true}
+            />
+          ) : contractData?.data?.contract_status === 'complete' ? (
+            feedbackCheckData.data === null ? (
+              <CustomBtn
+                lbl={'Give Feedback'}
+                style={{marginVertical: 20}}
+                onPress={() =>
+                  navigation.navigate('Feedback', {
+                    jobId: contractData?.data?.proposal?.job?.job_id,
+                    jobUserId:
+                      contractData?.data?.proposal?.job?.freelancer_id === null
+                        ? contractData?.data?.proposal?.job?.client?.user_id
+                        : contractData?.data?.proposal?.job?.freelancer
+                            ?.user_id,
+                    proposalUserId:
+                      contractData?.data?.proposal?.useraccount_id,
+                  })
+                }
+              />
+            ) : (
+              <CustomBtn
+                lbl={'Feedback ALready Send'}
+                style={{
+                  marginVertical: 20,
+                  backgroundColor: Colors.primary.sub,
+                }}
+                disabled={true}
+              />
+            )
+          ) : null
+        ) : // Post User
+        contractData?.data?.contract_status === 'working' ? (
           <CustomBtn
-            lbl={'Work Delivered'}
-            style={{marginVertical: 20}}
-            // onPress={handleAddPost}
-            // loading={addPostMutation.isPending}
+            lbl={'Work in Progress'}
+            style={{marginVertical: 20, backgroundColor: Colors.primary.sub}}
+            disabled={true}
           />
+        ) : contractData?.data?.contract_status === 'complete request' ? (
+          <View
+            style={{
+              marginVertical: 20,
+              flexDirection: 'row',
+              justifyContent: 'space-evenly',
+            }}>
+            {revisionCounter > contractData?.data?.proposal?.revisions ? (
+              <CustomBtn
+                lbl={'no more revision'}
+                style={{
+                  backgroundColor: Colors.primary.lightGray,
+                  paddingHorizontal: 20,
+                }}
+                disabled={true}
+              />
+            ) : (
+              <CustomBtn
+                lbl={'revised'}
+                style={{
+                  backgroundColor: Colors.primary.lightGray,
+                  paddingHorizontal: 20,
+                }}
+                onPress={() =>
+                  handleCompleteStatus({
+                    id: contractData?.data?.contract_id,
+                    status: 'working',
+                  })
+                }
+                loading={completeStatusMutation.isPending}
+              />
+            )}
+            <CustomBtn
+              lbl={'Completed'}
+              style={{
+                paddingHorizontal: 20,
+              }}
+              onPress={() =>
+                handleCompleteStatus({
+                  id: contractData?.data?.contract_id,
+                  status: 'complete',
+                })
+              }
+              loading={completeStatusMutation.isPending}
+            />
+          </View>
         ) : contractData?.data?.contract_status === 'complete' ? (
           feedbackCheckData.data === null ? (
             <CustomBtn
@@ -158,7 +297,10 @@ function OrderDetail({route, navigation}) {
           ) : (
             <CustomBtn
               lbl={'Feedback ALready Send'}
-              style={{marginVertical: 20, backgroundColor: Colors.primary.sub}}
+              style={{
+                marginVertical: 20,
+                backgroundColor: Colors.primary.sub,
+              }}
               disabled={true}
             />
           )

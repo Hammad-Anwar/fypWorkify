@@ -223,6 +223,7 @@ function Offers({navigation}) {
                         profile_image={data?.user_account?.image}
                         first_name={data?.user_account?.first_name}
                         last_name={data?.user_account?.last_name}
+                        verifiedStatus={data?.user_account?.status}
                         proposal_description={data?.description}
                         proposal_duration={data?.duration}
                         proposal_revision={data?.revisions}

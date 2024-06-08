@@ -32,7 +32,7 @@ function SendProposal({route, navigation}) {
   const [duration, setDuration] = useState('');
   const [payment, setPayment] = useState('');
   const [revisions, setRevisions] = useState('');
-  // const [proposalStatus, setProposalStatus] = useState('');
+  const [taskChecker, setTaskChecker] = useState(false);
 
   const handleCheckboxChange = taskId => {
     setCheckedTasks(prevCheckedTasks => ({
@@ -50,6 +50,14 @@ function SendProposal({route, navigation}) {
     console.log('Checked task IDs:', checkedTaskIds);
   }, [checkedTasks]);
 
+  useEffect(() => {
+    if (jobData?.task?.length !== 0) {
+      const allNone = jobData?.task?.every(task => task.status !== 'none');
+      console.log("first", allNone)
+      setTaskChecker(allNone);
+    }
+  }, [jobData]);
+
   const {data: jobProposalData} = useQuery({
     queryKey: ['jobProposalData', jobData.job_id],
     queryFn: async () => {
@@ -58,7 +66,7 @@ function SendProposal({route, navigation}) {
         url: `proposalsByJob?job_id=${parseInt(jobData.job_id)}`,
       });
 
-      const jobProposalData = response.data;
+      const proposalData = response.data;
       const proposals = response.data.data.proposal;
       let derivedStatus = '';
 
@@ -73,7 +81,9 @@ function SendProposal({route, navigation}) {
             } else if (
               proposal.useraccount_id === userData?.user?.useraccount_id
             ) {
-              hasSentProposal = true;
+              if (proposal.proposal_status === 'waiting') {
+                hasSentProposal = true;
+              } 
             }
           }
         });
@@ -83,17 +93,17 @@ function SendProposal({route, navigation}) {
         } else if (hasSentProposal) {
           derivedStatus = 'already sent';
         } else {
-          derivedStatus = 'not found';   
+          derivedStatus = 'not found';
         }
       }
 
-      return {jobProposalData, derivedStatus};
+      return {proposalData, derivedStatus};
     },
   });
 
   // console.log('props', proposalStatus);
   console.log('propsal Data', jobProposalData);
-  console.log('propsal Data', jobProposalData?.jobProposalData?.data?.proposal);
+  console.log('propsal Data', jobProposalData?.proposalData?.data?.proposal);
   const proposalMutation = useMutation({
     mutationKey: ['proposal'],
     mutationFn: async data => {
@@ -102,7 +112,7 @@ function SendProposal({route, navigation}) {
         url: `proposals`,
         data,
       });
-      return response;  
+      return response;
     },
     onSuccess: async e => {
       if (e.status === 200) {
@@ -234,7 +244,31 @@ function SendProposal({route, navigation}) {
               ) : null}
             </View>
           </View>
-
+          <View style={{marginTop: 10}}>
+            {jobData?.task?.map((task, index) => (
+              <View
+                key={index}
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  marginBottom: 10,
+                }}>
+                <View
+                  style={{
+                    padding: 6,
+                    borderRadius: 3,
+                    marginRight: 5,
+                    backgroundColor:
+                      task.status === 'progress'
+                        ? 'yellow'
+                        : task.status === 'complete'
+                        ? 'green'
+                        : 'black',
+                  }}></View>
+                <Text style={styles.txt}>{task.task_description}</Text>
+              </View>
+            ))}
+          </View>
           <View
             style={{
               flexDirection: 'row',
@@ -351,13 +385,44 @@ function SendProposal({route, navigation}) {
               }}
             />
           </View>
-
-          <CustomBtn
-            lbl={'Send Proposal'}
-            style={{marginTop: 20, marginBottom: 60}}
-            onPress={handleSendProposal}
-            loading={proposalMutation.isPending}
-          />
+          {jobProposalData?.derivedStatus === 'already sent' ? (
+            <CustomBtn
+              lbl={'You’ve Already Submitted a Proposal'}
+              style={{
+                marginTop: 20,
+                marginBottom: 60,
+                backgroundColor: Colors.primary.lightGray,
+              }}
+              disabled={true}
+            />
+          ) : jobProposalData?.derivedStatus === 'accept' ? (
+            <CustomBtn
+              lbl={'Job No Longer Available'}
+              style={{
+                marginTop: 20,
+                marginBottom: 60,
+                backgroundColor: Colors.primary.lightGray,
+              }}
+              disabled={true}
+            />
+          ) : taskChecker ? (
+            <CustomBtn
+              lbl={'Job No Longer Available'}
+              style={{
+                marginTop: 20,
+                marginBottom: 60,
+                backgroundColor: Colors.primary.lightGray,
+              }}
+              disabled={true}
+            />
+          ) : (
+            <CustomBtn
+              lbl={'Send Proposal'}
+              style={{marginTop: 20, marginBottom: 60}}
+              onPress={handleSendProposal}
+              loading={proposalMutation.isPending}
+            />
+          )}
         </View>
       </ScrollView>
     </SafeAreaView>

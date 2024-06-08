@@ -56,6 +56,8 @@ function MoreOptions({route, navigation}) {
     },
   });
 
+  console.log('ddd', userApiData?.data?.form);
+
   const verificationMutation = useMutation({
     mutationFn: async e => {
       const response = await apiRequest(urlType.BACKEND, {
@@ -74,7 +76,7 @@ function MoreOptions({route, navigation}) {
           backgroundColor: Colors.primary.green,
           floating: true,
         });
-        userApiData.refetch()
+        userApiData.refetch();
       } else {
         showMessage({
           message: e.response.message || 'An Error occured',
@@ -127,46 +129,59 @@ function MoreOptions({route, navigation}) {
                   styles.largeTxt,
                   {fontSize: 16, fontWeight: '400', fontStyle: 'italic'},
                 ]}>
-                {userData?.user.user_account.user_name}
+                {userData?.user.user_account.user_name}{' '}
+                {userData?.user?.user_account?.status === 'verified' ? (
+                  <MaterialCommunityIcons
+                    name="check-decagram"
+                    size={20}
+                    color={Colors.primary.lightBlack}
+                  />
+                ) : null}
               </Text>
             </View>
           </View>
           <View style={styles.line}></View>
-          {userApiData?.data?.status === 'unverified' ? (
-            <SettingCard
-              iconName={'alert-rhombus-outline'}
-              text={'Verification Request'}
-              onPress={() =>
-                handleStatus({
-                  id: parseInt(userData?.user?.user_account?.user_id),
-                  status: 'verification request',
-                })
-              }
-            />
-          ) : userApiData?.data?.status === 'verification request' ? (
-            <SettingCard
-              iconName={'alert-rhombus-outline'}
-              text={'Verification Request'}
-              onPress={() => {
-                showMessage({
-                  message: 'Account Verified Request Send Already',
-                  type: 'warning',
-                  floating: true,
-                });
-              }}
-            />
-          ) : userApiData?.data?.status === 'verified' ? (
-            <SettingCard
-              iconName={'alert-rhombus-outline'}
-              text={'Account Verified'}
-              onPress={() => {
-                showMessage({
-                  message: 'Account Already Verified',
-                  type: 'info',
-                  floating: true,
-                });
-              }}
-            />
+          {userApiData?.data?.role_id === 1 ? (
+            userApiData?.data?.status === 'unverified' ? (
+              <SettingCard
+                iconName={'account-check-outline'}
+                text={'Verification Request'}
+                onPress={() =>
+                  handleStatus({
+                    id: parseInt(userData?.user?.user_account?.user_id),
+                    status: 'verification request',
+                  })
+                }
+              />
+            ) : userApiData?.data?.status === 'verification request' ? (
+              <SettingCard
+                iconName={'account-check-outline'}
+                text={'Verification Request'}
+                onPress={() => {
+                  userApiData?.data?.form?.length === 0
+                    ? showMessage({
+                        message: 'Account Verified Request Send Already',
+                        type: 'warning',
+                        floating: true,
+                      })
+                    : navigation.navigate('VerificationAccount', {
+                        user_data: userApiData?.data,
+                      });
+                }}
+              />
+            ) : userApiData?.data?.status === 'verified' ? (
+              <SettingCard
+                iconName={'account-check'}
+                text={'Account Verified'}
+                onPress={() => {
+                  showMessage({
+                    message: 'Account Already Verified',
+                    type: 'info',
+                    floating: true,
+                  });
+                }}
+              />
+            ) : null
           ) : null}
           <SettingCard
             iconName={'alert-rhombus-outline'}

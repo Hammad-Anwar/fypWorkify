@@ -1,49 +1,50 @@
 import React, { useState, useEffect } from 'react';
-import { Text } from 'react-native';
-import { Colors } from '../../constants/theme';
+import { View, Text, StyleSheet } from 'react-native';
+import Countdown from 'react-native-countdown-component';
+import moment from 'moment';
 
-const RemainingTime = ({ durationInDays }) => {
-  const calculateRemainingTime = (durationInDays) => {
-    const endDate = new Date();
-    endDate.setDate(endDate.getDate() + durationInDays);
-
-    let remainingTime = endDate - new Date();
-
-    const days = Math.floor(remainingTime / (1000 * 60 * 60 * 24));
-    remainingTime -= days * (1000 * 60 * 60 * 24);
-
-    const hours = Math.floor(remainingTime / (1000 * 60 * 60));
-    remainingTime -= hours * (1000 * 60 * 60);
-
-    const minutes = Math.floor(remainingTime / (1000 * 60));
-
-    return { days, hours, minutes };
-  };
-
-  const [remainingTime, setRemainingTime] = useState(calculateRemainingTime(durationInDays));
+const RemainingTime = ({ createdDate, days }) => {
+  const [remainingTime, setRemainingTime] = useState(0);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      setRemainingTime(prevTime => {
-        const newTime = calculateRemainingTime(durationInDays);
-        
-        return newTime;
-      });
-    }, 60000); // Update every minute
-
-    return () => {
-      clearInterval(interval);
-    };
-  }, [durationInDays]);
+    // Calculate the end date
+    const endDate = moment(createdDate).add(days, 'days');
+    // Calculate the remaining time in seconds
+    const now = moment();
+    const duration = moment.duration(endDate.diff(now));
+    const seconds = duration.asSeconds();
+    setRemainingTime(seconds > 0 ? seconds : 0);
+  }, [createdDate, days]);
 
   return (
-    <Text style={{color: Colors.primary.darkgray, fontWeight: '500'}}>
-
-      {remainingTime.days === 0 && remainingTime.hours === 0 && remainingTime.minutes === 0
-        ? 'Time expired'
-        : `Time left: ${remainingTime.days} day${remainingTime.days !== 1 ? 's' : ''}, ${remainingTime.hours} hour${remainingTime.hours !== 1 ? 's' : ''}, ${remainingTime.minutes} minute${remainingTime.minutes !== 1 ? 's' : ''}`}
-    </Text>
+    <View style={styles.container}>
+      {remainingTime > 0 ? (
+        <Countdown
+          until={remainingTime}
+          onFinish={() => alert('Order time has expired')}
+          size={16}
+          timeToShow={['D', 'H', 'M', 'S']}
+          timeLabels={{ d: 'Days', h: 'Hours', m: 'Minutes', s: 'Seconds' }}
+          showSeparator
+        />
+      ) : (
+        <Text style={styles.expiredText}>Order time has expired</Text>
+      )}
+    </View>
   );
 };
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  expiredText: {
+    fontSize: 16,
+    color: 'red',
+    fontWeight: '500'
+  },
+});
 
 export default RemainingTime;

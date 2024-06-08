@@ -10,6 +10,7 @@ import {
   View,
 } from 'react-native';
 import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import profileImg from '../../assets/Images/profileImg.jpg';
 import {Colors} from '../../constants/theme';
 import RemainingTime from '../RemainingTime';
@@ -29,8 +30,10 @@ function SmallCard({
   profile_image,
   first_name,
   last_name,
+  verifiedStatus,
   proposal_description,
   proposal_duration,
+  created_at,
   proposal_payment,
   proposal_revision,
   proposal_status,
@@ -63,7 +66,9 @@ function SmallCard({
                 style={[styles.smallTxt, {marginLeft: 5, fontWeight: '600'}]}>
                 {first_name} {last_name} |
               </Text>
-              <Text style={[styles.smallTxt, {marginLeft: 5}]}>{job_skill}</Text>
+              <Text style={[styles.smallTxt, {marginLeft: 5}]}>
+                {job_skill}
+              </Text>
             </View>
             <Text style={[styles.smallTxt, {fontWeight: '600'}]}>{time}</Text>
           </View>
@@ -72,7 +77,9 @@ function SmallCard({
               {review_comment}
             </Text>
             <View style={[styles.row, {justifyContent: 'flex-end'}]}>
-              <Text style={[styles.smallTxt, {fontWeight: '600'}]}>{rating}</Text>
+              <Text style={[styles.smallTxt, {fontWeight: '600'}]}>
+                {rating}
+              </Text>
               <MaterialIcons
                 name="star"
                 size={20}
@@ -124,7 +131,14 @@ function SmallCard({
                 <Image source={profileImg} style={styles.cardImg} />
               )}
               <Text style={[styles.smallTxt, {marginLeft: 5}]}>
-                {first_name} {last_name}
+                {first_name} {last_name}{' '}
+                {verifiedStatus === 'verified' ? (
+                  <MaterialCommunityIcons
+                    name="check-decagram"
+                    size={14}
+                    color={Colors.primary.lightBlack}
+                  />
+                ) : null}
               </Text>
             </View>
             <Text style={[styles.smallTxt, {fontWeight: '600'}]}>{time}</Text>
@@ -272,7 +286,14 @@ function SmallCard({
                 style={styles.cardImg}
               />
               <Text style={[styles.smallTxt, {marginLeft: 5}]}>
-                {first_name} {last_name}
+                {first_name} {last_name}{' '}
+                {verifiedStatus === 'verified' ? (
+                  <MaterialCommunityIcons
+                    name="check-decagram"
+                    size={14}
+                    color={Colors.primary.lightBlack}
+                  />
+                ) : null}
               </Text>
             </View>
             <Text style={[styles.smallTxt, {fontWeight: '600'}]}>{time}</Text>
@@ -316,16 +337,31 @@ function SmallCard({
           </View>
           <View style={{alignItems: 'center', marginTop: 10}}>
             <View
-              style={{
-                backgroundColor: 'yellow',
-                padding: 10,
-                borderRadius: 6,
-                paddingHorizontal: 30,
-              }}>
+              style={[
+                order_status === 'working' ||
+                order_status === 'complete request'
+                  ? {backgroundColor: Colors.primary.main}
+                  : order_status === 'complete'
+                  ? {backgroundColor: Colors.primary.green}
+                  : order_status === 'order cancel' ||
+                    order_status === 'cancel request'
+                  ? {backgroundColor: Colors.primary.red}
+                  : null,
+
+                {
+                  padding: 10,
+                  borderRadius: 6,
+                  paddingHorizontal: 30,
+                },
+              ]}>
               <Text
                 style={[
                   styles.smallTxt,
                   {fontWeight: '500', textTransform: 'uppercase'},
+                  order_status === 'working' ||
+                  order_status === 'complete request'
+                    ? {color: Colors.primary.lightBlack}
+                    : {color: Colors.primary.white},
                 ]}>
                 {order_status}
               </Text>
@@ -333,10 +369,12 @@ function SmallCard({
           </View>
           <View style={styles.line}></View>
           <View style={{alignItems: 'center'}}>
-            {/* <Text style={[styles.smallTxt, {fontWeight: '600'}]}>
-              Remaing Time: 
-            </Text> */}
-            <RemainingTime durationInDays={proposal_duration} />
+            {order_status === 'working' ? (
+              <RemainingTime
+                createdDate={created_at}
+                days={proposal_duration}
+              />
+            ) : null}
           </View>
         </TouchableOpacity>
       ) : (

@@ -113,7 +113,14 @@ function AccountSetting({route, navigation}) {
                     />
                     <Text style={styles.largeTxt}>
                       {userDetail?.user_account?.first_name}{' '}
-                      {userDetail?.user_account?.last_name}
+                      {userDetail?.user_account?.last_name}{' '}
+                      {userDetail?.user_account?.status === 'verified' ? (
+                        <MaterialCommunityIcons
+                          name="check-decagram"
+                          size={20}
+                          color={Colors.primary.lightBlack}
+                        />
+                      ) : null}
                     </Text>
                     <View style={[styles.row, {marginVertical: 20}]}>
                       <View style={{alignItems: 'center', marginRight: 35}}>

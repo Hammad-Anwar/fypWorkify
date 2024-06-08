@@ -76,7 +76,7 @@ function Orders({navigation}) {
     <SafeAreaView style={styles.container}>
       <View style={styles.line}></View>
 
-      <View>
+      <View style={{marginBottom: 40}}>
         {contractData?.data && contractData?.data.length > 0 ? (
           <FlatList
             data={contractData?.data}
@@ -92,8 +92,10 @@ function Orders({navigation}) {
                 profile_image={data?.proposal?.user_account?.image}
                 first_name={data?.proposal?.user_account?.first_name}
                 last_name={data?.proposal?.user_account?.last_name}
+                verifiedStatus={data?.proposal?.user_account?.last_name}
                 proposal_description={data?.proposal?.description}
                 proposal_duration={data?.proposal?.duration}
+                created_at={data?.created_at}
                 proposal_revision={data?.proposal?.revisions}
                 proposal_payment={data?.proposal?.payment?.payment_amount}
                 order_status={data?.contract_status}
