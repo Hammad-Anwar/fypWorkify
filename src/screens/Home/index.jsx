@@ -218,8 +218,9 @@ function Home({navigation}) {
                         first_name: jobData?.client?.first_name,
                         last_name: jobData?.client?.last_name,
                         image: jobData?.client?.image,
-                        userId2: jobData?.client?.user_id,
+                        user: jobData?.client?.user_id,
                         job_id: jobData?.job_id,
+                     
                       });
                     }}
                   />

@@ -9,7 +9,7 @@ const RemainingTime = ({ createdDate, days }) => {
   useEffect(() => {
     // Calculate the end date
     const endDate = moment(createdDate).add(days, 'days');
-    // Calculate the remaining time in seconds
+    // Calculate the remaining time in seconds  
     const now = moment();
     const duration = moment.duration(endDate.diff(now));
     const seconds = duration.asSeconds();

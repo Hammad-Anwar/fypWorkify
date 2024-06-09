@@ -24,6 +24,9 @@ import urlType from '../../constants/UrlConstants';
 import CustomBtn from '../../components/CustomBtn';
 import {BottomSheet} from '../../components/BottomSheet';
 import LargeCard from '../../components/LargeCard';
+import ImageCropPicker from 'react-native-image-crop-picker';
+import emptyImg from '../../assets/Images/empty.jpg';
+import ImageViewer from 'react-native-image-zoom-viewer';
 const MessageBox = ({navigation}) => {
   const bottomRef = useRef();
   const route = useRoute();
@@ -49,6 +52,9 @@ const MessageBox = ({navigation}) => {
   const [socket, setSocket] = useState(io('http://192.168.100.34:5000/'));
   const [message, setmessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [imageUri, setImageUri] = useState(null);
+  const [imgUrl, setImgUrl] = useState('');
+
   console.log('sdasd', postData);
   // useEffect(() => {
   //   queryClient.removeQueries({ queryKey: ['messages'] });
@@ -82,7 +88,7 @@ const MessageBox = ({navigation}) => {
     };
   }, [socket]);
   const userJobs = useQuery({
-    queryKey: ['userJobs'],
+    queryKey: ['userJobs', user],
     queryFn: async () => {
       const response = await apiRequest(urlType.BACKEND, {
         method: 'get',
@@ -90,6 +96,7 @@ const MessageBox = ({navigation}) => {
       });
       return response.data;
     },
+    enabled: user === null ? false : true,
   });
   // console.log("sdshi",userJobs.data)
   const messagesData = useQuery({
@@ -108,11 +115,13 @@ const MessageBox = ({navigation}) => {
   };
   const sendMessage = () => {
     if (chatRoomId !== null) {
-      socket.emit('send-message', {
-        user: usr_id,
-        chatroom_id: chatRoomId,
-        msg_text: message,
-      });
+      if (message.length > 0) {
+        socket.emit('send-message', {
+          user: usr_id,
+          chatroom_id: chatRoomId,
+          msg_text: message,
+        });
+      }
     } else {
       socket.emit('join-room_and_send-message', {
         userId1: usr_id,
@@ -133,6 +142,28 @@ const MessageBox = ({navigation}) => {
       emitTypingEvent();
     } else {
       setIsTyping(false);
+    }
+  };
+
+  const chooseImage = async () => {
+    try {
+      const image = await ImageCropPicker.openPicker({
+        width: 720,
+        height: 720,
+        cropping: true,
+        includeBase64: true,
+      });
+      setImageUri(`data:${image.mime};base64,${image.data}`);
+    } catch (error) {
+      console.log('ImagePicker Error: ', error);
+    }
+  };
+
+  const renderImage = () => {
+    if (imageUri) {
+      return <Image source={{uri: imageUri}} style={styles.selectImgStyle} />;
+    } else {
+      return null;
     }
   };
   return (
@@ -233,7 +264,7 @@ const MessageBox = ({navigation}) => {
                     justifyContent: 'flex-end',
                   }}>
                   <Text style={styles.view3}>
-                    {moment(item?.created_at).format('YY-MM-DD HH:mm a')}
+                    {moment(item?.created_at).format('DD-MM-YY HH:mm a')}
                   </Text>
                 </View>
               </View>
@@ -258,7 +289,7 @@ const MessageBox = ({navigation}) => {
                     justifyContent: 'flex-end',
                   }}>
                   <Text style={styles.sview3}>
-                    {moment(item?.created_at).format('YY-MM-DD HH:mm a')}
+                    {moment(item?.created_at).format('DD-MM-YY HH:mm a')}
                   </Text>
                 </View>
               </View>
@@ -276,11 +307,23 @@ const MessageBox = ({navigation}) => {
           paddingHorizontal: 20,
           paddingVertical: 10,
         }}>
-        <Text style={{color: Colors.primary.darkgray}}>
-          {isTyping ? '...typing' : null}
-        </Text>
+        {isTyping ? (
+          <Text style={{color: Colors.primary.darkgray}}>...typing</Text>
+        ) : null}
       </View>
-
+      {renderImage() ? (
+        <View
+          style={{
+            borderRadius: 20,
+            marginBottom: 8,
+            borderColor: Colors.primary.lightGray,
+            borderWidth: 2,
+            marginHorizontal: 8,
+            padding: 10,
+          }}>
+          {renderImage()}
+        </View>
+      ) : null}
       <View
         style={{
           display: 'flex',
@@ -307,7 +350,7 @@ const MessageBox = ({navigation}) => {
                 justifyContent: 'center',
                 alignItems: 'center',
                 height: '90%',
-                width: '88%',
+                width: '81%',
                 backgroundColor: Colors.primary.white,
                 marginLeft: 10,
                 padding: 8,
@@ -321,6 +364,13 @@ const MessageBox = ({navigation}) => {
               }}
               placeholderTextColor={Colors.primary.darkgray}
             />
+            <TouchableOpacity style={{marginRight: 5}} onPress={chooseImage}>
+              <MaterialCommunityIcons
+                name={'camera'}
+                size={26}
+                color={Colors.primary.lightGray}
+              />
+            </TouchableOpacity>
             <TouchableOpacity onPress={sendMessage}>
               <MaterialCommunityIcons
                 name={'send-outline'}
@@ -347,7 +397,9 @@ const MessageBox = ({navigation}) => {
                 key={index}
                 jobData={jobData}
                 isProposal={true}
-                handleProposal={() => navigation.navigate("SendProposal", {jobData})}
+                handleProposal={() =>
+                  navigation.navigate('SendProposal', {jobData})
+                }
               />
             )}
             ListHeaderComponent={
@@ -503,5 +555,17 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: '600',
     color: Colors.primary.lightBlack,
+  },
+  imgStyle: {
+    width: 120,
+    height: 120,
+    borderRadius: 12,
+    marginBottom: 10,
+  },
+  selectImgStyle: {
+    width: 100,
+    height: 80,
+    resizeMode: 'stretch',
+    borderRadius: 6,
   },
 });

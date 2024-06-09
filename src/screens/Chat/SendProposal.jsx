@@ -53,7 +53,7 @@ function SendProposal({route, navigation}) {
   useEffect(() => {
     if (jobData?.task?.length !== 0) {
       const allNone = jobData?.task?.every(task => task.status !== 'none');
-      console.log("first", allNone)
+      console.log('first', allNone);
       setTaskChecker(allNone);
     }
   }, [jobData]);
@@ -83,7 +83,7 @@ function SendProposal({route, navigation}) {
             ) {
               if (proposal.proposal_status === 'waiting') {
                 hasSentProposal = true;
-              } 
+              }
             }
           }
         });
@@ -298,32 +298,42 @@ function SendProposal({route, navigation}) {
             </View>
           </View>
         </View>
-
-        <View style={{marginTop: 10}}>
-          <Text style={[styles.smallTxt, {marginBottom: 5}]}>
-            Available Task
+        <View style={[styles.row, {justifyContent: 'space-between'}]}>
+          <Text style={styles.txt}>
+            Declined Proposals:{' '}
+            {jobProposalData?.proposalData?.countDeclineProposal}{' '}
           </Text>
-          {jobData?.task?.map((task, index) => (
-            <View key={index}>
-              {task?.status === 'none' ? (
-                <View
-                  key={index}
-                  style={{
-                    flexDirection: 'row',
-                    alignItems: 'center',
-                    marginBottom: 10,
-                  }}>
-                  <CustomCheckBox
-                    label={task.task_description}
-                    simpleCheckBox={true}
-                    isChecked={checkedTasks[task.task_id] || false}
-                    onChange={() => handleCheckboxChange(task.task_id)}
-                  />
-                </View>
-              ) : null}
-            </View>
-          ))}
+          <Text style={styles.txt}>
+            Send Proposals: {jobProposalData?.proposalData?.countSendProposal}
+          </Text>
         </View>
+        {jobData?.task.length > 0 ? (
+          <View style={{marginTop: 10}}>
+            <Text style={[styles.smallTxt, {marginBottom: 5}]}>
+              Available Task
+            </Text>
+            {jobData?.task?.map((task, index) => (
+              <View key={index}>
+                {task?.status === 'none' ? (
+                  <View
+                    key={index}
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      marginBottom: 10,
+                    }}>
+                    <CustomCheckBox
+                      label={task.task_description}
+                      simpleCheckBox={true}
+                      isChecked={checkedTasks[task.task_id] || false}
+                      onChange={() => handleCheckboxChange(task.task_id)}
+                    />
+                  </View>
+                ) : null}
+              </View>
+            ))}
+          </View>
+        ) : null}
         <View style={{marginTop: 20}}>
           <Text style={styles.smallTxt}>Proposal Description</Text>
           <CustomInput
