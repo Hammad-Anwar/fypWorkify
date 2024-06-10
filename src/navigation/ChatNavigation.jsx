@@ -4,6 +4,7 @@ import {StatusBar} from 'react-native';
 import Chat from '../screens/Chat';
 import MessageBox from '../screens/Chat/Message';
 import SendProposal from '../screens/Chat/SendProposal';
+import Meeting from '../screens/Chat/Meeting';
 function ChatNavigation() {
   const Stack = createNativeStackNavigator();
   return (
@@ -28,6 +29,11 @@ function ChatNavigation() {
           options={{headerShown: false}}
           name="SendProposal"
           component={SendProposal}
+        />
+        <Stack.Screen
+          options={{headerShown: false}}
+          name="Meeting"
+          component={Meeting}
         />
       </Stack.Navigator>
     </>

@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   Image,
   SafeAreaView,
@@ -10,6 +10,7 @@ import {
   ActivityIndicator,
   FlatList,
   RefreshControl,
+  Alert,
 } from 'react-native';
 import {Colors} from '../../constants/theme';
 import SmallCard from '../../components/SmallCard';
@@ -17,14 +18,51 @@ import {useQuery, useQueryClient, useMutation} from '@tanstack/react-query';
 import apiRequest from '../../api/apiRequest';
 import urlType from '../../constants/UrlConstants';
 import moment from 'moment';
+import {useStripe} from '@stripe/stripe-react-native';
+import {showMessage} from 'react-native-flash-message';
 
 function Offers({navigation}) {
   const queryClient = useQueryClient();
   const userData = queryClient.getQueryData(['user']);
+  const {initPaymentSheet, presentPaymentSheet} = useStripe();
+  const [loading, setLoading] = useState(false);
   const [isMultiple, setIsMultiple] = useState(false);
   const handleSwitchChange = value => {
     setIsMultiple(value);
-  };   
+  };
+
+  const fetchPaymentSheetParams = async amount => {
+    const response = await apiRequest(urlType.BACKEND, {
+      method: 'POST',
+      url: 'payment-sheet',
+      data: {amount: amount},
+    });
+    const {paymentIntent, ephemeralKey, customer} = await response;
+    return {
+      paymentIntent,
+      ephemeralKey,
+      customer,
+    };
+  };
+
+
+  const initializePaymentSheet = async amount => {
+    const {paymentIntent, ephemeralKey, customer, publishableKey} =
+      await fetchPaymentSheetParams(amount);
+    const {error} = await initPaymentSheet({
+      merchantDisplayName: 'Example, Inc.',
+      customerId: customer,
+      customerEphemeralKeySecret: ephemeralKey,
+      paymentIntentClientSecret: paymentIntent,
+      allowsDelayedPaymentMethods: true,
+      defaultBillingDetails: {
+        name: 'Jane Doe',
+      },
+    });
+    if (!error) {
+      setLoading(true);
+    }
+  };
   const receivedProposalData = useQuery({
     queryKey: ['receivedProposalData', userData?.user?.useraccount_id],
     queryFn: async () => {
@@ -85,15 +123,25 @@ function Offers({navigation}) {
     },
   });
 
-  const handleAcceptProposal = async (proposalId) => {
+  const handleAcceptProposal = async ({proposalId, amount}) => {
     const data = {
       proposal_id: parseInt(proposalId),
       proposal_status: 'accept',
     };
-    await updateProposalStatusMutation.mutate(data);
+    await initializePaymentSheet(amount);
+
+    const {error} = await presentPaymentSheet();
+    console.log('first', error);
+
+    if (error) {
+      Alert.alert(`Error code: ${error.code}`, error.message);
+    } else {
+      Alert.alert('Success', 'Your order is confirmed!');
+      await updateProposalStatusMutation.mutate(data);
+    }
     // console.log(data);
   };
-  const handleDeclineProposal = async (proposalId) => {
+  const handleDeclineProposal = async proposalId => {
     const data = {
       proposal_id: parseInt(proposalId),
       proposal_status: 'decline',
@@ -101,6 +149,7 @@ function Offers({navigation}) {
     await updateProposalStatusMutation.mutate(data);
     // console.log(data);
   };
+
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.line}></View>
@@ -180,8 +229,15 @@ function Offers({navigation}) {
                         isReceived={true}
                         key={index}
                         isOffer={true}
-                        onAcceptPress={() => handleAcceptProposal(data?.proposal_id)}
-                        onDeclinePress={() => handleDeclineProposal(data?.proposal_id)}
+                        onAcceptPress={() =>
+                          handleAcceptProposal({
+                            proposalId: data?.proposal_id,
+                            amount: data?.payment?.payment_amount,
+                          })
+                        }
+                        onDeclinePress={() =>
+                          handleDeclineProposal(data?.proposal_id)
+                        }
                         // onPress={() =>
                         //   navigation.navigate('Complain', {
                         //     dispute_data: data,
@@ -261,8 +317,9 @@ function Offers({navigation}) {
         </View>
       ) : (
         // Client role_id = 2
-        <View style={{paddingBottom: 60}}> 
-          {receivedProposalData?.data && receivedProposalData?.data.length > 0 ? (
+        <View style={{paddingBottom: 60}}>
+          {receivedProposalData?.data &&
+          receivedProposalData?.data.length > 0 ? (
             <FlatList
               data={receivedProposalData?.data}
               refreshControl={
@@ -287,9 +344,16 @@ function Offers({navigation}) {
                   isReceived={true}
                   key={index}
                   isOffer={true}
-                  onAcceptPress={() => handleAcceptProposal(data?.proposal_id)}
-                  onDeclinePress={() => handleDeclineProposal(data?.proposal_id)}
-                  
+                  onAcceptPress={() =>
+                    handleAcceptProposal({
+                      proposalId: data?.proposal_id,
+                      amount: data?.payment?.payment_amount,
+                    })
+                  }
+                  onDeclinePress={() =>
+                    handleDeclineProposal(data?.proposal_id)
+                  }
+
                   // onPress={() =>
                   //   navigation.navigate('Complain', {
                   //     dispute_data: data,

@@ -189,7 +189,7 @@ function Home({navigation}) {
             borderRadius: 12,
             marginTop: 20,
             marginLeft: 10,
-          }}>
+          }} onPress={() => navigation.navigate('TestingStrip')}>
           <Image source={filterIcon} style={styles.iconStyle} />
         </TouchableOpacity>
       </View>

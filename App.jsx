@@ -12,12 +12,12 @@ export default function App() {
 
     <GlobalContextProvider initialState={initState} reducer={reducer}>
       <QueryClientProvider client={queryClient}>
-        {/* <StripeProvider
+        <StripeProvider
           publishableKey="pk_test_51PPmQqK9F79Hh53UdXQpmo2U6aIQelMMTd4DmVAZCubyfcSlIar2w80QsJIKzTttmTsEV72OFuFR6Z1cKiUGohH3005i0T1FT4"
           urlScheme="http://192.168.100.34:5000" // required for 3D Secure and bank redirects
-        > */}
+        >
           <Main />
-        {/* </StripeProvider> */}
+        </StripeProvider>
       </QueryClientProvider>
     </GlobalContextProvider>
   );

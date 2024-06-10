@@ -13,6 +13,7 @@ import {
   RefreshControl,
 } from 'react-native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import avatar from '../../assets/Images/profileImg.jpg';
 import {useNavigation, useRoute} from '@react-navigation/native';
 import {useQuery, useQueryClient} from '@tanstack/react-query';
@@ -216,6 +217,13 @@ const MessageBox = ({navigation}) => {
                 {first_name} {last_name}
               </Text>
             </View>
+            <TouchableOpacity onPress={() => navigation.navigate('Meeting')}>
+              <MaterialIcons
+                name="call"
+                size={32}
+                color={Colors.primary.lightBlack}
+              />
+            </TouchableOpacity>
           </View>
         </View>
         {role_id === 1 ? (

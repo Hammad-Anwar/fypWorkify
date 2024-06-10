@@ -28,7 +28,7 @@ import ImageCropPicker from 'react-native-image-crop-picker';
 import {useStateValue} from '../../context/GlobalContextProvider';
 
 const MoreInfo = ({route, navigation}) => {
-  const {accountType, firstName, lastName} = route.params;
+  const {accountType, firstName, lastName, user_id} = route.params;
   const [overview, setOverview] = useState('');
   const [experience, setExperience] = useState('');
   const [link, setLink] = useState('');
@@ -52,15 +52,15 @@ const MoreInfo = ({route, navigation}) => {
     enabled: false,
   });
 
-  const getUserData = async () => {
-    try {
-      const userString = await AsyncStorage.getItem('@user');
-      return JSON.parse(userString);
-    } catch (error) {
-      console.error('Error fetching user data:', error);
-      return null;
-    }
-  };
+  // const getUserData = async () => {
+  //   try {
+  //     const userString = await AsyncStorage.getItem('@user');
+  //     return JSON.parse(userString);
+  //   } catch (error) {
+  //     console.error('Error fetching user data:', error);
+  //     return null;
+  //   }
+  // };
 
   const countries = [
     {label: 'United States', value: 'US'},
@@ -83,9 +83,10 @@ const MoreInfo = ({route, navigation}) => {
     onSuccess: async e => {
       if (e.status === 200) {
         console.log(e.data);
-        await AsyncStorage.setItem('@user', JSON.stringify(e.data));
+        await AsyncStorage.setItem('@user', JSON.stringify(e.data.user));
+        await AsyncStorage.setItem('@auth_token', e.data.token);
         if (accountType == 1) {
-          navigation.navigate('AddSkills', {user_id: e?.data?.useraccount_id});
+          navigation.navigate('AddSkills', {user_id: user_id});
         } else if (accountType == 2) {
           if (e !== false) {
             await userQuery.refetch();
@@ -116,8 +117,8 @@ const MoreInfo = ({route, navigation}) => {
   });
 
   const handleContinue = async () => {
-      const userInfo = await getUserData();
-      console.log('Info', userInfo.user_id);
+      // const userInfo = await getUserData();
+      // console.log('Info', userInfo.user_id);
     // Freelancer
     if (parseInt(accountType) == 1) {
       if (
@@ -127,7 +128,7 @@ const MoreInfo = ({route, navigation}) => {
         countries.length > 0
       ) {
         const data = {
-          user_id: parseInt(userInfo.user_id),
+          user_id: parseInt(user_id),
           image: imageUri,
           userData: {
             overview: overview,
@@ -154,7 +155,7 @@ const MoreInfo = ({route, navigation}) => {
     else if (parseInt(accountType) == 2) {
       if (overview.length > 0 && countries.length > 0) {
         const data = {
-          user_id: parseInt(userInfo.user_id),
+          user_id: parseInt(user_id),
           image: imageUri,
           userData: {
             overview: overview,

@@ -21,8 +21,10 @@ import apiRequest from '../../api/apiRequest';
 import urlType from '../../constants/UrlConstants';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {showMessage} from 'react-native-flash-message';
+import {useStateValue} from '../../context/GlobalContextProvider';
 
 const Signup = ({navigation}) => {
+  const [fcmState] = useStateValue();
   const [email, setEmail] = useState('');
   const [user_name, setUser_name] = useState('');
   const [first_name, setFirst_name] = useState('');
@@ -52,12 +54,13 @@ const Signup = ({navigation}) => {
     },
     onSuccess: async e => {
       if (e.status === 200) {
-        await AsyncStorage.setItem('@user', JSON.stringify(e.data.user));
-        await AsyncStorage.setItem('@auth_token', e.data.token);
+      console.log("response", e);
+        
         navigation.navigate('MoreInfo', {
           accountType: parseInt(account),
           firstName: first_name,
           lastName: last_name,
+          user_id: e?.data?.user_id
         });
 
       } else if (e.response.status === 404) {
@@ -111,6 +114,7 @@ const Signup = ({navigation}) => {
           last_name: last_name,
           gender: selectedGender,
           role_id: parseInt(account),
+          fcmToken: fcmState.isFcmToken
         };
         await signupMutation.mutate(data);
         // console.log(loginMutation.isLoading);

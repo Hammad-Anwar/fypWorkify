@@ -15,6 +15,7 @@ import Dispute from '../screens/Dispute';
 import NewDispute from '../screens/Dispute/NewDispute';
 import Complain from '../screens/Dispute/Complains';
 import VerificationAccount from '../screens/Home/VerificationAccount';
+import TestingStrip from '../screens/Home/TestingStrip';
 function HomeNavigation() {
   const Stack = createNativeStackNavigator();
   return (
@@ -94,6 +95,11 @@ function HomeNavigation() {
           options={{headerShown: false}}
           name="VerificationAccount"
           component={VerificationAccount}
+        />
+        <Stack.Screen
+          options={{headerShown: false}}
+          name="TestingStrip"
+          component={TestingStrip}
         />
       </Stack.Navigator>
     </>
