@@ -16,6 +16,7 @@
     "@jitsi/react-native-sdk": "^2.2.1",
     "@notifee/react-native": "^7.8.2",
     "@react-native-async-storage/async-storage": "1.19.4",
+    "@react-native-community/cli-platform-ios": "^20.1.2",
     "@react-native-community/clipboard": "1.5.1",
     "@react-native-community/netinfo": "11.1.0",
     "@react-native-community/slider": "4.4.3",
@@ -88,6 +89,7 @@
     "node": ">=16"
   },
   "overrides": {
-    "@xmldom/xmldom": "0.8.7"
+    "@xmldom/xmldom": "0.8.7",
+    "fast-xml-parser": "5.5.6"
   }
 }
